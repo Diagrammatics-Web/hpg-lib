@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="d3.js"></script>
   <script type="text/javascript" src="eel.js"></script>
+  <script src="d3.js"></script>
   <script>
     // notify server to render app
     eel.update_server_status(true);
@@ -16,7 +16,7 @@
 <br>
 
 <button id="btn-new" onclick="newGraph()">New</button>
-<button id="btn-off" onclick="eel.update_server_status(false)">Save/finish</button>
+<button id="btn-off" onclick="end_session()">Save/Finish</button>
 <button id="btn-export" onclick="exportData()">Export data as json</button>
 <button id="btn-tikz" onclick="exportTikz()">Export tikz to clipboard</button>
 <br>
@@ -44,6 +44,12 @@
 <script>
 const radius = 10;
 var data = {vertices: [], edges:[]};
+
+// fill in data with constructor data on python side
+eel.get_graph()((g) => {
+  data = g;
+  update();
+});
 
 /*
 pseudodata for testing
@@ -248,7 +254,7 @@ function hourglassPath(edge) {
   return d;
 }
 
-// update graph svg baded on data updates
+// update graph svg based on data updates
 function update() {
   // update edges
   edges.selectAll(".edge").data(data.edges)
@@ -312,6 +318,12 @@ function importFromClipboard() {
   });
   update_edge_data(data);
   update();
+}
+
+// store graph data to python and close session
+function end_session() {
+  eel.save_graph(data);
+  eel.update_server_status(false);
 }
 
 
