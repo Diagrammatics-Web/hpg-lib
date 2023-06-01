@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="d3.js"></script>
+  <script type="text/javascript" src="eel.js"></script>
+  <script>
+    // notify server to render app
+    eel.update_server_status(true);
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<textarea id= "jsonData" style= "border-width: medium;"></textarea>
+<button id="btn-import" onclick="importData()">Import json data</button>
+<br>
+
+<button id="btn-new" onclick="newGraph()">New</button>
+<button id="btn-off" onclick="eel.update_server_status(false)">Save/finish</button>
+<button id="btn-export" onclick="exportData()">Export data as json</button>
+<button id="btn-tikz" onclick="exportTikz()">Export tikz to clipboard</button>
+<br>
+
+<div id="paper-container"></div>
+
+<!-- <br>
+<button id="btn-trip1" onclick="activateButton(this,'trip1')">Trip1</button>
+<button id="btn-trip2" onclick="activateButton(this,'trip2')">Trip2</button>
+<button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button> -->
+
+<br>
+<button id="btn-deselect" onclick="deselect()">Deselect all</button>
+<button id="btn-move" onclick="activateButton(this,'move')">Move</button>
+<button id="btn-place_filled" onclick="activateButton(this,'place_filled')">Place filled vertex</button>
+<button id="btn-place_unfilled" onclick="activateButton(this,'place_unfilled')">Place unfilled vertex</button>
+<button id="btn-toggle_color" onclick="activateButton(this,'toggle_color')">Toggle vertex color</button>
+<button id="btn-add_edge" onclick="activateButton(this,'place_edge')">Add edge</button>
+<button id="btn-add_hourglass" onclick="activateButton(this,'place_hourglass')">Add hourglass</button>
+<button id="btn-add_khourglass" onclick="activateButton(this,'place_khourglass')">Add k-hourglass</button>
+<!--<textarea id= "tikz" style= "border-width: medium;"></textarea>-->
+
+
+
+<script>
+const radius = 10;
+var data = {vertices: [], edges:[]};
+
+/*
+pseudodata for testing
+
+var data = {"edges":[{"weight":2,"sourceId":22,"targetId":21},{"weight":1,"sourceId":21,"targetId":4},{"weight":1,"sourceId":21,"targetId":5},{"weight":1,"sourceId":22,"targetId":20},{"weight":1,"sourceId":20,"targetId":19},{"weight":1,"sourceId":20,"targetId":18},{"weight":1,"sourceId":17,"targetId":23},{"weight":1,"sourceId":23,"targetId":16},{"weight":1,"sourceId":24,"targetId":20},{"weight":1,"sourceId":25,"targetId":22},{"weight":1,"sourceId":25,"targetId":24},{"weight":2,"sourceId":23,"targetId":24},{"weight":1,"sourceId":25,"targetId":6},{"weight":1,"sourceId":30,"targetId":26},{"weight":1,"sourceId":30,"targetId":15},{"weight":1,"sourceId":27,"targetId":31},{"weight":1,"sourceId":28,"targetId":29},{"weight":2,"sourceId":26,"targetId":29},{"weight":2,"sourceId":28,"targetId":31},{"weight":2,"sourceId":27,"targetId":30},{"weight":1,"sourceId":26,"targetId":25},{"weight":1,"sourceId":7,"targetId":29},{"weight":1,"sourceId":32,"targetId":11},{"weight":1,"sourceId":32,"targetId":10},{"weight":1,"sourceId":32,"targetId":9},{"weight":1,"sourceId":32,"targetId":28},{"weight":1,"sourceId":12,"targetId":31},{"weight":1,"sourceId":13,"targetId":33},{"weight":1,"sourceId":8,"targetId":33},{"weight":1,"sourceId":14,"targetId":33},{"weight":1,"sourceId":33,"targetId":27}],"vertices":[{"x":0.9666666666666877,"y":9.93333333333335,"id":4,"type":"filled"},{"x":5.110000000000031,"y":8.776666666666687,"id":5,"type":"filled"},{"x":8.130000000000036,"y":5.78000000000001,"id":6,"type":"filled"},{"x":9.806666666666692,"y":2.073333333333334,"id":7,"type":"filled"},{"x":-6.309999999999991,"y":-7.790000000000029,"id":8,"type":"filled"},{"x":9.576666666666718,"y":-2.900000000000003,"id":9,"type":"filled"},{"x":8.283333333333383,"y":-5.690000000000014,"id":10,"type":"filled"},{"x":6.090000000000047,"y":-7.963333333333347,"id":11,"type":"filled"},{"x":3.336666666666715,"y":-9.436666666666682,"id":12,"type":"filled"},{"x":-2.423333333333309,"y":-9.72666666666669,"id":13,"type":"filled"},{"x":-8.626666666666678,"y":-4.936666666666691,"id":14,"type":"filled"},{"x":-9.840000000000018,"y":-1.8300000000000156,"id":15,"type":"filled"},{"x":-9.740000000000013,"y":2.3,"id":16,"type":"filled"},{"x":-8.640000000000002,"y":4.920000000000003,"id":17,"type":"filled"},{"x":-6.563333333333345,"y":7.520000000000015,"id":18,"type":"filled"},{"x":-3.7466666666666684,"y":9.22000000000002,"id":19,"type":"filled"},{"x":-2.8666666666666587,"y":5.229999999999999,"id":20,"type":"unfilled"},{"x":1.3366666666666895,"y":6.5366666666666795,"id":21,"type":"unfilled"},{"x":-0.06999999999998785,"y":4.6666666666666705,"id":22,"type":"filled"},{"x":-6.733333333333345,"y":2.533333333333329,"id":23,"type":"unfilled"},{"x":-4.026666666666671,"y":1.6166666666666525,"id":24,"type":"filled"},{"x":0.6500000000000283,"y":2.1799999999999975,"id":25,"type":"unfilled"},{"x":0.40000000000000635,"y":-0.34666666666668045,"id":26,"type":"filled"},{"x":-2.7299999999999915,"y":-3.853333333333368,"id":27,"type":"filled"},{"x":1.4100000000000215,"y":-4.163333333333357,"id":28,"type":"filled"},{"x":2.2266666666666826,"y":-1.2700000000000085,"id":29,"type":"unfilled"},{"x":-1.7366666666666588,"y":-0.8966666666666865,"id":30,"type":"unfilled"},{"x":-0.499999999999976,"y":-4.639999999999997,"id":31,"type":"unfilled"},{"x":4.51333333333337,"y":-4.456666666666694,"id":32,"type":"unfilled"},{"x":-4.003333333333313,"y":-5.553333333333356,"id":33,"type":"unfilled"}]}
+
+*/
+
+// create new graph, prompt for number of vertices
+function newGraph() {
+  if(activeButton) {
+    activeButton.style.borderStyle = 'outset';
+  }
+  if(activeMode) {
+    activeMode.deactivate();
+  }
+  data = {vertices:[], edges:[]};
+  update_edge_data(data);
+  update();
+
+  let nvertices = prompt("Number of boundary vertices");
+  for(i=0; i<nvertices;i++) {
+    data.vertices[i] = {
+      x: radius*Math.sin(i*2*Math.PI/nvertices),
+      y: radius*Math.cos(i*2*Math.PI/nvertices),
+      id: i,
+      type: "filled"
+    };
+  }
+  maxVertexId = nvertices-1;
+  update_edge_data(data);
+  update();
+
+  // send new graph to python
+  eel.print_from_js(data);
+}
+
+// export graph data to JSON to clipboard
+function exportData() {
+  var d = {edges:[], vertices: data.vertices};
+
+  data.edges.forEach(function(edge) {
+  let f = {
+      weight : edge.weight,
+    sourceId : edge.source.id,
+    targetId : edge.target.id
+    };
+  d.edges.push(f);
+  });
+  console.log(JSON.stringify(d));
+  navigator.clipboard.writeText(JSON.stringify(d));
+}
+
+ // export LaTeX TikZ to clipboard
+function exportTikz() {
+  let tikzString = `
+\\documentclass{standalone}
+\\usepackage{tikz}
+\\tikzstyle{vertex}=[
+	minimum size=0.15cm,
+  inner sep=0pt,
+  outer sep=0pt,
+  circle,
+  draw=black,
+]
+\\tikzstyle{filled}=[
+	vertex,
+	fill=black
+]
+\\tikzstyle{unfilled}=[
+	vertex,
+	fill=white
+]
+\\tikzstyle{blank}=[
+	vertex,
+	fill=white,
+	draw=white
+]
+
+\\tikzstyle{hourglass}=[
+	out=#1*20,
+	in={#1*20+180},
+	relative,
+	looseness=1.5
+]
+\\begin{document}
+
+\\begin{tikzpicture}
+\\node [draw, circle, minimum size=${2*radius}cm, dashed] at (0,0) {};
+  `;
+  data.vertices.forEach(function(v) {
+    tikzString += `\\node [${v.type}] (v${v.id}) at (${v.x.toFixed(2)},${v.y.toFixed(2)}) {};\n`;
+  });
+
+  data.edges.forEach(function(e) {
+    let v_fromIdStr = "v"+e.source.id;
+    let v_toIdStr = "v"+e.target.id;
+    var hourglass_style = [0,0,1,1.5,2,2.5];
+    if(e.weight == 1) {
+      tikzString += `\\draw (${v_fromIdStr}) to (${v_toIdStr});\n`;
+    } else {
+      let hs = hourglass_style[hourglass_style.length-1];
+      if (e.weight < hourglass_style.length) {
+        hs = hourglass_style[e.weight];
+      }
+      for (var i=0; i<e.weight; i++) {
+        tikzString += `\\draw[hourglass=${hs-i*2*hs/(e.weight-1)}] (${v_fromIdStr}) to (${v_toIdStr});\n`;
+      }
+      //tikzString += `\\draw[hourglass=1] (${v_fromIdStr}) to (${v_toIdStr});\n`;
+      //tikzString += `\\draw[hourglass=-1] (${v_fromIdStr}) to (${v_toIdStr});\n`;
+    }
+  });
+  tikzString += `
+\\end{tikzpicture}
+\\end{document}
+  `;
+  //document.getElementById('tikz').textContent = tikzString;
+   navigator.clipboard.writeText(tikzString);
+}
+
+// point each edge to a source/target vertices based on Id data
+function update_edge_data(data) {
+  data.edges.forEach(function(edge) {
+    edge.source = data.vertices.filter(vertex => vertex.id == edge.sourceId)[0];
+    edge.target = data.vertices.filter(vertex => vertex.id == edge.targetId)[0];
+  });
+}
+
+// HELPER: add value if missing, remove if present
+function addOrRemove(array, value) {
+  var index = array.indexOf(value);
+
+  if (index === -1) {
+      array.push(value);
+  } else {
+      array.splice(index, 1);
+  }
+}
+
+
+var maxVertexId = 0;
+var size = 600;
+var body = d3.select("body");
+var x = d3.scaleLinear().domain([-radius*1.1,radius*1.1]).range([0, size]);
+var y = d3.scaleLinear().domain([-radius*1.1,radius*1.1]).range([size, 0]);
+
+var selected = [];
+
+// init graph canvas
+var svg = d3.select("#paper-container")
+ .append("svg")
+ .attr("id", "paper")
+ .attr("width", size)
+ .attr("height", size);
+
+// init boundary circcle
+var boundary_circle = svg.append("circle")
+    .attr('id', 'boundary_circle')
+    .attr('cx',x(0) )
+    .attr('cy', y(0) )
+    .attr('r',x(radius)-x(0));
+
+// init groups for edges and vertices
+var edges = svg.append("g").attr("id", "edges");
+var vertices = svg.append("g").attr("id", "vertices");
+
+// return curve string for D3 to render edge
+function hourglassPath(edge) {
+  var pos1_x = edge.source.x;
+  var pos1_y = edge.source.y;
+  var pos2_x = edge.target.x;
+  var pos2_y = edge.target.y;
+  var dx = pos2_x - pos1_x;
+  var dy = pos2_y - pos1_y;
+  var mid_x = (pos1_x+pos2_x)/2;
+  var mid_y = (pos1_y+pos2_y)/2;
+  var quater1_x = 0.75*pos1_x+0.25*pos2_x;
+  var quater1_y = 0.75*pos1_y+0.25*pos2_y;
+  var quater2_x = 0.25*pos1_x+0.75*pos2_x;
+  var quater2_y = 0.25*pos1_y+0.75*pos2_y;
+  var d = `M ${x(pos1_x)} ${y(pos1_y)} L ${x(pos2_x)} ${y(pos2_y)}`;
+
+  var curveGenerator = d3.line()
+    .curve(d3.curveNatural)
+    .x(d=>x(d[0])).y(d=>y(d[1]));
+
+  var d = "";
+
+  for(var i=0; i<edge.weight; i++) {
+    var factor = (-(edge.weight-1)/2+i);//*1/(Math.sqrt(dx*dx+dy*dy))*20;
+    var points = [
+      [pos1_x, pos1_y],
+      [quater1_x+factor*dy/8, quater1_y-factor*dx/8],
+      [mid_x, mid_y],
+      [quater2_x-factor*dy/8, quater2_y+factor*dx/8],
+      [pos2_x, pos2_y]
+    ];
+
+    d += curveGenerator(points);
+  }
+
+  return d;
+}
+
+// update graph svg baded on data updates
+function update() {
+  // update edges
+  edges.selectAll(".edge").data(data.edges)
+    .join("path")
+    .attr("class", "edge")
+    .attr("d", hourglassPath)
+    .attr("fill", "none");
+
+  // update vertices
+  vertices.selectAll(".vertex").data(data.vertices)
+    .join(
+      enter => enter
+          .append("circle")
+          .attr("class", "vertex")
+          .classed("unfilled", d=>d.type=="unfilled")
+          .classed("filled", d=>d.type=="filled")
+          .attr("cx", function(d) {
+            return x(d.x)
+          })
+          .attr("cy", function(d) {
+            return y(d.y)
+          })
+          .attr("r", 4),
+      update => update
+      .classed("unfilled", d=>d.type=="unfilled")
+      .classed("filled", d=>d.type=="filled")
+    );
+}
+
+// add edges to graph based on selected vertices
+function addEdge(weight) {
+  var selection = d3.selectAll(selected);
+  console.log(selection)
+  var selectedVertices = selection.data();
+  for(var i=0; i < selectedVertices.length-1; i++) {
+    data.edges.push({source:selectedVertices[i], target:selectedVertices[i+1], weight:weight});
+  }
+
+  // update graph
+  update();
+}
+
+// import graph data from json
+function importData() {
+  boundaryVertices = [];
+  edgePath = [];
+  data = {vertices:[], edges:[]};
+  update();
+  data = JSON.parse(document.getElementById("jsonData").value);
+  update_edge_data(data);
+  update();
+}
+
+// *UNUSED* import graph data from clipboard
+function importFromClipboard() {
+  boundaryVertices = [];
+  edgePath = [];
+  data = {vertices:[], edges:[]};
+    navigator.clipboard.readText().then((copiedText) => {
+    console.log(copiedText);
+  });
+  update_edge_data(data);
+  update();
+}
+
+
+</script>
+<script src="controller.js"></script>
+</body>
+</html>

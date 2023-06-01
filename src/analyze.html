@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="d3.js"></script>
+
+  <style>
+    #boundary_circle {
+      fill: none;
+      stroke: grey;
+      stroke-width: 1px;
+      stroke-dasharray: 5 2;
+    }
+
+    .active:hover {
+      filter: drop-shadow(0 0 5px rgba(0, 0, 0, 1));
+    }
+
+    .vertex {
+      stroke: black;
+      stroke-width: 2px;
+    }
+
+    .edge {
+      stroke: black;
+      stroke-width: 1px;
+    }
+
+    .path {
+      stroke: red;
+      stroke-width: 2px;
+    }
+
+    .unfilled {
+      fill: white;
+    }
+
+    .filled {
+      fill: black;
+    }
+    #paper {
+      border: 1px solid grey;
+    }
+
+
+    .selected {
+      filter: drop-shadow(0 0 5px rgba(0, 0, 0, 1));
+    }
+
+  </style>
+</head>
+<body>
+
+<textarea id= "jsonData" style= "border-width: medium;"></textarea>
+<button id="btn-import" onclick="importData()">Import json data</button>
+<div id="paper-container"></div>
+
+<br>
+<button id="btn-trip1" onclick="activateButton(this,'trip1')">Trip1</button>
+<button id="btn-trip2" onclick="activateButton(this,'trip2')">Trip2</button>
+<button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button>
+
+<!--<textarea id= "tikz" style= "border-width: medium;"></textarea>-->
+
+
+
+<script>
+const radius = 10;
+
+ var boundaryVertices = [];
+ var edgePath = [];
+ var data = {vertices:[], edges:[]};
+ /*
+ var data = {"vertices":[{"x":-16,"y":70,"id":4,"type":"filled"},{"x":6,"y":61,"id":5,"type":"filled"},{"x":23,"y":49,"id":6,"type":"filled"},{"x":35,"y":20,"id":7,"type":"filled"},{"x":-73,"y":-46,"id":8,"type":"filled"},{"x":36,"y":-7,"id":9,"type":"filled"},{"x":26,"y":-25,"id":10,"type":"filled"},{"x":7,"y":-47,"id":11,"type":"filled"},{"x":-22,"y":-61,"id":12,"type":"filled"},{"x":-51,"y":-54,"id":13,"type":"filled"},{"x":-76,"y":-27,"id":14,"type":"filled"},{"x":-83,"y":-4,"id":15,"type":"filled"},{"x":-82,"y":23,"id":16,"type":"filled"},{"x":-71,"y":47,"id":17,"type":"filled"},{"x":-55,"y":62,"id":18,"type":"filled"},{"x":-36,"y":68,"id":19,"type":"filled"},{"x":-36,"y":49,"id":20,"type":"unfilled"},{"x":-9,"y":54,"id":21,"type":"unfilled"},{"x":-15,"y":43,"id":22,"type":"filled"},{"x":-60,"y":29,"id":23,"type":"unfilled"},{"x":-41,"y":29,"id":24,"type":"filled"},{"x":-21,"y":24,"id":25,"type":"unfilled"},{"x":-18,"y":9,"id":26,"type":"filled"},{"x":-46,"y":-7,"id":27,"type":"filled"},{"x":-20,"y":-20,"id":28,"type":"filled"},{"x":-10,"y":-5,"id":29,"type":"unfilled"},{"x":-39,"y":9,"id":30,"type":"unfilled"},{"x":-38,"y":-20,"id":31,"type":"unfilled"},{"x":7,"y":-20,"id":32,"type":"unfilled"},{"x":-58,"y":-35,"id":33,"type":"unfilled"}],"edges":[{"weight":2,"sourceId":22,"targetId":21},{"weight":1,"sourceId":21,"targetId":4},{"weight":1,"sourceId":21,"targetId":5},{"weight":1,"sourceId":22,"targetId":20},{"weight":1,"sourceId":20,"targetId":19},{"weight":1,"sourceId":20,"targetId":18},{"weight":1,"sourceId":17,"targetId":23},{"weight":1,"sourceId":23,"targetId":16},{"weight":1,"sourceId":24,"targetId":20},{"weight":1,"sourceId":25,"targetId":22},{"weight":1,"sourceId":25,"targetId":24},{"weight":2,"sourceId":23,"targetId":24},{"weight":1,"sourceId":25,"targetId":6},{"weight":1,"sourceId":30,"targetId":26},{"weight":1,"sourceId":30,"targetId":15},{"weight":1,"sourceId":27,"targetId":31},{"weight":1,"sourceId":28,"targetId":29},{"weight":2,"sourceId":26,"targetId":29},{"weight":2,"sourceId":28,"targetId":31},{"weight":2,"sourceId":27,"targetId":30},{"weight":1,"sourceId":26,"targetId":25},{"weight":1,"sourceId":7,"targetId":29},{"weight":1,"sourceId":32,"targetId":11},{"weight":1,"sourceId":32,"targetId":10},{"weight":1,"sourceId":32,"targetId":9},{"weight":1,"sourceId":32,"targetId":28},{"weight":1,"sourceId":12,"targetId":31},{"weight":1,"sourceId":13,"targetId":33},{"weight":1,"sourceId":8,"targetId":33},{"weight":1,"sourceId":14,"targetId":33},{"weight":1,"sourceId":33,"targetId":27}]};
+*/
+
+
+ function prepare_data(data) {
+   data.vertices.forEach(function(vertex) {
+     /*vertex.x = vertex.x/10;
+     vertex.y = vertex.y/10;*/
+     vertex.multiHalfEdges = [];
+   });
+
+
+   data.edges.forEach(function(edge, i) {
+     edge.source = data.vertices.filter(vertex => vertex.id == edge.sourceId)[0];
+     edge.target = data.vertices.filter(vertex => vertex.id == edge.targetId)[0];
+     edge.id = i;
+     var mhe1 = {
+       edge: edge,
+       source: edge.source,
+       target: edge.target,
+       weight: edge.weight,
+       twin: "",
+       prev: "",
+       next: "",
+       halfEdges: []
+     };
+     edge.source.multiHalfEdges.push(mhe1);
+     var mhe2 = {
+        edge: edge,
+        source: edge.target,
+        target: edge.source,
+        weight: edge.weight,
+        twin: mhe1,
+        prev: "",
+        next: "",
+        halfEdges: []
+      };
+      mhe1.twin = mhe2;
+      edge.target.multiHalfEdges.push(mhe2);
+      for(var i=0; i<edge.weight; i++) {
+        var he1 = {
+          multiEdge: mhe1,
+          twin: "",
+          prev: "",
+          next: "",
+          heId: i
+        }
+        mhe1.halfEdges.push(he1);
+        var he2 = {
+          multiEdge: mhe2,
+          twin: he1,
+          prev: "",
+          next: "",
+          heId: i
+        }
+        mhe2.halfEdges.push(he2);
+        he1.twin = he2;
+      }
+   });
+
+   data.vertices.forEach(function(vertex) {
+     vertex.multiHalfEdges.sort(function(a,b) {
+       return Math.atan2(a.target.y-vertex.y, a.target.x-vertex.x) - Math.atan2(b.target.y-vertex.y, b.target.x-vertex.x);
+     });
+     let nedges = vertex.multiHalfEdges.length;
+     if (nedges <= 1) {
+       boundaryVertices.push(vertex);
+       if(nedges == 1) vertex.multiHalfEdges[0].id=0;
+     } else {
+       for(var i=0; i<nedges; i++) {
+         var mhe = vertex.multiHalfEdges[i];
+         mhe.next = vertex.multiHalfEdges[(i+1)%nedges];
+         mhe.prev = vertex.multiHalfEdges[(nedges+i-1)%nedges];
+         mhe.id = i;
+
+         //set prev and next for haldEdges in bundle
+         for(var j=0; j<mhe.weight; j++) {
+           if(j<mhe.weight-1) {
+             mhe.halfEdges[j].next = mhe.halfEdges[j+1];
+           } else {
+             mhe.halfEdges[j].next = mhe.next.halfEdges[0];
+           }
+
+           if(j>0) {
+             mhe.halfEdges[j].prev = mhe.halfEdges[j-1];
+           } else {
+             mhe.halfEdges[j].prev = mhe.prev.halfEdges[mhe.prev.weight-1];
+           }
+         }
+       }
+     }
+
+   });
+ }
+
+ function addOrRemove(array, value) {
+     var index = array.indexOf(value);
+
+     if (index === -1) {
+         array.push(value);
+     } else {
+         array.splice(index, 1);
+     }
+ }
+
+
+
+
+
+var size = 600;
+var body = d3.select("body");
+var svg = d3.select("#paper-container")
+ .append("svg")
+ .attr("id", "paper")
+ .attr("width", size)
+ .attr("height", size);
+
+var x = d3.scaleLinear().domain([-radius*1.1,radius*1.1]).range([0, size]);
+var y = d3.scaleLinear().domain([-radius*1.1,radius*1.1]).range([size, 0]);
+
+var selected = [];
+
+var boundary_circle = svg.append("circle")
+    .attr('id', 'boundary_circle')
+    .attr('cx',x(0) )
+    .attr('cy', y(0) )
+    .attr('r',x(radius)-x(0));
+
+
+var edges = svg.append("g").attr("id", "edges");
+var vertices = svg.append("g").attr("id", "vertices");
+
+function hourglassPath(edge) {
+  var pos1_x = edge.source.x;
+  var pos1_y = edge.source.y;
+  var pos2_x = edge.target.x;
+  var pos2_y = edge.target.y;
+  var dx = pos2_x - pos1_x;
+  var dy = pos2_y - pos1_y;
+
+  var mid_x = (pos1_x+pos2_x)/2;
+  var mid_y = (pos1_y+pos2_y)/2;
+  var quater1_x = 0.75*pos1_x+0.25*pos2_x;
+  var quater1_y = 0.75*pos1_y+0.25*pos2_y;
+  var quater2_x = 0.25*pos1_x+0.75*pos2_x;
+  var quater2_y = 0.25*pos1_y+0.75*pos2_y;
+  var d = `M ${x(pos1_x)} ${y(pos1_y)} L ${x(pos2_x)} ${y(pos2_y)}`;
+
+  var curveGenerator = d3.line()
+    .curve(d3.curveNatural)
+    .x(d=>x(d[0])).y(d=>y(d[1]));
+
+  var d = "";
+
+  for(var i=0; i<edge.weight; i++) {
+    var factor = (-(edge.weight-1)/2+i);//*1/(Math.sqrt(dx*dx+dy*dy))*20;
+    var points = [
+      [pos1_x, pos1_y],
+      [quater1_x+factor*dy/8, quater1_y-factor*dx/8],
+      [mid_x, mid_y],
+      [quater2_x-factor*dy/8, quater2_y+factor*dx/8],
+      [pos2_x, pos2_y]
+    ];
+
+    d += curveGenerator(points);
+  }
+
+
+  return d;
+}
+
+ function update() {
+
+     edges.selectAll(".edge").data(data.edges)
+       .join("path")
+       .attr("id", d=>"e"+d.id)
+       .attr("class", "edge")
+       .attr("d", hourglassPath)
+       .attr("fill", "none")
+       .classed("path", d=>edgePath.indexOf(d)>-1);
+
+
+     vertices.selectAll(".vertex").data(data.vertices)
+        .join(
+          enter => enter
+              .append("circle")
+              .attr("class", "vertex")
+              .classed("unfilled", d=>d.type=="unfilled")
+              .classed("filled", d=>d.type=="filled")
+              .attr("cx", function(d) {
+                return x(d.x)
+              })
+              .attr("cy", function(d) {
+                return y(d.y)
+              })
+              .attr("r", 4),
+          update => update
+          .classed("unfilled", d=>d.type=="unfilled")
+          .classed("filled", d=>d.type=="filled")
+        );
+  }
+
+
+  function importData() {
+    boundaryVertices = [];
+    edgePath = [];
+    data = {vertices:[], edges:[]};
+    update();
+    data = JSON.parse(document.getElementById("jsonData").value);
+    prepare_data(data);
+    update();
+  }
+
+  function importFromClipboard() {
+    boundaryVertices = [];
+    edgePath = [];
+    data = {vertices:[], edges:[]};
+      navigator.clipboard.readText().then((copiedText) => {
+      console.log(copiedText);
+    });
+    prepare_data(data);
+    update();
+  }
+
+
+</script>
+<script src="analyze.js"></script>
+</body>
+</html>
