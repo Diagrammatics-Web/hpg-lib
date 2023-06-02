@@ -276,12 +276,14 @@ function deactivateEdge(obj) {
 }
 
 
-
-// ******** (analyze.js) ********
+// ******** (Trip Permuation Functions) ********
 function idStr(e) {
   return "("+e.multiEdge.source.id+"/"+e.multiEdge.target.id+")."+e.multiEdge.id+"."+e.heId;
 }
 
+
+
+// create edge path for Trip i update graph
 function activateTrip(tripIndex) {
   activateObjects(".vertex");
   svg.selectAll(".vertex")
@@ -309,12 +311,13 @@ function activateTrip(tripIndex) {
             }
           }
           edgePath.push(e.multiEdge.edge);
-          update();
+          update_trips();
       }
 
     });
 }
 
+// helper functions to activate/deactivate trip types 1, 2, and 3
 function activateTrip1(obj) {
   activateTrip(1);
 }
@@ -323,10 +326,10 @@ function deactivateTrip1(obj) {
   svg.selectAll(".vertex").on("click", null);
 }
 
-
 function activateTrip2(obj) {
     activateTrip(2);
 }
+
 function deactivateTrip2(obj) {
   svg.selectAll(".vertex").on("click", null);
 }

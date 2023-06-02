@@ -23,10 +23,10 @@
 
 <div id="paper-container"></div>
 
-<!-- <br>
+<br>
 <button id="btn-trip1" onclick="activateButton(this,'trip1')">Trip1</button>
 <button id="btn-trip2" onclick="activateButton(this,'trip2')">Trip2</button>
-<button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button> -->
+<button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button>
 
 <br>
 <button id="btn-deselect" onclick="deselect()">Deselect all</button>
@@ -44,11 +44,14 @@
 <script>
 const radius = 10;
 var data = {vertices: [], edges:[]};
+var boundaryVertices = [];
+var edgePath = [];
 
 // fill in data with constructor data on python side
 eel.get_graph()((g) => {
   data = g;
   update();
+  prepare_data(data);
 });
 
 /*
@@ -57,6 +60,96 @@ pseudodata for testing
 var data = {"edges":[{"weight":2,"sourceId":22,"targetId":21},{"weight":1,"sourceId":21,"targetId":4},{"weight":1,"sourceId":21,"targetId":5},{"weight":1,"sourceId":22,"targetId":20},{"weight":1,"sourceId":20,"targetId":19},{"weight":1,"sourceId":20,"targetId":18},{"weight":1,"sourceId":17,"targetId":23},{"weight":1,"sourceId":23,"targetId":16},{"weight":1,"sourceId":24,"targetId":20},{"weight":1,"sourceId":25,"targetId":22},{"weight":1,"sourceId":25,"targetId":24},{"weight":2,"sourceId":23,"targetId":24},{"weight":1,"sourceId":25,"targetId":6},{"weight":1,"sourceId":30,"targetId":26},{"weight":1,"sourceId":30,"targetId":15},{"weight":1,"sourceId":27,"targetId":31},{"weight":1,"sourceId":28,"targetId":29},{"weight":2,"sourceId":26,"targetId":29},{"weight":2,"sourceId":28,"targetId":31},{"weight":2,"sourceId":27,"targetId":30},{"weight":1,"sourceId":26,"targetId":25},{"weight":1,"sourceId":7,"targetId":29},{"weight":1,"sourceId":32,"targetId":11},{"weight":1,"sourceId":32,"targetId":10},{"weight":1,"sourceId":32,"targetId":9},{"weight":1,"sourceId":32,"targetId":28},{"weight":1,"sourceId":12,"targetId":31},{"weight":1,"sourceId":13,"targetId":33},{"weight":1,"sourceId":8,"targetId":33},{"weight":1,"sourceId":14,"targetId":33},{"weight":1,"sourceId":33,"targetId":27}],"vertices":[{"x":0.9666666666666877,"y":9.93333333333335,"id":4,"type":"filled"},{"x":5.110000000000031,"y":8.776666666666687,"id":5,"type":"filled"},{"x":8.130000000000036,"y":5.78000000000001,"id":6,"type":"filled"},{"x":9.806666666666692,"y":2.073333333333334,"id":7,"type":"filled"},{"x":-6.309999999999991,"y":-7.790000000000029,"id":8,"type":"filled"},{"x":9.576666666666718,"y":-2.900000000000003,"id":9,"type":"filled"},{"x":8.283333333333383,"y":-5.690000000000014,"id":10,"type":"filled"},{"x":6.090000000000047,"y":-7.963333333333347,"id":11,"type":"filled"},{"x":3.336666666666715,"y":-9.436666666666682,"id":12,"type":"filled"},{"x":-2.423333333333309,"y":-9.72666666666669,"id":13,"type":"filled"},{"x":-8.626666666666678,"y":-4.936666666666691,"id":14,"type":"filled"},{"x":-9.840000000000018,"y":-1.8300000000000156,"id":15,"type":"filled"},{"x":-9.740000000000013,"y":2.3,"id":16,"type":"filled"},{"x":-8.640000000000002,"y":4.920000000000003,"id":17,"type":"filled"},{"x":-6.563333333333345,"y":7.520000000000015,"id":18,"type":"filled"},{"x":-3.7466666666666684,"y":9.22000000000002,"id":19,"type":"filled"},{"x":-2.8666666666666587,"y":5.229999999999999,"id":20,"type":"unfilled"},{"x":1.3366666666666895,"y":6.5366666666666795,"id":21,"type":"unfilled"},{"x":-0.06999999999998785,"y":4.6666666666666705,"id":22,"type":"filled"},{"x":-6.733333333333345,"y":2.533333333333329,"id":23,"type":"unfilled"},{"x":-4.026666666666671,"y":1.6166666666666525,"id":24,"type":"filled"},{"x":0.6500000000000283,"y":2.1799999999999975,"id":25,"type":"unfilled"},{"x":0.40000000000000635,"y":-0.34666666666668045,"id":26,"type":"filled"},{"x":-2.7299999999999915,"y":-3.853333333333368,"id":27,"type":"filled"},{"x":1.4100000000000215,"y":-4.163333333333357,"id":28,"type":"filled"},{"x":2.2266666666666826,"y":-1.2700000000000085,"id":29,"type":"unfilled"},{"x":-1.7366666666666588,"y":-0.8966666666666865,"id":30,"type":"unfilled"},{"x":-0.499999999999976,"y":-4.639999999999997,"id":31,"type":"unfilled"},{"x":4.51333333333337,"y":-4.456666666666694,"id":32,"type":"unfilled"},{"x":-4.003333333333313,"y":-5.553333333333356,"id":33,"type":"unfilled"}]}
 
 */
+
+// prepare internal representation of trip permutations
+function prepare_data(data) {
+  data.vertices.forEach(function(vertex) {
+    vertex.multiHalfEdges = [];
+  });
+
+
+  data.edges.forEach(function(edge, i) {
+    edge.source = data.vertices.filter(vertex => vertex.id == edge.sourceId)[0];
+    edge.target = data.vertices.filter(vertex => vertex.id == edge.targetId)[0];
+    edge.id = i;
+    var mhe1 = {
+      edge: edge,
+      source: edge.source,
+      target: edge.target,
+      weight: edge.weight,
+      twin: "",
+      prev: "",
+      next: "",
+      halfEdges: []
+    };
+    edge.source.multiHalfEdges.push(mhe1);
+    var mhe2 = {
+      edge: edge,
+      source: edge.target,
+      target: edge.source,
+      weight: edge.weight,
+      twin: mhe1,
+      prev: "",
+      next: "",
+      halfEdges: []
+    };
+    mhe1.twin = mhe2;
+    edge.target.multiHalfEdges.push(mhe2);
+    for(var i=0; i<edge.weight; i++) {
+      var he1 = {
+        multiEdge: mhe1,
+        twin: "",
+        prev: "",
+        next: "",
+        heId: i
+      }
+      mhe1.halfEdges.push(he1);
+      var he2 = {
+        multiEdge: mhe2,
+        twin: he1,
+        prev: "",
+        next: "",
+        heId: i
+      }
+      mhe2.halfEdges.push(he2);
+      he1.twin = he2;
+    }
+  });
+
+  data.vertices.forEach(function(vertex) {
+    vertex.multiHalfEdges.sort(function(a,b) {
+      return Math.atan2(a.target.y-vertex.y, a.target.x-vertex.x) - Math.atan2(b.target.y-vertex.y, b.target.x-vertex.x);
+    });
+    let nedges = vertex.multiHalfEdges.length;
+    if (nedges <= 1) {
+      boundaryVertices.push(vertex);
+      if(nedges == 1) vertex.multiHalfEdges[0].id=0;
+    } else {
+      for(var i=0; i<nedges; i++) {
+        var mhe = vertex.multiHalfEdges[i];
+        mhe.next = vertex.multiHalfEdges[(i+1)%nedges];
+        mhe.prev = vertex.multiHalfEdges[(nedges+i-1)%nedges];
+        mhe.id = i;
+
+        //set prev and next for haldEdges in bundle
+        for(var j=0; j<mhe.weight; j++) {
+          if(j<mhe.weight-1) {
+            mhe.halfEdges[j].next = mhe.halfEdges[j+1];
+          } else {
+            mhe.halfEdges[j].next = mhe.next.halfEdges[0];
+          }
+
+          if(j>0) {
+            mhe.halfEdges[j].prev = mhe.halfEdges[j-1];
+          } else {
+            mhe.halfEdges[j].prev = mhe.prev.halfEdges[mhe.prev.weight-1];
+          }
+        }
+      }
+    }
+
+  });
+}
 
 // create new graph, prompt for number of vertices
 function newGraph() {
@@ -87,10 +180,12 @@ function newGraph() {
   eel.print_from_js(data);
 }
 
-// export graph data to JSON to clipboard
-function exportData() {
-  var d = {edges:[], vertices: data.vertices};
+// convert graph data to recyclable format
+// return value is convertable to JSON
+function export_graph() {
+  var d = {edges:[], vertices: []};
 
+  // add edge info
   data.edges.forEach(function(edge) {
   let f = {
       weight : edge.weight,
@@ -99,6 +194,24 @@ function exportData() {
     };
   d.edges.push(f);
   });
+
+  // add vertex info
+  data.vertices.forEach(function(vertex) {
+    let f = {
+        x : vertex.x,
+        y : vertex.y,
+        id : vertex.id,
+        type : vertex.type
+      };
+    d.vertices.push(f);
+  });
+
+  return d;
+}
+
+// export graph data to JSON to clipboard
+function exportData() {
+  let d = export_graph();
   console.log(JSON.stringify(d));
   navigator.clipboard.writeText(JSON.stringify(d));
 }
@@ -255,6 +368,7 @@ function hourglassPath(edge) {
 }
 
 // update graph svg based on data updates
+// FIXME: need to cross reference update() with update_trips()
 function update() {
   // update edges
   edges.selectAll(".edge").data(data.edges)
@@ -262,6 +376,38 @@ function update() {
     .attr("class", "edge")
     .attr("d", hourglassPath)
     .attr("fill", "none");
+
+  // update vertices
+  vertices.selectAll(".vertex").data(data.vertices)
+    .join(
+      enter => enter
+          .append("circle")
+          .attr("class", "vertex")
+          .classed("unfilled", d=>d.type=="unfilled")
+          .classed("filled", d=>d.type=="filled")
+          .attr("cx", function(d) {
+            return x(d.x)
+          })
+          .attr("cy", function(d) {
+            return y(d.y)
+          })
+          .attr("r", 4),
+      update => update
+      .classed("unfilled", d=>d.type=="unfilled")
+      .classed("filled", d=>d.type=="filled")
+    );
+}
+
+// update graph svg based on activated trip permutation
+function update_trips() {
+  // update edges
+  edges.selectAll(".edge").data(data.edges)
+    .join("path")
+    .attr("id", d=>"e"+d.id)
+    .attr("class", "edge")
+    .attr("d", hourglassPath)
+    .attr("fill", "none")
+    .classed("path", d=>edgePath.indexOf(d)>-1);
 
   // update vertices
   vertices.selectAll(".vertex").data(data.vertices)
@@ -305,6 +451,7 @@ function importData() {
   update();
   data = JSON.parse(document.getElementById("jsonData").value);
   update_edge_data(data);
+  prepare_data(data);
   update();
 }
 
@@ -317,12 +464,13 @@ function importFromClipboard() {
     console.log(copiedText);
   });
   update_edge_data(data);
+  prepare_data(data);
   update();
 }
 
 // store graph data to python and close session
 function end_session() {
-  eel.save_graph(data);
+  eel.save_graph(export_graph());
   eel.update_server_status(false);
 }
 
