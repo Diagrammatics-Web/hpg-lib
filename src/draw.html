@@ -370,6 +370,13 @@ function hourglassPath(edge) {
 // update graph svg based on data updates
 // FIXME: need to cross reference update() with update_trips()
 function update() {
+  // make sure data is valid format
+  if (data == null) {
+    console.log("data is null")
+    data = {vertices:[], edges:[]};
+  }
+  console.log(data);
+
   // update edges
   edges.selectAll(".edge").data(data.edges)
     .join("path")
