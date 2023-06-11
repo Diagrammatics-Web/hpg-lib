@@ -237,6 +237,7 @@ function activateEdge(obj) {
     .classed("active", true);
 }
 
+// TODO: may need to change to allow for different trip-types w/ hourglass edges
 // create hourglass edges on click and update graph
 function activateHourglass(obj) {
   deselect();
@@ -253,6 +254,7 @@ function activateHourglass(obj) {
     .classed("active", true);
 }
 
+// TODO: may need to change to allow for different trip-types w/ hourglass edges
 // create k-hourglass edges on click and update graph
 function activatekHourglass(obj) {
   deselect();

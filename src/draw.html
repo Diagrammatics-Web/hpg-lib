@@ -50,10 +50,11 @@ var edgePath = [];
 // fill in data with constructor data on python side
 eel.get_graph()((g) => {
   data = g;
+  // populate data with edge information
+  prepare_mhe_data(data);
+  // update canvas
   update();
-  prepare_data(data);
 });
-
 /*
 pseudodata for testing
 
@@ -61,12 +62,11 @@ var data = {"edges":[{"weight":2,"sourceId":22,"targetId":21},{"weight":1,"sourc
 
 */
 
-// prepare internal representation of trip permutations
-function prepare_data(data) {
+// prepare edge data internally, adding mhe info for hourglass edges
+function prepare_mhe_data(data) {
   data.vertices.forEach(function(vertex) {
     vertex.multiHalfEdges = [];
   });
-
 
   data.edges.forEach(function(edge, i) {
     edge.source = data.vertices.filter(vertex => vertex.id == edge.sourceId)[0];
@@ -209,80 +209,6 @@ function export_graph() {
   return d;
 }
 
-// export graph data to JSON to clipboard
-function exportData() {
-  let d = export_graph();
-  console.log(JSON.stringify(d));
-  navigator.clipboard.writeText(JSON.stringify(d));
-}
-
- // export LaTeX TikZ to clipboard
-function exportTikz() {
-  let tikzString = `
-\\documentclass{standalone}
-\\usepackage{tikz}
-\\tikzstyle{vertex}=[
-	minimum size=0.15cm,
-  inner sep=0pt,
-  outer sep=0pt,
-  circle,
-  draw=black,
-]
-\\tikzstyle{filled}=[
-	vertex,
-	fill=black
-]
-\\tikzstyle{unfilled}=[
-	vertex,
-	fill=white
-]
-\\tikzstyle{blank}=[
-	vertex,
-	fill=white,
-	draw=white
-]
-
-\\tikzstyle{hourglass}=[
-	out=#1*20,
-	in={#1*20+180},
-	relative,
-	looseness=1.5
-]
-\\begin{document}
-
-\\begin{tikzpicture}
-\\node [draw, circle, minimum size=${2*radius}cm, dashed] at (0,0) {};
-  `;
-  data.vertices.forEach(function(v) {
-    tikzString += `\\node [${v.type}] (v${v.id}) at (${v.x.toFixed(2)},${v.y.toFixed(2)}) {};\n`;
-  });
-
-  data.edges.forEach(function(e) {
-    let v_fromIdStr = "v"+e.source.id;
-    let v_toIdStr = "v"+e.target.id;
-    var hourglass_style = [0,0,1,1.5,2,2.5];
-    if(e.weight == 1) {
-      tikzString += `\\draw (${v_fromIdStr}) to (${v_toIdStr});\n`;
-    } else {
-      let hs = hourglass_style[hourglass_style.length-1];
-      if (e.weight < hourglass_style.length) {
-        hs = hourglass_style[e.weight];
-      }
-      for (var i=0; i<e.weight; i++) {
-        tikzString += `\\draw[hourglass=${hs-i*2*hs/(e.weight-1)}] (${v_fromIdStr}) to (${v_toIdStr});\n`;
-      }
-      //tikzString += `\\draw[hourglass=1] (${v_fromIdStr}) to (${v_toIdStr});\n`;
-      //tikzString += `\\draw[hourglass=-1] (${v_fromIdStr}) to (${v_toIdStr});\n`;
-    }
-  });
-  tikzString += `
-\\end{tikzpicture}
-\\end{document}
-  `;
-  //document.getElementById('tikz').textContent = tikzString;
-   navigator.clipboard.writeText(tikzString);
-}
-
 // point each edge to a source/target vertices based on Id data
 function update_edge_data(data) {
   data.edges.forEach(function(edge) {
@@ -291,7 +217,7 @@ function update_edge_data(data) {
   });
 }
 
-// HELPER: add value if missing, remove if present
+// helper fn: add value if missing, remove if present
 function addOrRemove(array, value) {
   var index = array.indexOf(value);
 
@@ -377,14 +303,14 @@ function update() {
   }
   console.log(data);
 
-  // update edges
+  // update path html element for each edge
   edges.selectAll(".edge").data(data.edges)
     .join("path")
     .attr("class", "edge")
     .attr("d", hourglassPath)
     .attr("fill", "none");
 
-  // update vertices
+  // update circle html element for each vertex
   vertices.selectAll(".vertex").data(data.vertices)
     .join(
       enter => enter
@@ -446,10 +372,90 @@ function addEdge(weight) {
     data.edges.push({source:selectedVertices[i], target:selectedVertices[i+1], weight:weight});
   }
 
-  // update graph
+  // update canvas
   update();
 }
 
+// export graph data to JSON to clipboard
+function exportData() {
+  let d = export_graph();
+  console.log(JSON.stringify(d));
+  navigator.clipboard.writeText(JSON.stringify(d));
+}
+
+function defaultTikzString() {
+  str = `
+\\documentclass{standalone}
+\\usepackage{tikz}
+\\tikzstyle{vertex}=[
+  minimum size=0.15cm,
+  inner sep=0pt,
+  outer sep=0pt,
+  circle,
+  draw=black,
+]
+\\tikzstyle{filled}=[
+  vertex,
+  fill=black
+]
+\\tikzstyle{unfilled}=[
+  vertex,
+  fill=white
+]
+\\tikzstyle{blank}=[
+  vertex,
+  fill=white,
+  draw=white
+]
+
+\\tikzstyle{hourglass}=[
+  out=#1*20,
+  in={#1*20+180},
+  relative,
+  looseness=1.5
+]
+\\begin{document}
+
+\\begin{tikzpicture}
+\\node [draw, circle, minimum size=${2*radius}cm, dashed] at (0,0) {};
+  `;
+
+  return str;
+}
+
+// export LaTeX TikZ to clipboard
+function exportTikz() {
+  let tikzString = defaultTikzString();
+  data.vertices.forEach(function(v) {
+    tikzString += `\\node [${v.type}] (v${v.id}) at (${v.x.toFixed(2)},${v.y.toFixed(2)}) {};\n`;
+  });
+
+  data.edges.forEach(function(e) {
+    let v_fromIdStr = "v"+e.source.id;
+    let v_toIdStr = "v"+e.target.id;
+    var hourglass_style = [0,0,1,1.5,2,2.5];
+    if(e.weight == 1) {
+      tikzString += `\\draw (${v_fromIdStr}) to (${v_toIdStr});\n`;
+    } else {
+      let hs = hourglass_style[hourglass_style.length-1];
+      if (e.weight < hourglass_style.length) {
+        hs = hourglass_style[e.weight];
+      }
+      for (var i=0; i<e.weight; i++) {
+        tikzString += `\\draw[hourglass=${hs-i*2*hs/(e.weight-1)}] (${v_fromIdStr}) to (${v_toIdStr});\n`;
+      }
+      //tikzString += `\\draw[hourglass=1] (${v_fromIdStr}) to (${v_toIdStr});\n`;
+      //tikzString += `\\draw[hourglass=-1] (${v_fromIdStr}) to (${v_toIdStr});\n`;
+    }
+  });
+  tikzString += `
+\\end{tikzpicture}
+\\end{document}
+  `;
+  //document.getElementById('tikz').textContent = tikzString;
+  navigator.clipboard.writeText(tikzString);
+}
+  
 // import graph data from json
 function importData() {
   boundaryVertices = [];
@@ -457,8 +463,7 @@ function importData() {
   data = {vertices:[], edges:[]};
   update();
   data = JSON.parse(document.getElementById("jsonData").value);
-  update_edge_data(data);
-  prepare_data(data);
+  prepare_mhe_data(data);
   update();
 }
 
@@ -467,11 +472,11 @@ function importFromClipboard() {
   boundaryVertices = [];
   edgePath = [];
   data = {vertices:[], edges:[]};
-    navigator.clipboard.readText().then((copiedText) => {
-    console.log(copiedText);
+      navigator.clipboard.readText().then((copiedText) => {
+      console.log(copiedText);
   });
   update_edge_data(data);
-  prepare_data(data);
+  prepare_mhe_data(data);
   update();
 }
 
