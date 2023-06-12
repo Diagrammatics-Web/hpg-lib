@@ -247,7 +247,8 @@ function activateHourglass(obj) {
       d3.select(this).classed("selected", !d3.select(this).classed("selected"));
       addOrRemove(selected, this);
       if(selected.length == 2) {
-        addEdge(2); // 2 is default degree for hourglass
+        addEdge(2, 0); // 2 is default degree for hourglass
+        addEdge(2, 1);
         deselect();
       }
     })
@@ -265,7 +266,9 @@ function activatekHourglass(obj) {
       addOrRemove(selected, this);
       if(selected.length == 2) {
         var k = prompt("Enter degree",3);
-        addEdge(k);
+        for (var w_i = 0; w_i < k; w_i++) {
+          addEdge(k, w_i);
+        }
         deselect();
       }
     })
@@ -284,8 +287,7 @@ function idStr(e) {
 }
 
 
-
-// create edge path for Trip i update graph
+// create edge path for Trip and update graph
 function activateTrip(tripIndex) {
   activateObjects(".vertex");
   svg.selectAll(".vertex")
@@ -300,7 +302,7 @@ function activateTrip(tripIndex) {
       while(boundaryVertices.indexOf(e.multiEdge.target)==-1)// && confirm("Continue?"))
       {
           e = e.twin;
-          console.log("swith to",idStr(e));
+          console.log("switch to",idStr(e));
           if(e.multiEdge.source.type=="unfilled") {
             for(var i=0; i<tripIndex; i++) {
                 e = e.prev;
@@ -313,7 +315,7 @@ function activateTrip(tripIndex) {
             }
           }
           edgePath.push(e.multiEdge.edge);
-          update_trips();
+          update();
       }
 
     });

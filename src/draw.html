@@ -43,6 +43,7 @@
 
 <script>
 const radius = 10;
+// global state variables
 var data = {vertices: [], edges:[]};
 var boundaryVertices = [];
 var edgePath = [];
@@ -51,7 +52,7 @@ var edgePath = [];
 eel.get_graph()((g) => {
   data = g;
   // populate data with edge information
-  prepare_mhe_data(data);
+  prepare_data(data);
   // update canvas
   update();
 });
@@ -63,7 +64,15 @@ var data = {"edges":[{"weight":2,"sourceId":22,"targetId":21},{"weight":1,"sourc
 */
 
 // prepare edge data internally, adding mhe info for hourglass edges
-function prepare_mhe_data(data) {
+function prepare_data(data) {
+  // iterate through data and create multiple edges for hourglass edges
+  data.edges.forEach(function(edge) {
+    if (!edge.weight_idx) {
+      edge.weight_idx = 0;
+    }
+  });
+
+  // prepare mhe data for trup permutations
   data.vertices.forEach(function(vertex) {
     vertex.multiHalfEdges = [];
   });
@@ -180,35 +189,6 @@ function newGraph() {
   eel.print_from_js(data);
 }
 
-// convert graph data to recyclable format
-// return value is convertable to JSON
-function export_graph() {
-  var d = {edges:[], vertices: []};
-
-  // add edge info
-  data.edges.forEach(function(edge) {
-  let f = {
-      weight : edge.weight,
-    sourceId : edge.source.id,
-    targetId : edge.target.id
-    };
-  d.edges.push(f);
-  });
-
-  // add vertex info
-  data.vertices.forEach(function(vertex) {
-    let f = {
-        x : vertex.x,
-        y : vertex.y,
-        id : vertex.id,
-        type : vertex.type
-      };
-    d.vertices.push(f);
-  });
-
-  return d;
-}
-
 // point each edge to a source/target vertices based on Id data
 function update_edge_data(data) {
   data.edges.forEach(function(edge) {
@@ -277,24 +257,29 @@ function hourglassPath(edge) {
 
   var d = "";
 
-  for(var i=0; i<edge.weight; i++) {
-    var factor = (-(edge.weight-1)/2+i);//*1/(Math.sqrt(dx*dx+dy*dy))*20;
-    var points = [
-      [pos1_x, pos1_y],
-      [quater1_x+factor*dy/8, quater1_y-factor*dx/8],
-      [mid_x, mid_y],
-      [quater2_x-factor*dy/8, quater2_y+factor*dx/8],
-      [pos2_x, pos2_y]
-    ];
-
-    d += curveGenerator(points);
+  // FIXME: alter how we handle weight_idx
+  if (!edge.weight_idx) {
+    var weight_idx = 0;
   }
+  else {
+    var weight_idx = edge.weight_idx;
+  }
+
+  var factor = (-(edge.weight-1)/2+weight_idx);//*1/(Math.sqrt(dx*dx+dy*dy))*20;
+  var points = [
+    [pos1_x, pos1_y],
+    [quater1_x+factor*dy/8, quater1_y-factor*dx/8],
+    [mid_x, mid_y],
+    [quater2_x-factor*dy/8, quater2_y+factor*dx/8],
+    [pos2_x, pos2_y]
+  ];
+
+  d += curveGenerator(points);
 
   return d;
 }
 
 // update graph svg based on data updates
-// FIXME: need to cross reference update() with update_trips()
 function update() {
   // make sure data is valid format
   if (data == null) {
@@ -303,12 +288,14 @@ function update() {
   }
   console.log(data);
 
-  // update path html element for each edge
+  // update path html element for each edge, also checking for trip path
+  // TODO: need to add an edge for each part of an hourglass edge
   edges.selectAll(".edge").data(data.edges)
     .join("path")
     .attr("class", "edge")
     .attr("d", hourglassPath)
-    .attr("fill", "none");
+    .attr("fill", "none")
+    .classed("path", d=>edgePath.indexOf(d)>-1);
 
   // update circle html element for each vertex
   vertices.selectAll(".vertex").data(data.vertices)
@@ -331,49 +318,57 @@ function update() {
     );
 }
 
-// update graph svg based on activated trip permutation
-function update_trips() {
-  // update edges
-  edges.selectAll(".edge").data(data.edges)
-    .join("path")
-    .attr("id", d=>"e"+d.id)
-    .attr("class", "edge")
-    .attr("d", hourglassPath)
-    .attr("fill", "none")
-    .classed("path", d=>edgePath.indexOf(d)>-1);
-
-  // update vertices
-  vertices.selectAll(".vertex").data(data.vertices)
-    .join(
-      enter => enter
-          .append("circle")
-          .attr("class", "vertex")
-          .classed("unfilled", d=>d.type=="unfilled")
-          .classed("filled", d=>d.type=="filled")
-          .attr("cx", function(d) {
-            return x(d.x)
-          })
-          .attr("cy", function(d) {
-            return y(d.y)
-          })
-          .attr("r", 4),
-      update => update
-      .classed("unfilled", d=>d.type=="unfilled")
-      .classed("filled", d=>d.type=="filled")
-    );
-}
-
 // add edges to graph based on selected vertices
-function addEdge(weight) {
+function addEdge(weight, weight_idx) {
   var selection = d3.selectAll(selected);
   console.log(selection)
   var selectedVertices = selection.data();
   for(var i=0; i < selectedVertices.length-1; i++) {
-    data.edges.push({source:selectedVertices[i], target:selectedVertices[i+1], weight:weight});
+    data.edges.push({
+      source:selectedVertices[i], 
+      target:selectedVertices[i+1], 
+      weight:weight,
+      weight_idx:i
+    });
   }
 
   // update canvas
   update();
+}
+
+
+
+/* 
+ *  Graph Import/Export fns
+ */
+
+// convert graph data to recyclable format
+// return value is convertable to JSON
+function export_graph() {
+  var d = {edges:[], vertices: []};
+
+  // add edge info
+  data.edges.forEach(function(edge) {
+  let f = {
+      weight : edge.weight,
+    sourceId : edge.source.id,
+    targetId : edge.target.id
+    };
+  d.edges.push(f);
+  });
+
+  // add vertex info
+  data.vertices.forEach(function(vertex) {
+    let f = {
+        x : vertex.x,
+        y : vertex.y,
+        id : vertex.id,
+        type : vertex.type
+      };
+    d.vertices.push(f);
+  });
+
+  return d;
 }
 
 // export graph data to JSON to clipboard
@@ -463,7 +458,7 @@ function importData() {
   data = {vertices:[], edges:[]};
   update();
   data = JSON.parse(document.getElementById("jsonData").value);
-  prepare_mhe_data(data);
+  prepare_data(data);
   update();
 }
 
@@ -476,7 +471,7 @@ function importFromClipboard() {
       console.log(copiedText);
   });
   update_edge_data(data);
-  prepare_mhe_data(data);
+  prepare_data(data);
   update();
 }
 
