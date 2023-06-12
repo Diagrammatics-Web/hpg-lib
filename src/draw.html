@@ -56,22 +56,10 @@ eel.get_graph()((g) => {
   // update canvas
   update();
 });
-/*
-pseudodata for testing
-
-var data = {"edges":[{"weight":2,"sourceId":22,"targetId":21},{"weight":1,"sourceId":21,"targetId":4},{"weight":1,"sourceId":21,"targetId":5},{"weight":1,"sourceId":22,"targetId":20},{"weight":1,"sourceId":20,"targetId":19},{"weight":1,"sourceId":20,"targetId":18},{"weight":1,"sourceId":17,"targetId":23},{"weight":1,"sourceId":23,"targetId":16},{"weight":1,"sourceId":24,"targetId":20},{"weight":1,"sourceId":25,"targetId":22},{"weight":1,"sourceId":25,"targetId":24},{"weight":2,"sourceId":23,"targetId":24},{"weight":1,"sourceId":25,"targetId":6},{"weight":1,"sourceId":30,"targetId":26},{"weight":1,"sourceId":30,"targetId":15},{"weight":1,"sourceId":27,"targetId":31},{"weight":1,"sourceId":28,"targetId":29},{"weight":2,"sourceId":26,"targetId":29},{"weight":2,"sourceId":28,"targetId":31},{"weight":2,"sourceId":27,"targetId":30},{"weight":1,"sourceId":26,"targetId":25},{"weight":1,"sourceId":7,"targetId":29},{"weight":1,"sourceId":32,"targetId":11},{"weight":1,"sourceId":32,"targetId":10},{"weight":1,"sourceId":32,"targetId":9},{"weight":1,"sourceId":32,"targetId":28},{"weight":1,"sourceId":12,"targetId":31},{"weight":1,"sourceId":13,"targetId":33},{"weight":1,"sourceId":8,"targetId":33},{"weight":1,"sourceId":14,"targetId":33},{"weight":1,"sourceId":33,"targetId":27}],"vertices":[{"x":0.9666666666666877,"y":9.93333333333335,"id":4,"type":"filled"},{"x":5.110000000000031,"y":8.776666666666687,"id":5,"type":"filled"},{"x":8.130000000000036,"y":5.78000000000001,"id":6,"type":"filled"},{"x":9.806666666666692,"y":2.073333333333334,"id":7,"type":"filled"},{"x":-6.309999999999991,"y":-7.790000000000029,"id":8,"type":"filled"},{"x":9.576666666666718,"y":-2.900000000000003,"id":9,"type":"filled"},{"x":8.283333333333383,"y":-5.690000000000014,"id":10,"type":"filled"},{"x":6.090000000000047,"y":-7.963333333333347,"id":11,"type":"filled"},{"x":3.336666666666715,"y":-9.436666666666682,"id":12,"type":"filled"},{"x":-2.423333333333309,"y":-9.72666666666669,"id":13,"type":"filled"},{"x":-8.626666666666678,"y":-4.936666666666691,"id":14,"type":"filled"},{"x":-9.840000000000018,"y":-1.8300000000000156,"id":15,"type":"filled"},{"x":-9.740000000000013,"y":2.3,"id":16,"type":"filled"},{"x":-8.640000000000002,"y":4.920000000000003,"id":17,"type":"filled"},{"x":-6.563333333333345,"y":7.520000000000015,"id":18,"type":"filled"},{"x":-3.7466666666666684,"y":9.22000000000002,"id":19,"type":"filled"},{"x":-2.8666666666666587,"y":5.229999999999999,"id":20,"type":"unfilled"},{"x":1.3366666666666895,"y":6.5366666666666795,"id":21,"type":"unfilled"},{"x":-0.06999999999998785,"y":4.6666666666666705,"id":22,"type":"filled"},{"x":-6.733333333333345,"y":2.533333333333329,"id":23,"type":"unfilled"},{"x":-4.026666666666671,"y":1.6166666666666525,"id":24,"type":"filled"},{"x":0.6500000000000283,"y":2.1799999999999975,"id":25,"type":"unfilled"},{"x":0.40000000000000635,"y":-0.34666666666668045,"id":26,"type":"filled"},{"x":-2.7299999999999915,"y":-3.853333333333368,"id":27,"type":"filled"},{"x":1.4100000000000215,"y":-4.163333333333357,"id":28,"type":"filled"},{"x":2.2266666666666826,"y":-1.2700000000000085,"id":29,"type":"unfilled"},{"x":-1.7366666666666588,"y":-0.8966666666666865,"id":30,"type":"unfilled"},{"x":-0.499999999999976,"y":-4.639999999999997,"id":31,"type":"unfilled"},{"x":4.51333333333337,"y":-4.456666666666694,"id":32,"type":"unfilled"},{"x":-4.003333333333313,"y":-5.553333333333356,"id":33,"type":"unfilled"}]}
-
-*/
 
 // prepare edge data internally, adding mhe info for hourglass edges
+// TODO: need to alter mhe prep to account for multiple edges between vertices
 function prepare_data(data) {
-  // iterate through data and create multiple edges for hourglass edges
-  data.edges.forEach(function(edge) {
-    if (!edge.weight_idx) {
-      edge.weight_idx = 0;
-    }
-  });
-
   // prepare mhe data for trup permutations
   data.vertices.forEach(function(vertex) {
     vertex.multiHalfEdges = [];
@@ -352,7 +340,8 @@ function export_graph() {
   let f = {
       weight : edge.weight,
     sourceId : edge.source.id,
-    targetId : edge.target.id
+    targetId : edge.target.id,
+    weight_idx : edge.weight_idx
     };
   d.edges.push(f);
   });
