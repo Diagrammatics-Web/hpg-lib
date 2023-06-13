@@ -247,8 +247,7 @@ function activateHourglass(obj) {
       d3.select(this).classed("selected", !d3.select(this).classed("selected"));
       addOrRemove(selected, this);
       if(selected.length == 2) {
-        addEdge(2, 0); // 2 is default degree for hourglass
-        addEdge(2, 1);
+        addEdge(2);
         deselect();
       }
     })
@@ -266,9 +265,7 @@ function activatekHourglass(obj) {
       addOrRemove(selected, this);
       if(selected.length == 2) {
         var k = prompt("Enter degree",3);
-        for (var w_i = 0; w_i < k; w_i++) {
-          addEdge(k, w_i);
-        }
+        addEdge(k);
         deselect();
       }
     })

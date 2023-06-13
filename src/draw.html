@@ -57,14 +57,14 @@ eel.get_graph()((g) => {
   update();
 });
 
-// prepare edge data internally, adding mhe info for hourglass edges
+// prepare edge data in data object, adding mhe info for hourglass edges
 // TODO: need to alter mhe prep to account for multiple edges between vertices
 function prepare_data(data) {
-  // prepare mhe data for trup permutations
   data.vertices.forEach(function(vertex) {
     vertex.multiHalfEdges = [];
   });
 
+  // equip each vertex with ordered list of edges
   data.edges.forEach(function(edge, i) {
     edge.source = data.vertices.filter(vertex => vertex.id == edge.sourceId)[0];
     edge.target = data.vertices.filter(vertex => vertex.id == edge.targetId)[0];
@@ -92,6 +92,8 @@ function prepare_data(data) {
     };
     mhe1.twin = mhe2;
     edge.target.multiHalfEdges.push(mhe2);
+
+    // add halfEdges to each multiHalfEdge object
     for(var i=0; i<edge.weight; i++) {
       var he1 = {
         multiEdge: mhe1,
@@ -115,8 +117,12 @@ function prepare_data(data) {
 
   data.vertices.forEach(function(vertex) {
     vertex.multiHalfEdges.sort(function(a,b) {
+      // sort based on angle from vertex
       return Math.atan2(a.target.y-vertex.y, a.target.x-vertex.x) - Math.atan2(b.target.y-vertex.y, b.target.x-vertex.x);
     });
+
+    // TODO: double check this after looking at activateTrip logic
+    // TODO: need to sort halfEdges in each mhe based on "weight index"
     let nedges = vertex.multiHalfEdges.length;
     if (nedges <= 1) {
       boundaryVertices.push(vertex);
@@ -224,7 +230,7 @@ var edges = svg.append("g").attr("id", "edges");
 var vertices = svg.append("g").attr("id", "vertices");
 
 // return curve string for D3 to render edge
-function hourglassPath(edge) {
+function hourglassPath(edge, hourglass_idx) {
   var pos1_x = edge.source.x;
   var pos1_y = edge.source.y;
   var pos2_x = edge.target.x;
@@ -245,15 +251,7 @@ function hourglassPath(edge) {
 
   var d = "";
 
-  // FIXME: alter how we handle weight_idx
-  if (!edge.weight_idx) {
-    var weight_idx = 0;
-  }
-  else {
-    var weight_idx = edge.weight_idx;
-  }
-
-  var factor = (-(edge.weight-1)/2+edge.weight_idx);//*1/(Math.sqrt(dx*dx+dy*dy))*20;
+  var factor = (-(edge.weight-1)/2+hourglass_idx);
   var points = [
     [pos1_x, pos1_y],
     [quater1_x+factor*dy/8, quater1_y-factor*dx/8],
@@ -277,13 +275,26 @@ function update() {
   console.log(data);
 
   // update path html element for each edge, also checking for trip path
-  // TODO: need to add an edge for each part of an hourglass edge
   edges.selectAll(".edge").data(data.edges)
-    .join("path")
-    .attr("class", "edge")
-    .attr("d", hourglassPath)
-    .attr("fill", "none")
-    .classed("path", d=>edgePath.indexOf(d)>-1);
+    .join(
+      // FIXME: this is not the right code to handle multiedges, will fix soon
+      (enter) => {
+        enter.each(function(d) {
+          // add path element for each edge in hourglass multiedge
+          for (var i=0; i < d.weight; i++) {
+            enter
+              .append("path")
+              .attr("class", "edge")
+              .attr("d", hourglassPath(d, i))
+              .attr("fill", "none")
+              .classed("path", d=>edgePath.indexOf(d)>-1)
+              .on("click", function(d) {
+                addOrRemove(selected, d);
+                update();
+              });
+          }
+        });
+      });
 
   // update circle html element for each vertex
   vertices.selectAll(".vertex").data(data.vertices)
@@ -307,19 +318,16 @@ function update() {
 }
 
 // add edges to graph based on selected vertices
-function addEdge(weight, weight_idx) {
+function addEdge(weight) {
   var selection = d3.selectAll(selected);
   console.log(selection)
   var selectedVertices = selection.data();
   for(var i=0; i < selectedVertices.length-1; i++) {
-    for (var idx=0; idx < weight; idx++) {
-      data.edges.push({
-      source:selectedVertices[i], 
-      target:selectedVertices[i+1], 
-      weight:weight,
-      weight_idx:idx
+    data.edges.push({
+    source:selectedVertices[i], 
+    target:selectedVertices[i+1], 
+    weight:weight
     });
-    }
   }
 
   // update canvas
@@ -342,8 +350,7 @@ function export_graph() {
   let f = {
       weight : edge.weight,
     sourceId : edge.source.id,
-    targetId : edge.target.id,
-    weight_idx : edge.weight_idx
+    targetId : edge.target.id
     };
   d.edges.push(f);
   });
