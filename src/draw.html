@@ -253,7 +253,7 @@ function hourglassPath(edge) {
     var weight_idx = edge.weight_idx;
   }
 
-  var factor = (-(edge.weight-1)/2+weight_idx);//*1/(Math.sqrt(dx*dx+dy*dy))*20;
+  var factor = (-(edge.weight-1)/2+edge.weight_idx);//*1/(Math.sqrt(dx*dx+dy*dy))*20;
   var points = [
     [pos1_x, pos1_y],
     [quater1_x+factor*dy/8, quater1_y-factor*dx/8],
@@ -312,12 +312,14 @@ function addEdge(weight, weight_idx) {
   console.log(selection)
   var selectedVertices = selection.data();
   for(var i=0; i < selectedVertices.length-1; i++) {
-    data.edges.push({
+    for (var idx=0; idx < weight; idx++) {
+      data.edges.push({
       source:selectedVertices[i], 
       target:selectedVertices[i+1], 
       weight:weight,
-      weight_idx:i
+      weight_idx:idx
     });
+    }
   }
 
   // update canvas
