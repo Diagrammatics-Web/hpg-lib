@@ -295,8 +295,8 @@ function activateTrip(tripIndex) {
       var e0 = vertex.multiHalfEdges[0].halfEdges[0];
       var e = e0;
       console.log("start with",idStr(e));
-      edgePath.push(e.multiEdge.edge);
-      while(boundaryVertices.indexOf(e.multiEdge.target)==-1)// && confirm("Continue?"))
+      edgePath.push(JSON.stringify([e.multiEdge.edge.id, e.heId]));
+      while(boundaryVertices.indexOf(e.multiEdge.target)==-1)
       {
           e = e.twin;
           console.log("switch to",idStr(e));
@@ -311,7 +311,7 @@ function activateTrip(tripIndex) {
                 console.log("filled turn to",idStr(e));
             }
           }
-          edgePath.push(e.multiEdge.edge);
+          edgePath.push(JSON.stringify([e.multiEdge.edge.id, e.heId]));
           update();
       }
 

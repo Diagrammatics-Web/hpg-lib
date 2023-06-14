@@ -93,14 +93,14 @@ function prepare_data(data) {
     mhe1.twin = mhe2;
     edge.target.multiHalfEdges.push(mhe2);
 
-    // add halfEdges to each multiHalfEdge object
+    // add halfEdges to each multiHalfEdge object, inherent ordering
     for(var i=0; i<edge.weight; i++) {
       var he1 = {
         multiEdge: mhe1,
         twin: "",
         prev: "",
         next: "",
-        heId: i
+        heId: i // also used as hourglass_idx
       }
       mhe1.halfEdges.push(he1);
       var he2 = {
@@ -108,7 +108,7 @@ function prepare_data(data) {
         twin: he1,
         prev: "",
         next: "",
-        heId: i
+        heId: i // also used as hourglass_idx
       }
       mhe2.halfEdges.push(he2);
       he1.twin = he2;
@@ -116,8 +116,8 @@ function prepare_data(data) {
   });
 
   data.vertices.forEach(function(vertex) {
+    // sort based on angle from vertex
     vertex.multiHalfEdges.sort(function(a,b) {
-      // sort based on angle from vertex
       return Math.atan2(a.target.y-vertex.y, a.target.x-vertex.x) - Math.atan2(b.target.y-vertex.y, b.target.x-vertex.x);
     });
 
@@ -141,7 +141,6 @@ function prepare_data(data) {
           } else {
             mhe.halfEdges[j].next = mhe.next.halfEdges[0];
           }
-
           if(j>0) {
             mhe.halfEdges[j].prev = mhe.halfEdges[j-1];
           } else {
@@ -272,29 +271,35 @@ function update() {
     console.log("data is null")
     data = {vertices:[], edges:[]};
   }
-  console.log(data);
 
-  // update path html element for each edge, also checking for trip path
-  edges.selectAll(".edge").data(data.edges)
-    .join(
-      // FIXME: this is not the right code to handle multiedges, will fix soon
-      (enter) => {
-        enter.each(function(d) {
-          // add path element for each edge in hourglass multiedge
-          for (var i=0; i < d.weight; i++) {
-            enter
-              .append("path")
-              .attr("class", "edge")
-              .attr("d", hourglassPath(d, i))
-              .attr("fill", "none")
-              .classed("path", d=>edgePath.indexOf(d)>-1)
-              .on("click", function(d) {
-                addOrRemove(selected, d);
-                update();
-              });
-          }
-        });
-      });
+  // update path html element for each edge type
+  // FIXME: not huge fan of this, but it works
+  // this generates pseudo-edges for each component of an hourglass edge
+  edges.selectAll(".edge")
+    .data(() => {
+      var edgs = [];
+      for (e of data.edges) {
+        for (var i=0; i<e.weight; i++) {
+          edgs.push({edge:e, hourglass_idx:i});
+        }
+      }
+      return edgs;
+    })
+    .join("path")
+    .attr("id", d=>"e"+d.edge.id)
+    .attr("class", "edge")
+    .attr("d", (d) => hourglassPath(d.edge, d.hourglass_idx))
+    .attr("fill", "none")
+    // color edges if in edge path
+    .classed("path", (d) => {
+      var idx = edgePath.indexOf(JSON.stringify([d.edge.id, d.hourglass_idx]));
+      if (idx > -1) {
+        console.log("EDGE PATH:", edgePath[idx]);
+        console.log("PROPOSED:", JSON.stringify([d.edge.id, d.hourglass_idx]))
+      }
+      return (idx > -1);
+    });
+    // TODO: just selecting first edge currently
 
   // update circle html element for each vertex
   vertices.selectAll(".vertex").data(data.vertices)
