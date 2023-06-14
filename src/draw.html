@@ -135,6 +135,7 @@ function prepare_data(data) {
         mhe.id = i;
 
         //set prev and next for haldEdges in bundle
+        // TODO: need to fix how we are ordering half edges
         for(var j=0; j<mhe.weight; j++) {
           if(j<mhe.weight-1) {
             mhe.halfEdges[j].next = mhe.halfEdges[j+1];
@@ -299,7 +300,6 @@ function update() {
       }
       return (idx > -1);
     });
-    // TODO: just selecting first edge currently
 
   // update circle html element for each vertex
   vertices.selectAll(".vertex").data(data.vertices)
