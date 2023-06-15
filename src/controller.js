@@ -302,13 +302,14 @@ function activateTrip(tripIndex) {
           console.log("switch to",idStr(e));
           if(e.multiEdge.source.type=="unfilled") {
             for(var i=0; i<tripIndex; i++) {
+              console.log("HE ID:", e.heId, "OTHER:", e.multiEdge.halfEdges)
                 e = e.prev;
-                console.log("unfilled turn to",idStr(e));
+                console.log("unfilled turn to", idStr(e));
             }
           } else {
             for(var i=0; i<tripIndex; i++) {
                 e = e.next;
-                console.log("filled turn to",idStr(e));
+                console.log("filled turn to", idStr(e));
             }
           }
           edgePath.push(JSON.stringify([e.multiEdge.edge.id, e.heId]));

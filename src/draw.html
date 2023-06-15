@@ -47,6 +47,7 @@ const radius = 10;
 var data = {vertices: [], edges:[]};
 var boundaryVertices = [];
 var edgePath = [];
+var showLabels = true;
 
 // fill in data with constructor data on python side
 eel.get_graph()((g) => {
@@ -134,18 +135,19 @@ function prepare_data(data) {
         mhe.prev = vertex.multiHalfEdges[(nedges+i-1)%nedges];
         mhe.id = i;
 
-        //set prev and next for haldEdges in bundle
+        //set prev and next for halfEdges in bundle
+        // counterclockwise ordering
         // TODO: need to fix how we are ordering half edges
         for(var j=0; j<mhe.weight; j++) {
           if(j<mhe.weight-1) {
-            mhe.halfEdges[j].next = mhe.halfEdges[j+1];
+            mhe.halfEdges[j].prev = mhe.halfEdges[j+1];
           } else {
-            mhe.halfEdges[j].next = mhe.next.halfEdges[0];
+            mhe.halfEdges[j].prev = mhe.prev.halfEdges[0];
           }
           if(j>0) {
-            mhe.halfEdges[j].prev = mhe.halfEdges[j-1];
+            mhe.halfEdges[j].next = mhe.halfEdges[j-1];
           } else {
-            mhe.halfEdges[j].prev = mhe.prev.halfEdges[mhe.prev.weight-1];
+            mhe.halfEdges[j].next = mhe.next.halfEdges[mhe.next.weight-1];
           }
         }
       }
@@ -294,17 +296,14 @@ function update() {
     // color edges if in edge path
     .classed("path", (d) => {
       var idx = edgePath.indexOf(JSON.stringify([d.edge.id, d.hourglass_idx]));
-      if (idx > -1) {
-        console.log("EDGE PATH:", edgePath[idx]);
-        console.log("PROPOSED:", JSON.stringify([d.edge.id, d.hourglass_idx]))
-      }
       return (idx > -1);
     });
 
   // update circle html element for each vertex
   vertices.selectAll(".vertex").data(data.vertices)
     .join(
-      enter => enter
+      (enter) => 
+        enter
           .append("circle")
           .attr("class", "vertex")
           .classed("unfilled", d=>d.type=="unfilled")
@@ -315,11 +314,32 @@ function update() {
           .attr("cy", function(d) {
             return y(d.y)
           })
-          .attr("r", 4),
+          .attr("r", 4)
+      ,
       update => update
-      .classed("unfilled", d=>d.type=="unfilled")
-      .classed("filled", d=>d.type=="filled")
+        .classed("unfilled", d=>d.type=="unfilled")
+        .classed("filled", d=>d.type=="filled")
     );
+
+  // add labels to vertices for trip perm debugging
+  if (showLabels) {
+    vertices.selectAll(".vertex-label").data(data.vertices)
+      .join(
+        (enter) => 
+          enter
+            .append("text")
+            .attr("class", "vertex-label")
+            .attr("x", function(d) {
+              return x(d.x-0.3)
+            })
+            .attr("y", function(d) {
+              return y(d.y+0.3)
+            })
+            .text(function(d) {
+              return d.id
+            })
+      );
+  }
 }
 
 // add edges to graph based on selected vertices
