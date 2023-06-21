@@ -44,6 +44,10 @@ var modes = {
     activate: activateTrip3,
     deactivate: deactivateTrip3
   },
+  "toggle_labels": {
+    activate: show_labels,
+    deactivate: hide_labels
+  }
 };
 
 
@@ -134,6 +138,16 @@ function deactivateMove(obj) {
   svg.call(nodrag);
   svg.on('mousedown.drag', null);
   deactivateAllObjects();
+}
+
+// toggle labels
+function show_labels(obj) {
+  showLabels = true;
+  update();
+}
+function hide_labels(obj) {
+  showLabels = false;
+  update();
 }
 
 

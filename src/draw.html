@@ -37,6 +37,7 @@
 <button id="btn-add_edge" onclick="activateButton(this,'place_edge')">Add edge</button>
 <button id="btn-add_hourglass" onclick="activateButton(this,'place_hourglass')">Add hourglass</button>
 <button id="btn-add_khourglass" onclick="activateButton(this,'place_khourglass')">Add k-hourglass</button>
+<button id="btn-toggle_labels" onclick="activateButton(this,'toggle_labels')">Toggle vertex labels</button>
 <!--<textarea id= "tikz" style= "border-width: medium;"></textarea>-->
 
 
@@ -47,7 +48,7 @@ const radius = 10;
 var data = {vertices: [], edges:[]};
 var boundaryVertices = [];
 var edgePath = [];
-var showLabels = true;
+var showLabels = false;
 
 // fill in data with constructor data on python side
 eel.get_graph()((g) => {
