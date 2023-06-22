@@ -3,6 +3,7 @@
 <head>
   <script type="text/javascript" src="eel.js"></script>
   <script src="d3.js"></script>
+  <script type="text/javascript" src="jsonpickleJS/build/jsonpickle.min.js"></script>
   <script>
     // notify server to render app
     eel.update_server_status(true);
@@ -52,12 +53,40 @@ var showLabels = false;
 
 // fill in data with constructor data on python side
 eel.get_graph()((g) => {
-  data = g;
+  data = JSON.parse(g);
   // populate data with edge information
   prepare_data(data);
   // update canvas
   update();
 });
+
+// function for parsing JSON pickles from Python
+function pickle_decode(json_string) {
+  console.log(json_string)
+
+  var refs = {}; // Store references by id
+  var obj = JSON.parse(json_string, function (key, value) {
+    if (typeof value === "object" && value !== null) {
+      if ("py/id" in value) {
+        if (value["py/id"] in refs) {
+          // This object is a reference to an earlier object
+          return refs[value["py/id"]];
+        }
+        else {
+          // This object is a new object, store it
+          refs[value["py/id"]] = value;
+          // Remove the id property
+          delete value["py/id"];
+        }
+      }
+    }
+    return value;
+  });
+
+  console.log(obj);
+}
+
+
 
 // prepare edge data in data object, adding mhe info for hourglass edges
 // TODO: need to alter mhe prep to account for multiple edges between vertices
@@ -123,8 +152,6 @@ function prepare_data(data) {
       return Math.atan2(a.target.y-vertex.y, a.target.x-vertex.x) - Math.atan2(b.target.y-vertex.y, b.target.x-vertex.x);
     });
 
-    // TODO: double check this after looking at activateTrip logic
-    // TODO: need to sort halfEdges in each mhe based on "weight index"
     let nedges = vertex.multiHalfEdges.length;
     if (nedges <= 1) {
       boundaryVertices.push(vertex);
@@ -138,7 +165,6 @@ function prepare_data(data) {
 
         //set prev and next for halfEdges in bundle
         // counterclockwise ordering
-        // TODO: need to fix how we are ordering half edges
         for(var j=0; j<mhe.weight; j++) {
           if(j<mhe.weight-1) {
             mhe.halfEdges[j].prev = mhe.halfEdges[j+1];
