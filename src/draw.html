@@ -442,35 +442,38 @@ function defaultTikzString() {
 
 // export LaTeX TikZ to clipboard
 function exportTikz() {
-  let tikzString = defaultTikzString();
-  data.vertices.forEach(function(v) {
-    tikzString += `\\node [${v.type}] (v${v.id}) at (${v.x.toFixed(2)},${v.y.toFixed(2)}) {};\n`;
-  });
+  // ****** (JS implementation) ******
+//   let tikzString = defaultTikzString();
+//   data.vertices.forEach(function(v) {
+//     tikzString += `\\node [${v.type}] (v${v.id}) at (${v.x.toFixed(2)},${v.y.toFixed(2)}) {};\n`;
+//   });
 
-  data.edges.forEach(function(e) {
-    let v_fromIdStr = "v"+e.source.id;
-    let v_toIdStr = "v"+e.target.id;
-    var hourglass_style = [0,0,1,1.5,2,2.5];
-    if(e.weight == 1) {
-      tikzString += `\\draw (${v_fromIdStr}) to (${v_toIdStr});\n`;
-    } else {
-      let hs = hourglass_style[hourglass_style.length-1];
-      if (e.weight < hourglass_style.length) {
-        hs = hourglass_style[e.weight];
-      }
-      for (var i=0; i<e.weight; i++) {
-        tikzString += `\\draw[hourglass=${hs-i*2*hs/(e.weight-1)}] (${v_fromIdStr}) to (${v_toIdStr});\n`;
-      }
-      //tikzString += `\\draw[hourglass=1] (${v_fromIdStr}) to (${v_toIdStr});\n`;
-      //tikzString += `\\draw[hourglass=-1] (${v_fromIdStr}) to (${v_toIdStr});\n`;
-    }
-  });
-  tikzString += `
-\\end{tikzpicture}
-\\end{document}
-  `;
-  //document.getElementById('tikz').textContent = tikzString;
-  navigator.clipboard.writeText(tikzString);
+//   data.edges.forEach(function(e) {
+//     let v_fromIdStr = "v"+e.source.id;
+//     let v_toIdStr = "v"+e.target.id;
+//     var hourglass_style = [0,0,1,1.5,2,2.5];
+//     if(e.weight == 1) {
+//       tikzString += `\\draw (${v_fromIdStr}) to (${v_toIdStr});\n`;
+//     } else {
+//       let hs = hourglass_style[hourglass_style.length-1];
+//       if (e.weight < hourglass_style.length) {
+//         hs = hourglass_style[e.weight];
+//       }
+//       for (var i=0; i<e.weight; i++) {
+//         tikzString += `\\draw[hourglass=${hs-i*2*hs/(e.weight-1)}] (${v_fromIdStr}) to (${v_toIdStr});\n`;
+//       }
+//       //tikzString += `\\draw[hourglass=1] (${v_fromIdStr}) to (${v_toIdStr});\n`;
+//       //tikzString += `\\draw[hourglass=-1] (${v_fromIdStr}) to (${v_toIdStr});\n`;
+//     }
+//   });
+//   tikzString += `
+// \\end{tikzpicture}
+// \\end{document}
+//   `;
+
+  eel.get_tikz()((tikzString) => {
+    navigator.clipboard.writeText(tikzString);
+  })
 }
   
 // import graph data from json
