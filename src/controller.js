@@ -302,33 +302,50 @@ function idStr(e) {
 function activateTrip(tripIndex) {
   activateObjects(".vertex");
   svg.selectAll(".vertex")
-    .on("click", function(e) {
-      edgePath = [];
+    .on("click", async function(e) {
       v = d3.select(this);
-      var vertex = v.datum();
-      var e0 = vertex.multiHalfEdges[0].halfEdges[0];
-      var e = e0;
-      console.log("start with",idStr(e));
-      edgePath.push(JSON.stringify([e.multiEdge.edge.id, e.heId]));
-      while(boundaryVertices.indexOf(e.multiEdge.target)==-1)
-      {
-          e = e.twin;
-          console.log("switch to",idStr(e));
-          if(e.multiEdge.source.type=="unfilled") {
-            for(var i=0; i<tripIndex; i++) {
-              console.log("HE ID:", e.heId, "OTHER:", e.multiEdge.halfEdges)
-                e = e.prev;
-                console.log("unfilled turn to", idStr(e));
-            }
-          } else {
-            for(var i=0; i<tripIndex; i++) {
-                e = e.next;
-                console.log("filled turn to", idStr(e));
-            }
-          }
-          edgePath.push(JSON.stringify([e.multiEdge.edge.id, e.heId]));
+      vertexId = v.datum().id;
+
+      // ******** (Trip Permuation in JS) ********
+      // edgePath = [];
+      // v = d3.select(this);
+      // var vertex = v.datum();
+      // var e0 = vertex.multiHalfEdges[0].halfEdges[0];
+      // var e = e0;
+      // console.log("start with",idStr(e));
+      // edgePath.push(JSON.stringify([e.multiEdge.edge.id, e.heId]));
+      // while(boundaryVertices.indexOf(e.multiEdge.target)==-1)
+      // {
+      //   e = e.twin;
+      //   console.log("switch to",idStr(e));
+      //   if(e.multiEdge.source.type=="unfilled") {
+      //     for(var i=0; i<tripIndex; i++) {
+      //       console.log("HE ID:", e.heId, "OTHER:", e.multiEdge.halfEdges)
+      //         e = e.prev;
+      //         console.log("unfilled turn to", idStr(e));
+      //     }
+      //   } else {
+      //     for(var i=0; i<tripIndex; i++) {
+      //         e = e.next;
+      //         console.log("filled turn to", idStr(e));
+      //     }
+      //   }
+      //   edgePath.push(JSON.stringify([e.multiEdge.edge.id, e.heId]));
+
+      //   console.log("NOW AT:", e.multiEdge.source.id);
+      //   console.log("BOUNDARY VERTICES:", boundaryVertices.map((v) => v.id));
+
+      //   update();
+      // }
+
+      // edgepath from python
+      eel.get_trip(tripIndex, vertexId)((ep) => {
+        edgePath = [];
+        for (var i = 0; i < ep.length; i++) {
+          edgePath.push(JSON.stringify(ep[i]));
           update();
-      }
+        }
+      });
 
     });
 }
