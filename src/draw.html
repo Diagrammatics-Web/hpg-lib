@@ -12,7 +12,7 @@
 <body>
 
 <textarea id= "jsonData" style= "border-width: medium;"></textarea>
-<button id="btn-import" onclick="importData()">Import json data</button>
+<button id="btn-import" onclick="importJson()">Import json data</button>
 <br>
 
 <button id="btn-new" onclick="newGraph()">New</button>
@@ -43,167 +43,18 @@
 
 
 <script>
-const radius = 10;
+
 // global state variables
+const radius = 10;
 var data = {vertices: [], edges:[]};
 var boundaryVertices = [];
 var edgePath = [];
 var showLabels = false;
 
-// fill in data with constructor data on python side
-eel.get_graph()((g) => {
-  data = g;
-  // populate data with edge information
-  // FIXME: remove eventually
-  prepare_data(data);
-  // update canvas
-  update();
-});
 
-// prepare edge data in data object, adding mhe info for hourglass edges
-// TODO: need to alter mhe prep to account for multiple edges between vertices
-function prepare_data(data) {
-  data.vertices.forEach(function(vertex) {
-    vertex.multiHalfEdges = [];
-  });
-
-  // equip each vertex with ordered list of edges
-  data.edges.forEach(function(edge, i) {
-    edge.source = data.vertices.filter(vertex => vertex.id == edge.sourceId)[0];
-    edge.target = data.vertices.filter(vertex => vertex.id == edge.targetId)[0];
-    edge.id = i;
-    var mhe1 = {
-      edge: edge,
-      source: edge.source,
-      target: edge.target,
-      weight: edge.weight,
-      twin: "",
-      prev: "",
-      next: "",
-      halfEdges: []
-    };
-    edge.source.multiHalfEdges.push(mhe1);
-    var mhe2 = {
-      edge: edge,
-      source: edge.target,
-      target: edge.source,
-      weight: edge.weight,
-      twin: mhe1,
-      prev: "",
-      next: "",
-      halfEdges: []
-    };
-    mhe1.twin = mhe2;
-    edge.target.multiHalfEdges.push(mhe2);
-
-    // add halfEdges to each multiHalfEdge object, inherent ordering
-    for(var i=0; i<edge.weight; i++) {
-      var he1 = {
-        multiEdge: mhe1,
-        twin: "",
-        prev: "",
-        next: "",
-        heId: i // also used as hourglass_idx
-      }
-      mhe1.halfEdges.push(he1);
-      var he2 = {
-        multiEdge: mhe2,
-        twin: he1,
-        prev: "",
-        next: "",
-        heId: i // also used as hourglass_idx
-      }
-      mhe2.halfEdges.push(he2);
-      he1.twin = he2;
-    }
-  });
-
-  data.vertices.forEach(function(vertex) {
-    // sort based on angle from vertex
-    vertex.multiHalfEdges.sort(function(a,b) {
-      return Math.atan2(a.target.y-vertex.y, a.target.x-vertex.x) - Math.atan2(b.target.y-vertex.y, b.target.x-vertex.x);
-    });
-
-    let nedges = vertex.multiHalfEdges.length;
-    if (nedges <= 1) {
-      boundaryVertices.push(vertex);
-      if(nedges == 1) vertex.multiHalfEdges[0].id=0;
-    } else {
-      for(var i=0; i<nedges; i++) {
-        var mhe = vertex.multiHalfEdges[i];
-        mhe.next = vertex.multiHalfEdges[(i+1)%nedges];
-        mhe.prev = vertex.multiHalfEdges[(nedges+i-1)%nedges];
-        mhe.id = i;
-
-        //set prev and next for halfEdges in bundle
-        // counterclockwise ordering
-        for(var j=0; j<mhe.weight; j++) {
-          if(j<mhe.weight-1) {
-            mhe.halfEdges[j].prev = mhe.halfEdges[j+1];
-          } else {
-            mhe.halfEdges[j].prev = mhe.prev.halfEdges[0];
-          }
-          if(j>0) {
-            mhe.halfEdges[j].next = mhe.halfEdges[j-1];
-          } else {
-            mhe.halfEdges[j].next = mhe.next.halfEdges[mhe.next.weight-1];
-          }
-        }
-      }
-    }
-
-  });
-}
-
-// create new graph, prompt for number of vertices
-function newGraph() {
-  if(activeButton) {
-    activeButton.style.borderStyle = 'outset';
-  }
-  if(activeMode) {
-    activeMode.deactivate();
-  }
-  data = {vertices:[], edges:[]};
-  update_edge_data(data);
-  update();
-
-  let nvertices = prompt("Number of boundary vertices");
-  for(i=0; i<nvertices;i++) {
-    data.vertices[i] = {
-      x: radius*Math.sin(i*2*Math.PI/nvertices),
-      y: radius*Math.cos(i*2*Math.PI/nvertices),
-      id: i,
-      type: "filled"
-    };
-  }
-  maxVertexId = nvertices-1;
-  update_edge_data(data);
-  update();
-
-  // send new graph to python
-  eel.print_from_js(data);
-}
-
-// point each edge to a source/target vertices based on Id data
-function update_edge_data(data) {
-  data.edges.forEach(function(edge) {
-    edge.source = data.vertices.filter(vertex => vertex.id == edge.sourceId)[0];
-    edge.target = data.vertices.filter(vertex => vertex.id == edge.targetId)[0];
-  });
-}
-
-// helper fn: add value if missing, remove if present
-function addOrRemove(array, value) {
-  var index = array.indexOf(value);
-
-  if (index === -1) {
-      array.push(value);
-  } else {
-      array.splice(index, 1);
-  }
-}
-
-
+/* 
+ *  Initialize Canvas
+ */
 var maxVertexId = 0;
 var size = 600;
 var body = d3.select("body");
@@ -229,6 +80,45 @@ var boundary_circle = svg.append("circle")
 // init groups for edges and vertices
 var edges = svg.append("g").attr("id", "edges");
 var vertices = svg.append("g").attr("id", "vertices");
+
+
+// get initial graph from backend
+eel.get_graph()((g) => {
+  data = g;
+  preprocess_data();
+  update();
+});
+
+// create new graph, prompt for number of vertices
+function newGraph() {
+  if(activeButton) {
+    activeButton.style.borderStyle = 'outset';
+  }
+  if(activeMode) {
+    activeMode.deactivate();
+  }
+  data = {vertices:[], edges:[]};
+  update();
+
+  let nvertices = prompt("Number of boundary vertices");
+  for(i=0; i<nvertices;i++) {
+    data.vertices[i] = {
+      x: radius*Math.sin(i*2*Math.PI/nvertices),
+      y: radius*Math.cos(i*2*Math.PI/nvertices),
+      id: i,
+      type: "filled"
+    };
+  }
+  maxVertexId = nvertices-1;
+
+  // send new graph to python
+  eel.import_graph(data)((d) => {
+    data = d;
+    preprocess_data();
+    update();
+  });
+}
+
 
 // return curve string for D3 to render edge
 function hourglassPath(edge, hourglass_idx) {
@@ -275,7 +165,6 @@ function update() {
   }
 
   // update path html element for each edge type
-  // FIXME: not huge fan of this, but it works
   // this generates pseudo-edges for each component of an hourglass edge
   edges.selectAll(".edge")
     .data(() => {
@@ -298,7 +187,7 @@ function update() {
       return (idx > -1);
     });
 
-  // update circle html element for each vertex
+  // add circle html element for each vertex
   vertices.selectAll(".vertex").data(data.vertices)
     .join(
       (enter) => 
@@ -320,7 +209,7 @@ function update() {
         .classed("filled", d=>d.type=="filled")
     );
 
-  // add labels to vertices for trip perm debugging
+  // add labels if option selected
   if (showLabels) {
     vertices.selectAll(".vertex-label").data(data.vertices)
       .join(
@@ -348,14 +237,18 @@ function addEdge(weight) {
   var selectedVertices = selection.data();
   for(var i=0; i < selectedVertices.length-1; i++) {
     data.edges.push({
-    source:selectedVertices[i], 
-    target:selectedVertices[i+1], 
-    weight:weight
+      sourceId: selectedVertices[i].id, 
+      targetId: selectedVertices[i+1].id, 
+      weight:weight
     });
   }
 
-  // update canvas
-  update();
+  // FIXME: improve method for incremental updates
+  eel.import_graph(data_compressed())((d) => {
+    data = d;
+    preprocess_data();
+    update();
+  });
 }
 
 
@@ -363,20 +256,70 @@ function addEdge(weight) {
 /* 
  *  Graph Import/Export fns
  */
+// export graph data to JSON to clipboard
+function exportData() {
+  eel.get_graph()((d) => {
+    navigator.clipboard.writeText(JSON.stringify(d));
+  });
+}
 
-// convert graph data to recyclable format
-// return value is convertable to JSON
-function export_graph() {
+// export LaTeX TikZ to clipboard
+function export_tikz() {
+  eel.get_tikz()((tikzString) => {
+    navigator.clipboard.writeText(tikzString);
+  })
+}
+  
+// import graph data from json
+function importJson() {
+  boundaryVertices = [];
+  edgePath = [];
+  data = {vertices:[], edges:[]};
+  update();
+  data = JSON.parse(document.getElementById("jsonData").value);
+
+  // save to backend
+  eel.import_graph(data_compressed())((d) => {
+    console.log("imported graph to backend");
+    data = d;
+    preprocess_data();
+    update();
+    console.log("data retrieved from backend");
+  });
+}
+
+
+/* 
+ *  Backend Frontend Communication fns
+ */
+// store graph data to python and close session
+function end_session() {
+  eel.import_graph(data_compressed());
+  eel.update_server_status(false);
+}
+
+// bring graph to frontend and preprocess data
+function preprocess_data() {
+  // add references to source and target vertices
+  data.edges.forEach(function(edge, i) {
+    edge.source = data.vertices.filter(vertex => vertex.id == edge.sourceId)[0];
+    edge.target = data.vertices.filter(vertex => vertex.id == edge.targetId)[0];
+    edge.id = i;
+  });
+}
+
+// convert graph data to exportable object
+function data_compressed() {
   var d = {edges:[], vertices: []};
 
   // add edge info
   data.edges.forEach(function(edge) {
-  let f = {
+    let f = {
       weight : edge.weight,
-    sourceId : edge.source.id,
-    targetId : edge.target.id
+      sourceId : edge.sourceId,
+      targetId : edge.targetId
     };
-  d.edges.push(f);
+    d.edges.push(f);
   });
 
   // add vertex info
@@ -391,119 +334,6 @@ function export_graph() {
   });
 
   return d;
-}
-
-// export graph data to JSON to clipboard
-function exportData() {
-  let d = export_graph();
-  console.log(JSON.stringify(d));
-  navigator.clipboard.writeText(JSON.stringify(d));
-}
-
-function defaultTikzString() {
-  str = `
-\\documentclass{standalone}
-\\usepackage{tikz}
-\\tikzstyle{vertex}=[
-  minimum size=0.15cm,
-  inner sep=0pt,
-  outer sep=0pt,
-  circle,
-  draw=black,
-]
-\\tikzstyle{filled}=[
-  vertex,
-  fill=black
-]
-\\tikzstyle{unfilled}=[
-  vertex,
-  fill=white
-]
-\\tikzstyle{blank}=[
-  vertex,
-  fill=white,
-  draw=white
-]
-
-\\tikzstyle{hourglass}=[
-  out=#1*20,
-  in={#1*20+180},
-  relative,
-  looseness=1.5
-]
-\\begin{document}
-
-\\begin{tikzpicture}
-\\node [draw, circle, minimum size=${2*radius}cm, dashed] at (0,0) {};
-  `;
-
-  return str;
-}
-
-// export LaTeX TikZ to clipboard
-function exportTikz() {
-  // ****** (JS implementation) ******
-//   let tikzString = defaultTikzString();
-//   data.vertices.forEach(function(v) {
-//     tikzString += `\\node [${v.type}] (v${v.id}) at (${v.x.toFixed(2)},${v.y.toFixed(2)}) {};\n`;
-//   });
-
-//   data.edges.forEach(function(e) {
-//     let v_fromIdStr = "v"+e.source.id;
-//     let v_toIdStr = "v"+e.target.id;
-//     var hourglass_style = [0,0,1,1.5,2,2.5];
-//     if(e.weight == 1) {
-//       tikzString += `\\draw (${v_fromIdStr}) to (${v_toIdStr});\n`;
-//     } else {
-//       let hs = hourglass_style[hourglass_style.length-1];
-//       if (e.weight < hourglass_style.length) {
-//         hs = hourglass_style[e.weight];
-//       }
-//       for (var i=0; i<e.weight; i++) {
-//         tikzString += `\\draw[hourglass=${hs-i*2*hs/(e.weight-1)}] (${v_fromIdStr}) to (${v_toIdStr});\n`;
-//       }
-//       //tikzString += `\\draw[hourglass=1] (${v_fromIdStr}) to (${v_toIdStr});\n`;
-//       //tikzString += `\\draw[hourglass=-1] (${v_fromIdStr}) to (${v_toIdStr});\n`;
-//     }
-//   });
-//   tikzString += `
-// \\end{tikzpicture}
-// \\end{document}
-//   `;
-
-  eel.get_tikz()((tikzString) => {
-    navigator.clipboard.writeText(tikzString);
-  })
-}
-  
-// import graph data from json
-function importData() {
-  boundaryVertices = [];
-  edgePath = [];
-  data = {vertices:[], edges:[]};
-  update();
-  data = JSON.parse(document.getElementById("jsonData").value);
-  prepare_data(data);
-  update();
-}
-
-// *UNUSED* import graph data from clipboard
-function importFromClipboard() {
-  boundaryVertices = [];
-  edgePath = [];
-  data = {vertices:[], edges:[]};
-      navigator.clipboard.readText().then((copiedText) => {
-      console.log(copiedText);
-  });
-  update_edge_data(data);
-  prepare_data(data);
-  update();
-}
-
-// store graph data to python and close session
-function end_session() {
-  eel.save_graph(export_graph());
-  eel.update_server_status(false);
 }
 
 

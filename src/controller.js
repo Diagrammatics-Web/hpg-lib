@@ -374,3 +374,13 @@ function activateTrip3(obj) {
 function deactivateTrip3(obj) {
   svg.selectAll(".vertex").on("click", null);
 }
+
+// helper fn: add value if missing, remove if present
+function addOrRemove(array, value) {
+  var index = array.indexOf(value);
+  if (index === -1) {
+      array.push(value);
+  } else {
+      array.splice(index, 1);
+  }
+}
