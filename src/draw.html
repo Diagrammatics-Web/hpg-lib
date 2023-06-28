@@ -112,9 +112,13 @@ function newGraph() {
   maxVertexId = nvertices-1;
 
   // send new graph to python
-  eel.import_graph(data)((d) => {
+  eel.import_data(data)((d) => {
     data = d;
     preprocess_data();
+    
+    // FIXME: need to do the following
+    // 1. update boundary vertices
+
     update();
   });
 }
@@ -239,12 +243,12 @@ function addEdge(weight) {
     data.edges.push({
       sourceId: selectedVertices[i].id, 
       targetId: selectedVertices[i+1].id, 
-      weight:weight
+      weight: weight
     });
   }
 
   // FIXME: improve method for incremental updates
-  eel.import_graph(data_compressed())((d) => {
+  eel.import_data(data_compressed())((d) => {
     data = d;
     preprocess_data();
     update();
@@ -279,7 +283,7 @@ function importJson() {
   data = JSON.parse(document.getElementById("jsonData").value);
 
   // save to backend
-  eel.import_graph(data_compressed())((d) => {
+  eel.import_data(data_compressed())((d) => {
     console.log("imported graph to backend");
     data = d;
     preprocess_data();
@@ -294,12 +298,14 @@ function importJson() {
  */
 // store graph data to python and close session
 function end_session() {
-  eel.import_graph(data_compressed());
+  eel.import_data(data_compressed());
   eel.update_server_status(false);
 }
 
 // bring graph to frontend and preprocess data
 function preprocess_data() {
+  maxVertexId = Math.max(data.vertices.map(v => v.id)) + 1;
+
   // add references to source and target vertices
   data.edges.forEach(function(edge, i) {
     edge.source = data.vertices.filter(vertex => vertex.id == edge.sourceId)[0];
@@ -314,6 +320,10 @@ function data_compressed() {
 
   // add edge info
   data.edges.forEach(function(edge) {
+    if (edge.weight == 3) {
+      console.log("edge weight 3");
+      // FIXME: for some reason, backend is unable to read edge weight 3
+    }
     let f = {
       weight : edge.weight,
       sourceId : edge.sourceId,

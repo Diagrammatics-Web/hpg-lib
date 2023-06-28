@@ -206,6 +206,7 @@ function deactivateAllObjects() {
   svg.selectAll("*").classed("active", false);
 }
 
+// FIXME: alter vertex functions to udpate backend
 // init new vertex object
 function newVertex(x, y, type) {
   return {x:x, y:y, id: ++maxVertexId, type:type};
@@ -218,21 +219,21 @@ function addVertex(e) {
     vertexType = "unfilled"
   }
   data.vertices.push(newVertex(x.invert(e.offsetX), y.invert(e.offsetY), vertexType));
-  update();
+  eel.import_data(data_compressed())(() => {update();});
 }
 
 // add unfilled vertex on click and update graph
 function addUnfilledVertex(e) {
   vertexType = "unfilled"
   data.vertices.push(newVertex(x.invert(e.offsetX), y.invert(e.offsetY), vertexType));
-  update();
+  eel.import_data(data_compressed())(() => {update();});
 }
 
 // add filled vertex on click and update graph
 function addFilledVertex(e) {
   vertexType = "filled"
   data.vertices.push(newVertex(x.invert(e.offsetX), y.invert(e.offsetY), vertexType));
-  update();
+  eel.import_data(data_compressed())(() => {update();});
 }
 
 // create edge on click and update graph
@@ -292,12 +293,6 @@ function deactivateEdge(obj) {
 }
 
 
-// ******** (Trip Permuation Functions) ********
-function idStr(e) {
-  return "("+e.multiEdge.source.id+"/"+e.multiEdge.target.id+")."+e.multiEdge.id+"."+e.heId;
-}
-
-
 // create edge path for Trip and update graph
 function activateTrip(tripIndex) {
   activateObjects(".vertex");
@@ -305,38 +300,6 @@ function activateTrip(tripIndex) {
     .on("click", async function(e) {
       v = d3.select(this);
       vertexId = v.datum().id;
-
-      // ******** (Trip Permuation in JS) ********
-      // edgePath = [];
-      // v = d3.select(this);
-      // var vertex = v.datum();
-      // var e0 = vertex.multiHalfEdges[0].halfEdges[0];
-      // var e = e0;
-      // console.log("start with",idStr(e));
-      // edgePath.push(JSON.stringify([e.multiEdge.edge.id, e.heId]));
-      // while(boundaryVertices.indexOf(e.multiEdge.target)==-1)
-      // {
-      //   e = e.twin;
-      //   console.log("switch to",idStr(e));
-      //   if(e.multiEdge.source.type=="unfilled") {
-      //     for(var i=0; i<tripIndex; i++) {
-      //       console.log("HE ID:", e.heId, "OTHER:", e.multiEdge.halfEdges)
-      //         e = e.prev;
-      //         console.log("unfilled turn to", idStr(e));
-      //     }
-      //   } else {
-      //     for(var i=0; i<tripIndex; i++) {
-      //         e = e.next;
-      //         console.log("filled turn to", idStr(e));
-      //     }
-      //   }
-      //   edgePath.push(JSON.stringify([e.multiEdge.edge.id, e.heId]));
-
-      //   console.log("NOW AT:", e.multiEdge.source.id);
-      //   console.log("BOUNDARY VERTICES:", boundaryVertices.map((v) => v.id));
-
-      //   update();
-      // }
 
       // edgepath from python
       eel.get_trip(tripIndex, vertexId)((ep) => {
