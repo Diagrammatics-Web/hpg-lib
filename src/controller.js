@@ -280,7 +280,7 @@ function activatekHourglass(obj) {
       addOrRemove(selected, this);
       if(selected.length == 2) {
         var k = prompt("Enter degree",3);
-        addEdge(k);
+        addEdge(parseInt(k)); // pass in int
         deselect();
       }
     })
