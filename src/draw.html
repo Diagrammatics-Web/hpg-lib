@@ -213,24 +213,34 @@ function update() {
     );
 
   // add labels if option selected
-  if (showLabels) {
-    vertices.selectAll(".vertex-label").data(data.vertices)
-      .join(
-        (enter) => 
-          enter
-            .append("text")
-            .attr("class", "vertex-label")
-            .attr("x", function(d) {
-              return x(d.x-0.3)
-            })
-            .attr("y", function(d) {
-              return y(d.y+0.3)
-            })
-            .text(function(d) {
-              return d.id
-            })
-      );
-  }
+  vertices.selectAll(".vertex-label").data(data.vertices)
+    .join(
+      (enter) => 
+        enter
+          .append("text")
+          .attr("class", "vertex-label")
+          .attr("x", function(d) {
+            return x(d.x-0.3)
+          })
+          .attr("y", function(d) {
+            return y(d.y+0.3)
+          })
+          .text(function(d) {
+            if (!showLabels) {
+              return "";
+            }
+            return d.id;
+          })
+          ,
+      (update) => 
+        update
+          .text(function(d) {
+            if (!showLabels) {
+              return "";
+            }
+            return d.id;
+          })
+    );
 }
 
 // add edges to graph based on selected vertices

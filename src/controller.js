@@ -142,11 +142,11 @@ function deactivateMove(obj) {
 
 // toggle labels
 function show_labels(obj) {
-  showLabels = true;
+  showLabels = !showLabels;
+  console.log("show labels: " + showLabels);
   update();
 }
 function hide_labels(obj) {
-  showLabels = false;
   update();
 }
 
