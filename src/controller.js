@@ -209,6 +209,7 @@ function deactivateAllObjects() {
 // FIXME: alter vertex functions to udpate backend
 // init new vertex object
 function newVertex(x, y, type) {
+  console.log("New vertex: " + x + ", " + y + ", " + (maxVertexId + 1));
   return {x:x, y:y, id: ++maxVertexId, type:type};
 }
 

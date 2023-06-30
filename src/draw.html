@@ -109,7 +109,6 @@ function newGraph() {
       type: "filled"
     };
   }
-  maxVertexId = nvertices-1;
 
   // send new graph to python
   eel.import_data(data)((d) => {
@@ -304,7 +303,7 @@ function end_session() {
 
 // bring graph to frontend and preprocess data
 function preprocess_data() {
-  maxVertexId = Math.max(data.vertices.map(v => v.id)) + 1;
+  maxVertexId = Math.max(...data.vertices.map(v => v.id)) + 1;
 
   // add references to source and target vertices
   data.edges.forEach(function(edge, i) {
