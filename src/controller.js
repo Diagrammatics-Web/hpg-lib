@@ -73,7 +73,7 @@ function deselect() {
 function activateButton(obj, mode) {
   // update active button
   if(activeButton) {
-    activeButton.style.borderStyle = 'outset';
+    activeButton.style.borderStyle = '';
   }
   activeButton = obj;
   activeButton.style.borderStyle = 'inset';
