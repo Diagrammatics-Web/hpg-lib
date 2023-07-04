@@ -64,6 +64,16 @@ var selectedElement = false;
 
 // remove any vertices from selected class
 function deselect() {
+  // if(activeButton) {
+  //   activeButton.style.borderStyle = '';
+  //   activeButton = false;
+  // }
+  // if(activeMode) {
+  //   activeMode.deactivate();
+  //   activeMode = false;
+  // }
+
+
   d3.selectAll(selected).classed("selected", false);
   selected = [];
 }
@@ -71,6 +81,14 @@ function deselect() {
 
 // button clicked, so activate corresponding mode
 function activateButton(obj, mode) {
+  // if same button clicked, then deselect
+  if(activeButton == obj) {
+    activeButton.style.borderStyle = '';
+    activeButton = false;
+    activeMode.deactivate();
+    return;
+  }
+
   // update active button
   if(activeButton) {
     activeButton.style.borderStyle = '';
@@ -83,8 +101,6 @@ function activateButton(obj, mode) {
     activeMode.deactivate();
   }
   activeMode = modes[mode];
-
-  // call activate function for new mode
   activeMode.activate();
 }
 
@@ -102,9 +118,17 @@ var draggroup = d3.drag()
         d.y += y.invert(e.dy)-y.invert(0);
         return y(d.y);
       });
-    update();
+
+      // save to backend
+      eel.import_data(data_compressed())((d) => {
+        data = d;
+        preprocess_data();
+        update();
+      });
   })
-  .on("end", e => svg.style('cursor', 'pointer'));
+  .on("end", e => {
+    svg.style('cursor', 'pointer');
+  });
 
 // init d3 object for stopping drag events
 var nodrag = d3.drag()
@@ -220,21 +244,39 @@ function addVertex(e) {
     vertexType = "unfilled"
   }
   data.vertices.push(newVertex(x.invert(e.offsetX), y.invert(e.offsetY), vertexType));
-  eel.import_data(data_compressed())(() => {update();});
+
+  // save to backend
+  eel.import_data(data_compressed())((d) => {
+    data = d;
+    preprocess_data();
+    update();
+  });
 }
 
 // add unfilled vertex on click and update graph
 function addUnfilledVertex(e) {
   vertexType = "unfilled"
   data.vertices.push(newVertex(x.invert(e.offsetX), y.invert(e.offsetY), vertexType));
-  eel.import_data(data_compressed())(() => {update();});
+  
+  // save to backend
+  eel.import_data(data_compressed())((d) => {
+    data = d;
+    preprocess_data();
+    update();
+  });
 }
 
 // add filled vertex on click and update graph
 function addFilledVertex(e) {
   vertexType = "filled"
   data.vertices.push(newVertex(x.invert(e.offsetX), y.invert(e.offsetY), vertexType));
-  eel.import_data(data_compressed())(() => {update();});
+  
+  // save to backend
+  eel.import_data(data_compressed())((d) => {
+    data = d;
+    preprocess_data();
+    update();
+  });
 }
 
 // create edge on click and update graph

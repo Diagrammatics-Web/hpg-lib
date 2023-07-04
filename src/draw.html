@@ -11,40 +11,66 @@
 </head>
 <body>
 
-<textarea id= "jsonData" style= "border-width: medium;"></textarea>
-<button id="btn-import" onclick="importJson()">Import json data</button>
 <br>
+<div>
+  <button id="btn-new" onclick="newGraph()">New</button>
+  <button id="btn-off" onclick="end_session()">Save/Finish</button>
+  <button id="btn-export" onclick="exportData()">Export data as json</button>
+  <button id="btn-tikz" onclick="exportTikz()">Export tikz to clipboard</button>
+  <button id="btn-import" onclick="importJson()">Import json data</button>
+</div>
 
-<button id="btn-new" onclick="newGraph()">New</button>
-<button id="btn-off" onclick="end_session()">Save/Finish</button>
-<button id="btn-export" onclick="exportData()">Export data as json</button>
-<button id="btn-tikz" onclick="exportTikz()">Export tikz to clipboard</button>
-<br>
-
-<div id="paper-container"></div>
-
-<br>
-<button id="btn-trip1" onclick="activateButton(this,'trip1')">Trip1</button>
-<button id="btn-trip2" onclick="activateButton(this,'trip2')">Trip2</button>
-<button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button>
+<div>
+  <div id="paper-container"></div>
+  <button id="btn-tikz" onclick="changeMode('edit')">Edit</button>
+  <button id="btn-tikz" onclick="changeMode('analyze')">Analyze</button>
+</div>
 
 <br>
-<button id="btn-deselect" onclick="deselect()">Deselect all</button>
-<button id="btn-move" onclick="activateButton(this,'move')">Move</button>
-<button id="btn-place_filled" onclick="activateButton(this,'place_filled')">Place filled vertex</button>
-<button id="btn-place_unfilled" onclick="activateButton(this,'place_unfilled')">Place unfilled vertex</button>
-<button id="btn-toggle_color" onclick="activateButton(this,'toggle_color')">Toggle vertex color</button>
-<button id="btn-add_edge" onclick="activateButton(this,'place_edge')">Add edge</button>
-<button id="btn-add_hourglass" onclick="activateButton(this,'place_hourglass')">Add hourglass</button>
-<button id="btn-add_khourglass" onclick="activateButton(this,'place_khourglass')">Add k-hourglass</button>
-<button id="btn-toggle_labels" onclick="activateButton(this,'toggle_labels')">Toggle vertex labels</button>
-<!--<textarea id= "tikz" style= "border-width: medium;"></textarea>-->
-
+<!-- empty div where buttons dynamically rendered -->
+<div id="actions"></div>
 
 
 <script>
+function changeMode(newMode) {
+  mode = newMode;
+  actions.innerHTML = '';
+
+  // conditionally render buttons for each mode
+  if (mode === 'edit') {
+    const actions = document.getElementById('actions');
+
+    const container = document.createElement('div');
+    container.innerHTML = `
+    <button id="btn-deselect" onclick="deselect()">Deselect all</button>
+    <button id="btn-move" onclick="activateButton(this,'move')">Move</button>
+    <button id="btn-place_filled" onclick="activateButton(this,'place_filled')">Place filled vertex</button>
+    <button id="btn-place_unfilled" onclick="activateButton(this,'place_unfilled')">Place unfilled vertex</button>
+    <button id="btn-toggle_color" onclick="activateButton(this,'toggle_color')">Toggle vertex color</button>
+    <button id="btn-add_edge" onclick="activateButton(this,'place_edge')">Add edge</button>
+    <button id="btn-add_hourglass" onclick="activateButton(this,'place_hourglass')">Add hourglass</button>
+    <button id="btn-add_khourglass" onclick="activateButton(this,'place_khourglass')">Add k-hourglass</button>
+    <button id="btn-toggle_labels" onclick="activateButton(this,'toggle_labels')">Toggle vertex labels</button>
+    `
+
+    actions.appendChild(container);
+  }
+
+  else if (mode === 'analyze') {
+    const actions = document.getElementById('actions');
+    const container = document.createElement('div');
+    container.innerHTML = `
+    <button id="btn-trip1" onclick="activateButton(this,'trip1')">Trip1</button>
+    <button id="btn-trip2" onclick="activateButton(this,'trip2')">Trip2</button>
+    <button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button>
+    `
+
+    actions.appendChild(container);
+  }
+}
 
 // global state variables
+let mode = "";
 const radius = 10;
 var data = {vertices: [], edges:[]};
 var boundaryVertices = [];
@@ -111,7 +137,7 @@ function newGraph() {
   }
 
   // send new graph to python
-  eel.import_data(data)((d) => {
+  eel.import_data(data_compressed())((d) => {
     data = d;
     preprocess_data();
     
@@ -285,19 +311,23 @@ function export_tikz() {
   
 // import graph data from json
 function importJson() {
+  let newData = prompt("Paste JSON here:");
+  if (newData == null) {
+    return;
+  }
+
+  // clear graph and update data
   boundaryVertices = [];
   edgePath = [];
   data = {vertices:[], edges:[]};
   update();
-  data = JSON.parse(document.getElementById("jsonData").value);
+  data = JSON.parse(newData);
 
   // save to backend
   eel.import_data(data_compressed())((d) => {
-    console.log("imported graph to backend");
     data = d;
     preprocess_data();
     update();
-    console.log("data retrieved from backend");
   });
 }
 
@@ -329,10 +359,6 @@ function data_compressed() {
 
   // add edge info
   data.edges.forEach(function(edge) {
-    if (edge.weight == 3) {
-      console.log("edge weight 3");
-      // FIXME: for some reason, backend is unable to read edge weight 3
-    }
     let f = {
       weight : edge.weight,
       sourceId : edge.sourceId,
