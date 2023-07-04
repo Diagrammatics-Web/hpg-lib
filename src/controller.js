@@ -34,15 +34,15 @@ var modes = {
   },
   "trip1": {
     activate: activateTrip1,
-    deactivate: deactivateTrip1
+    deactivate: deactivateTrip
   },
   "trip2": {
     activate: activateTrip2,
-    deactivate: deactivateTrip2
+    deactivate: deactivateTrip
   },
   "trip3": {
     activate: activateTrip3,
-    deactivate: deactivateTrip3
+    deactivate: deactivateTrip
   },
   "toggle_labels": {
     activate: show_labels,
@@ -361,24 +361,18 @@ function activateTrip1(obj) {
   activateTrip(1);
 }
 
-function deactivateTrip1(obj) {
+function deactivateTrip(obj) {
   svg.selectAll(".vertex").on("click", null);
+  edgePath = [];
+  update();
 }
 
 function activateTrip2(obj) {
-    activateTrip(2);
-}
-
-function deactivateTrip2(obj) {
-  svg.selectAll(".vertex").on("click", null);
+  activateTrip(2);
 }
 
 function activateTrip3(obj) {
   activateTrip(3);
-}
-
-function deactivateTrip3(obj) {
-  svg.selectAll(".vertex").on("click", null);
 }
 
 // helper fn: add value if missing, remove if present
