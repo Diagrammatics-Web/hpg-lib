@@ -42,15 +42,13 @@
 
 .path_1 {
   stroke: red;
-  stroke-width: 2px;
+  stroke-width: 1.5px;
 }
 .path_2 {
   stroke: blue;
-  stroke-dasharray: 8, 8;
-  stroke-width: 2px;
+  stroke-width: 1.5px;
 }
 .path_3 {
   stroke: rgb(1, 255, 1);
-  stroke-dasharray: 4, 4;
-  stroke-width: 2px;
+  stroke-width: 1.5px;
 }
