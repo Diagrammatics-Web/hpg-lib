@@ -39,8 +39,18 @@
   filter: drop-shadow(0 0 5px rgba(0, 0, 0, 1));
 }
 
-/* FIXME: not working  */
-.path {
+
+.path_1 {
   stroke: red;
+  stroke-width: 2px;
+}
+.path_2 {
+  stroke: blue;
+  stroke-dasharray: 8, 8;
+  stroke-width: 2px;
+}
+.path_3 {
+  stroke: rgb(1, 255, 1);
+  stroke-dasharray: 4, 4;
   stroke-width: 2px;
 }

@@ -74,7 +74,11 @@ let mode = "";
 const radius = 10;
 var data = {vertices: [], edges:[]};
 var boundaryVertices = [];
-var edgePath = [];
+var edgePaths = {
+  1: [],
+  2: [],
+  3: [],
+}
 var showLabels = false;
 
 
@@ -155,6 +159,7 @@ function hourglassPath(edge, hourglass_idx) {
   var pos1_y = edge.source.y;
   var pos2_x = edge.target.x;
   var pos2_y = edge.target.y;
+
   var dx = pos2_x - pos1_x;
   var dy = pos2_y - pos1_y;
   var mid_x = (pos1_x+pos2_x)/2;
@@ -201,6 +206,26 @@ function update() {
       for (e of data.edges) {
         for (var i=0; i<e.weight; i++) {
           edgs.push({edge:e, hourglass_idx:i});
+
+          // push each time it appears in an edge path
+          if (edgePaths[1].indexOf(JSON.stringify([e.id, i])) > -1) {
+            edgs.push({
+              edge:e, 
+              hourglass_idx:i,
+              path: 1});
+          }
+          if (edgePaths[2].indexOf(JSON.stringify([e.id, i])) > -1) {
+            edgs.push({
+              edge:e, 
+              hourglass_idx:i,
+              path: 2});
+          }
+          if (edgePaths[3].indexOf(JSON.stringify([e.id, i])) > -1) {
+            edgs.push({
+              edge:e, 
+              hourglass_idx:i,
+              path: 3});
+          }
         }
       }
       return edgs;
@@ -208,12 +233,22 @@ function update() {
     .join("path")
     .attr("id", d=>"e"+d.edge.id)
     .attr("class", "edge")
-    .attr("d", (d) => hourglassPath(d.edge, d.hourglass_idx))
+    .attr("d", (d) => {
+      return hourglassPath(d.edge, d.hourglass_idx);
+    })
     .attr("fill", "none")
     // color edges if in edge path
-    .classed("path", (d) => {
-      var idx = edgePath.indexOf(JSON.stringify([d.edge.id, d.hourglass_idx]));
-      return (idx > -1);
+    .classed("path_1", (d) => {
+      var idx = edgePaths[1].indexOf(JSON.stringify([d.edge.id, d.hourglass_idx]));
+      return (idx > -1 && d.path == 1);
+    })
+    .classed("path_2", (d) => {
+      var idx = edgePaths[2].indexOf(JSON.stringify([d.edge.id, d.hourglass_idx]));
+      return (idx > -1 && d.path == 2);
+    })
+    .classed("path_3", (d) => {
+      var idx = edgePaths[3].indexOf(JSON.stringify([d.edge.id, d.hourglass_idx]));
+      return (idx > -1 && d.path == 3);
     });
 
   // add circle html element for each vertex
@@ -318,7 +353,11 @@ function importJson() {
 
   // clear graph and update data
   boundaryVertices = [];
-  edgePath = [];
+  edgePaths = {
+    1: [],
+    2: [],
+    3: []
+  };
   data = {vertices:[], edges:[]};
   update();
   data = JSON.parse(newData);

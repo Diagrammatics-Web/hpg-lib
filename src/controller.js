@@ -34,15 +34,15 @@ var modes = {
   },
   "trip1": {
     activate: activateTrip1,
-    deactivate: deactivateTrip
+    deactivate: deactivateTrip1
   },
   "trip2": {
     activate: activateTrip2,
-    deactivate: deactivateTrip
+    deactivate: deactivateTrip2
   },
   "trip3": {
     activate: activateTrip3,
-    deactivate: deactivateTrip
+    deactivate: deactivateTrip3
   },
   "toggle_labels": {
     activate: show_labels,
@@ -60,20 +60,10 @@ var modes = {
 var activeButton = false;
 var activeMode = false;
 var selectedElement = false;
-
+var trips = [];
 
 // remove any vertices from selected class
 function deselect() {
-  // if(activeButton) {
-  //   activeButton.style.borderStyle = '';
-  //   activeButton = false;
-  // }
-  // if(activeMode) {
-  //   activeMode.deactivate();
-  //   activeMode = false;
-  // }
-
-
   d3.selectAll(selected).classed("selected", false);
   selected = [];
 }
@@ -81,27 +71,46 @@ function deselect() {
 
 // button clicked, so activate corresponding mode
 function activateButton(obj, mode) {
-  // if same button clicked, then deselect
-  if(activeButton == obj) {
-    activeButton.style.borderStyle = '';
-    activeButton = false;
-    activeMode.deactivate();
-    return;
+  // if trip button
+  if (mode.includes("trip")) {
+    // if mode in trips, then remove
+    if(trips.includes(mode)) {
+      trips.splice(trips.indexOf(mode), 1);
+      obj.style.borderStyle = '';
+      modes[mode].deactivate();
+    }
+    // else add to trips
+    else {
+      trips.push(mode);
+      obj.style.borderStyle = 'inset';
+      modes[mode].activate();
+    }
   }
 
-  // update active button
-  if(activeButton) {
-    activeButton.style.borderStyle = '';
-  }
-  activeButton = obj;
-  activeButton.style.borderStyle = 'inset';
+  // if other type of button
+  else {
+    // if same button clicked, then deselect
+    if(activeButton == obj) {
+      activeButton.style.borderStyle = '';
+      activeButton = false;
+      activeMode.deactivate();
+      return;
+    }
 
-  // update active mode, and deactive previous mode
-  if(activeMode) {
-    activeMode.deactivate();
+    // update active button only if not a trip button
+    if(activeButton) {
+      activeButton.style.borderStyle = '';
+    }
+    activeButton = obj;
+    activeButton.style.borderStyle = 'inset';
+
+    // update active mode, and deactive previous mode
+    if(activeMode) {
+      activeMode.deactivate();
+    }
+    activeMode = modes[mode];
+    activeMode.activate();
   }
-  activeMode = modes[mode];
-  activeMode.activate();
 }
 
 
@@ -346,9 +355,9 @@ function activateTrip(tripIndex) {
 
       // edgepath from python
       eel.get_trip(tripIndex, vertexId)((ep) => {
-        edgePath = [];
+        edgePaths[tripIndex] = [];
         for (var i = 0; i < ep.length; i++) {
-          edgePath.push(JSON.stringify(ep[i]));
+          edgePaths[tripIndex].push(JSON.stringify(ep[i]));
           update();
         }
       });
@@ -361,9 +370,9 @@ function activateTrip1(obj) {
   activateTrip(1);
 }
 
-function deactivateTrip(obj) {
+function deactivateTrip1(obj) {
   svg.selectAll(".vertex").on("click", null);
-  edgePath = [];
+  edgePaths[1] = [];
   update();
 }
 
@@ -371,8 +380,20 @@ function activateTrip2(obj) {
   activateTrip(2);
 }
 
+function deactivateTrip2(obj) {
+  svg.selectAll(".vertex").on("click", null);
+  edgePaths[2] = [];
+  update();
+}
+
 function activateTrip3(obj) {
   activateTrip(3);
+}
+
+function deactivateTrip3(obj) {
+  svg.selectAll(".vertex").on("click", null);
+  edgePaths[3] = [];
+  update();
 }
 
 // helper fn: add value if missing, remove if present
