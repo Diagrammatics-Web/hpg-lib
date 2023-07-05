@@ -162,19 +162,20 @@ function hourglassPath(edge, hourglass_idx, path) {
 
   // offset edge based on path index
   // NONE for path=0,1 (none, or trip 1)
+  const offset = 0.08;
   if (path == 2) {
     theta = (pos2_y - pos1_y)/(pos2_x - pos1_x);
-    pos1_x -= 0.05*Math.sin(theta);
-    pos2_x -= 0.05*Math.sin(theta);
-    pos1_y += 0.05*Math.cos(theta);
-    pos2_y += 0.05*Math.cos(theta);
+    pos1_x -= offset*Math.sin(theta);
+    pos2_x -= offset*Math.sin(theta);
+    pos1_y += offset*Math.cos(theta);
+    pos2_y += offset*Math.cos(theta);
   }
   else if (path == 3) {
     theta = (pos2_y - pos1_y)/(pos2_x - pos1_x);
-    pos1_x += 0.05*Math.sin(theta);
-    pos2_x += 0.05*Math.sin(theta);
-    pos1_y -= 0.05*Math.cos(theta);
-    pos2_y -= 0.05*Math.cos(theta);
+    pos1_x += offset*Math.sin(theta);
+    pos2_x += offset*Math.sin(theta);
+    pos1_y -= offset*Math.cos(theta);
+    pos2_y -= offset*Math.cos(theta);
   }
 
   var dx = pos2_x - pos1_x;
