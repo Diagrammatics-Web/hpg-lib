@@ -355,9 +355,14 @@ function activateTrip(tripIndex) {
 
       // edgepath from python
       eel.get_trip(tripIndex, vertexId)((ep) => {
+        // reset edgepaths for this trip type
         edgePaths[tripIndex] = [];
+
         for (var i = 0; i < ep.length; i++) {
+          // add edge to edgePaths
           edgePaths[tripIndex].push(JSON.stringify(ep[i]));
+
+          // render graph
           update();
         }
       });
@@ -376,7 +381,7 @@ function deactivateTrip1(obj) {
   update();
 }
 
-function activateTrip2(obj) {
+function activateTrip2(obj) {;
   activateTrip(2);
 }
 

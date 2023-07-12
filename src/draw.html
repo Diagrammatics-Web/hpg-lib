@@ -79,6 +79,7 @@ var edgePaths = {
   2: [],
   3: [],
 }
+var edgePathsCnt = {}
 var showLabels = false;
 
 
@@ -154,23 +155,25 @@ function newGraph() {
 
 
 // return curve string for D3 to render edge
-function hourglassPath(edge, hourglass_idx, path) {
+function hourglassPath(edge, hourglass_idx, trip_idx) {
   var pos1_x = edge.source.x;
   var pos1_y = edge.source.y;
   var pos2_x = edge.target.x;
   var pos2_y = edge.target.y;
 
-  // offset edge based on path index
-  // NONE for path=0,1 (none, or trip 1)
+  let pos = edgePathsCnt[edge.id][hourglass_idx].indexOf(trip_idx);
+
+  // Apply offset when multiple trips use same edge
+  // this offset scheme is a bit finicky with vertical edges
   const offset = 0.08;
-  if (path == 2) {
+  if (pos == 1) {
     theta = (pos2_y - pos1_y)/(pos2_x - pos1_x);
     pos1_x -= offset*Math.sin(theta);
     pos2_x -= offset*Math.sin(theta);
     pos1_y += offset*Math.cos(theta);
     pos2_y += offset*Math.cos(theta);
   }
-  else if (path == 3) {
+  else if (pos == 2) {
     theta = (pos2_y - pos1_y)/(pos2_x - pos1_x);
     pos1_x += offset*Math.sin(theta);
     pos2_x += offset*Math.sin(theta);
@@ -221,17 +224,34 @@ function update() {
   edges.selectAll(".edge")
     .data(() => {
       var edgs = [];
+
+      // clear count of paths on each edge
+      edgePathsCnt = {};
+
       for (e of data.edges) {
+
+        // init edge path count if nonexistent
+        if (edgePathsCnt[e.id] == undefined) {
+            edgePathsCnt[e.id] = {
+              0: [],
+              1: [],
+              2: [],
+            }
+          }
+
         for (var i=0; i<e.weight; i++) {
           let cnt = 0;
 
-          // push each time it appears in an edge path
+          // generate edge to render each time this edge appears in path
           if (edgePaths[1].indexOf(JSON.stringify([e.id, i])) > -1) {
             edgs.push({
               edge:e, 
               hourglass_idx:i,
               path: 1});
             cnt++;
+
+            // push trip index to edge path count
+            edgePathsCnt[e.id][i].push(1);
           }
           if (edgePaths[2].indexOf(JSON.stringify([e.id, i])) > -1) {
             edgs.push({
@@ -239,6 +259,7 @@ function update() {
               hourglass_idx:i,
               path: 2});
             cnt++;
+            edgePathsCnt[e.id][i].push(2);
           }
           if (edgePaths[3].indexOf(JSON.stringify([e.id, i])) > -1) {
             edgs.push({
@@ -246,6 +267,7 @@ function update() {
               hourglass_idx:i,
               path: 3});
             cnt++;
+            edgePathsCnt[e.id][i].push(3);
           }
 
           // if it doesn't appear in any edge path, push it once
