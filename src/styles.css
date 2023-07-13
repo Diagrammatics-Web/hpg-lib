@@ -34,6 +34,13 @@
   border: 1px solid grey;
 }
 
+.face {
+  fill: greenyellow;
+  opacity: 0.5;
+  stroke: black;
+  stroke-width: 2px;
+}
+
 
 .selected {
   filter: drop-shadow(0 0 5px rgba(0, 0, 0, 1));
