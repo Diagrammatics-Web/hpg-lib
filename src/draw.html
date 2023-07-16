@@ -110,10 +110,9 @@ var boundary_circle = svg.append("circle")
     .attr('r',x(radius)-x(0));
 
 // init groups for edges and vertices
+var faces = svg.append("g").attr("id", "faces");
 var edges = svg.append("g").attr("id", "edges");
 var vertices = svg.append("g").attr("id", "vertices");
-var faces = svg.append("g").attr("id", "faces");
-
 
 // get initial graph from backend
 eel.get_graph()((g) => {
