@@ -39,6 +39,13 @@
   opacity: 0.5;
   stroke-width: 2px;
 }
+.face:hover {
+  fill: rgb(159, 239, 40);
+}
+.face:active {
+  transition: 150ms ease-in-out;
+  fill: rgb(147, 224, 31);
+}
 
 
 .selected {
