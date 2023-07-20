@@ -137,6 +137,27 @@ var draggroup = d3.drag()
   })
   .on("end", e => {
     svg.style('cursor', 'pointer');
+    // d3.selectAll(selected)
+    //   .attr("cx", function(d) {
+    //     // if euclidean distance close to radius, snap to radius
+    //     if (abs(Math.sqrt(Math.pow(d.x,2) + Math.pow(d.y,2)) - radius) < 2) {
+    //       // get closest point on circle
+    //       var angle = Math.atan2(d.y, d.x);
+    //       d.x = radius * Math.cos(angle);
+    //       d.y = radius * Math.sin(angle);
+    //     }
+    //     return x(d.x);
+    //   })
+    //   .attr("cy", function(d) {
+    //     // if euclidean distance close to radius, snap to radius
+    //     if (abs(Math.sqrt(Math.pow(d.x,2) + Math.pow(d.y,2)) - radius) < 2) {
+    //       // get closest point on circle
+    //       var angle = Math.atan2(d.y, d.x);
+    //       d.x = radius * Math.cos(angle);
+    //       d.y = radius * Math.sin(angle);
+    //     }
+    //     return y(d.y);
+    //   });
   });
 
 // init d3 object for stopping drag events

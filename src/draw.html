@@ -392,12 +392,6 @@ function activateFaces() {
 
   showFaces = true;
   eel.get_planar_faces()((face_data) => {
-    /*
-      FIXME: currenly using one element to verify correctness
-
-    */
-    // face_data = [face_data[0]]
-
     // draw lines for each face
     let polygon = d3.line().curve(d3.curveLinearClosed);
 
@@ -416,32 +410,33 @@ function activateFaces() {
         const polygon_hull = polygon(pts.map(d => [d[0], d[1]]));
 
         // get boundary vertices
-        let boundary_pts = [];
-        for (const v of d) {
-          // if vertex is new boundary vertex, add to list
-          if (boundaryVertices.indexOf(v[0]) != -1) {
-            boundary_pts.push([x(v[1]), y(v[2])])
-            console.log(v[0])
-          }
-        }
+        // let boundary_pts = [];
+        // for (const v of d) {
+        //   // if vertex is new boundary vertex, add to list
+        //   if (boundaryVertices.indexOf(v[0]) != -1) {
+        //     boundary_pts.push([v[1], v[2]]);
+        //   }
+        // }
 
-        // if central face, return polygon hull
+        // // if central face, return polygon hull
         // if (boundary_pts.length != 2) {
         //   return polygon_hull;
         // }
 
-        // // add arc
+        // create arc
         // arc = d3.path();
-        // const angles = [Math.atan2(boundary_pts[0][1], boundary_pts[0][0]),
-        //                 Math.atan2(boundary_pts[1][1], boundary_pts[1][0])]
+        // const angles = [-Math.atan2(boundary_pts[0][1], boundary_pts[0][0]),
+        //                 -Math.atan2(boundary_pts[1][1], boundary_pts[1][0])]
         // const start_angle = Math.min(...angles);
         // const end_angle = Math.max(...angles);
         // // FIXME: find circle center
-        // arc.arc(x(0), y(0), x(radius)-x(0), start_angle, end_angle+1);
+        // arc.arc(x(0), y(0), x(radius)-x(0), start_angle, end_angle);
         // arc.closePath();
 
-        // I want to return a hull that is the union of the two paths
         return polygon_hull;
+      })
+      .text(d => {
+        return d.map(v => v[0]).join(" ");
       })
       .attr("class", "face");
   });

@@ -38,6 +38,7 @@
   fill: greenyellow;
   opacity: 0.5;
   stroke-width: 2px;
+  /* stroke: red; */
 }
 .face:hover {
   fill: rgb(159, 239, 40);
