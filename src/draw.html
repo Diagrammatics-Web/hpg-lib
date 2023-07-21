@@ -25,6 +25,7 @@
   <button id="btn-tikz" onclick="changeMode('edit')">Edit</button>
   <button id="btn-tikz" onclick="changeMode('analyze')">Analyze</button>
   <button id="btn-tikz" onclick="activateFaces()">Toggle Faces</button>
+  <button id="btn-tikz" onclick="activateButton(this, 'benzene_move')">DEBUG</button>
 </div>
 
 <br>
@@ -443,6 +444,23 @@ function activateFaces() {
 }
 
 
+function benzeneMove() {
+  // get vertex ids from selected vertices
+  let selection = d3.selectAll(selected);
+  let selectedVertices = selection.data();
+  let selectedIds = selectedVertices.map(v => v.id);
+  
+  eel.benzene_move(selectedIds)((d) => {
+    if (d == null) {
+      return;
+    }
+    
+    data = d;
+    preprocess_data();
+    update();
+  });
+}
+
 
 
 
@@ -452,7 +470,7 @@ function activateFaces() {
 // export graph data to JSON to clipboard
 function exportData() {
   eel.get_graph()((d) => {
-    navigator.clipboard.writeText(JSON.stringify(d));
+    navigator.clipboard.writeText(JSON.stringify(d['data']));
   });
 }
 

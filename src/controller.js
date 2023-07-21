@@ -47,7 +47,11 @@ var modes = {
   "toggle_labels": {
     activate: show_labels,
     deactivate: hide_labels
-  }
+  },
+  "benzene_move": {
+    activate: activateBenzene,
+    deactivate: deactivateBenzene
+  },
 };
 
 
@@ -421,6 +425,28 @@ function deactivateTrip3(obj) {
   edgePaths[3] = [];
   update();
 }
+
+
+// create edge on click and update graph
+function activateBenzene(obj) {
+  deselect();
+  svg.selectAll(".vertex")
+    .on("mousedown", function(e) {
+      d3.select(this).classed("selected", !d3.select(this).classed("selected"));
+      addOrRemove(selected, this);
+      if(selected.length == 6) {
+        console.log("Benzene Move");
+        benzeneMove();
+      }
+    })
+    .classed("active", true);
+}
+
+function deactivateBenzene(obj) {
+  svg.selectAll(".vertex").on("mousedown", null);
+}
+
+
 
 // helper fn: add value if missing, remove if present
 function addOrRemove(array, value) {
