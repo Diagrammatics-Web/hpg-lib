@@ -63,6 +63,7 @@ var modes = {
 */
 var activeButton = false;
 var activeMode = false;
+var moveMode = false;
 var selectedElement = false;
 var trips = [];
 
@@ -429,21 +430,31 @@ function deactivateTrip3(obj) {
 
 // create edge on click and update graph
 function activateBenzene(obj) {
-  deselect();
-  svg.selectAll(".vertex")
-    .on("mousedown", function(e) {
-      d3.select(this).classed("selected", !d3.select(this).classed("selected"));
-      addOrRemove(selected, this);
-      if(selected.length == 6) {
-        console.log("Benzene Move");
-        benzeneMove();
-      }
-    })
-    .classed("active", true);
+  // // vertex-wise benzene move
+  // deselect();
+  // svg.selectAll(".vertex")
+  //   .on("mousedown", function(e) {
+  //     d3.select(this).classed("selected", !d3.select(this).classed("selected"));
+  //     addOrRemove(selected, this);
+  //     if(selected.length == 6) {
+  //       console.log("Benzene Move");
+
+  //       let selection = d3.selectAll(selected);
+  //       let selectedVertices = selection.data();
+  //       let selectedIds = selectedVertices.map(v => v.id);
+  //       benzeneMove(selectedIds);
+  //     }
+  //   })
+  //   .classed("active", true);
+
+  moveMode = 'benzene';
 }
 
 function deactivateBenzene(obj) {
-  svg.selectAll(".vertex").on("mousedown", null);
+  // // for vertex-wise benzene move
+  // svg.selectAll(".vertex").on("mousedown", null);
+  
+  moveMode = false;
 }
 
 

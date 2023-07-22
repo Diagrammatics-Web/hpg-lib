@@ -24,8 +24,6 @@
   <div id="paper-container"></div>
   <button id="btn-tikz" onclick="changeMode('edit')">Edit</button>
   <button id="btn-tikz" onclick="changeMode('analyze')">Analyze</button>
-  <button id="btn-tikz" onclick="activateFaces()">Toggle Faces</button>
-  <button id="btn-tikz" onclick="activateButton(this, 'benzene_move')">DEBUG</button>
 </div>
 
 <br>
@@ -62,9 +60,12 @@ function changeMode(newMode) {
     const actions = document.getElementById('actions');
     const container = document.createElement('div');
     container.innerHTML = `
+    <button id="btn-deselect" onclick="deselect()">Deselect all</button>
     <button id="btn-trip1" onclick="activateButton(this,'trip1')">Trip1</button>
     <button id="btn-trip2" onclick="activateButton(this,'trip2')">Trip2</button>
     <button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button>
+    <button id="btn-tikz" onclick="activateFaces()">Toggle Faces</button>
+    <button id="btn-tikz" onclick="activateButton(this, 'benzene_move')">Benzene move</button>
     `
 
     actions.appendChild(container);
@@ -393,6 +394,7 @@ function activateFaces() {
 
   showFaces = true;
   eel.get_planar_faces()((face_data) => {
+
     // draw lines for each face
     let polygon = d3.line().curve(d3.curveLinearClosed);
 
@@ -436,22 +438,29 @@ function activateFaces() {
 
         return polygon_hull;
       })
-      .text(d => {
-        return d.map(v => v[0]).join(" ");
+      .on("click", (e, d) => {
+        // select all vertices in face
+        let face_vertices = d.map(v => v[0]);
+
+        // depending on mode, perform different move
+        if (moveMode == false) {
+          return;
+        }
+        else if (moveMode = 'benzene') {
+          benzeneMove(face_vertices);
+        }
       })
       .attr("class", "face");
   });
 }
 
 
-function benzeneMove() {
-  // get vertex ids from selected vertices
-  let selection = d3.selectAll(selected);
-  let selectedVertices = selection.data();
-  let selectedIds = selectedVertices.map(v => v.id);
-  
-  eel.benzene_move(selectedIds)((d) => {
-    if (d == null) {
+function benzeneMove(vertex_ids) {
+  // call backend fn and update graph  
+  eel.benzene_move(vertex_ids)((d) => {
+    // check if error
+    if (typeof(d) == "string") {
+      console.log(d);
       return;
     }
     
