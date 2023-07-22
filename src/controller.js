@@ -138,6 +138,7 @@ var draggroup = d3.drag()
         data = d;
         preprocess_data();
         update();
+        console.log("updated");
       });
   })
   .on("end", e => {

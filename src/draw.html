@@ -351,10 +351,15 @@ function update() {
               return "";
             }
             return d.id;
-          })
-          ,
+          }),
       (update) => 
         update
+          .attr("x", function(d) {
+            return x(d.x-0.3)
+          })
+          .attr("y", function(d) {
+            return y(d.y+0.3)
+          })
           .text(function(d) {
             if (!showLabels) {
               return "";
