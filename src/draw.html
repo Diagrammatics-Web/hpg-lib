@@ -166,6 +166,12 @@ function hourglassPath(edge, hourglass_idx, trip_idx) {
   var pos2_x = edge.target.x;
   var pos2_y = edge.target.y;
 
+  // init edge path count if nonexistent
+  if (edgePathsCnt[edge.id].length <= hourglass_idx) {
+      edgePathsCnt[edge.id][hourglass_idx] = [];
+  }
+  
+
   let pos = edgePathsCnt[edge.id][hourglass_idx].indexOf(trip_idx);
 
   // Apply offset when multiple trips use same edge
@@ -237,12 +243,13 @@ function update() {
 
         // init edge path count if nonexistent
         if (edgePathsCnt[e.id] == undefined) {
-            edgePathsCnt[e.id] = {
-              0: [],
-              1: [],
-              2: [],
+            edgePathsCnt[e.id] = {}
+
+            // add array for each hourglass index
+            for (var i=0; i<e.weight; i++) {
+              edgePathsCnt[e.id][i] = [];
             }
-          }
+        }
 
         for (var i=0; i<e.weight; i++) {
           let cnt = 0;
