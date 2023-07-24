@@ -50,8 +50,12 @@ var modes = {
   },
   "benzene_move": {
     activate: activateBenzene,
-    deactivate: deactivateBenzene
+    deactivate: deactivateFaceMove
   },
+  "square_move": {
+    activate: activateSquare,
+    deactivate: deactivateFaceMove
+  }
 };
 
 
@@ -106,6 +110,7 @@ function activateButton(obj, mode) {
     if(activeButton) {
       activeButton.style.borderStyle = '';
     }
+
     activeButton = obj;
     activeButton.style.borderStyle = 'inset';
 
@@ -202,11 +207,11 @@ function deactivateMove(obj) {
 
 // toggle labels
 function show_labels(obj) {
-  showLabels = !showLabels;
-  console.log("show labels: " + showLabels);
+  showLabels = true;
   update();
 }
 function hide_labels(obj) {
+  showLabels = false;
   update();
 }
 
@@ -431,30 +436,18 @@ function deactivateTrip3(obj) {
 
 // create edge on click and update graph
 function activateBenzene(obj) {
-  // // vertex-wise benzene move
-  // deselect();
-  // svg.selectAll(".vertex")
-  //   .on("mousedown", function(e) {
-  //     d3.select(this).classed("selected", !d3.select(this).classed("selected"));
-  //     addOrRemove(selected, this);
-  //     if(selected.length == 6) {
-  //       console.log("Benzene Move");
-
-  //       let selection = d3.selectAll(selected);
-  //       let selectedVertices = selection.data();
-  //       let selectedIds = selectedVertices.map(v => v.id);
-  //       benzeneMove(selectedIds);
-  //     }
-  //   })
-  //   .classed("active", true);
-
+  // update move mode, so that benzene move can be activated
+  // from clicking on graph faces in draw.html
   moveMode = 'benzene';
 }
 
-function deactivateBenzene(obj) {
-  // // for vertex-wise benzene move
-  // svg.selectAll(".vertex").on("mousedown", null);
-  
+function activateSquare(obj) {
+  // face-wise square move
+  moveMode = 'square';
+}
+
+function deactivateFaceMove(obj) {
+  // face-wise square move
   moveMode = false;
 }
 

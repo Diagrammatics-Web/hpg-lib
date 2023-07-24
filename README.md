@@ -1,5 +1,10 @@
 # Hourglass-Plabic-Graphs
 
+## Quick TODOs
+- [x] fix vertex label enter, update, exit structure to be more concise
+    - can probably just use `.join()`
+- [x] fix connectedness issue with the face rendering
+
 ## TODOs
 Large list of tasks in progress and to start:
 - [x] ability to maintain multiple trip permutations

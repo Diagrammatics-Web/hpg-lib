@@ -64,8 +64,9 @@ function changeMode(newMode) {
     <button id="btn-trip1" onclick="activateButton(this,'trip1')">Trip1</button>
     <button id="btn-trip2" onclick="activateButton(this,'trip2')">Trip2</button>
     <button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button>
-    <button id="btn-tikz" onclick="activateFaces()">Toggle Faces</button>
-    <button id="btn-tikz" onclick="activateButton(this, 'benzene_move')">Benzene move</button>
+    <button id="btn-faces" onclick="activateFaces()">Toggle Faces</button>
+    <button id="btn-benzene" onclick="activateButton(this, 'benzene_move')">Benzene move</button>
+    <button id="btn-square" onclick="activateButton(this, 'square_move')">Square move</button>
     `
 
     actions.appendChild(container);
@@ -333,40 +334,27 @@ function update() {
         .classed("filled", d=>d.type=="filled")
     );
 
+  // deactivate faces if not in analyze mode
+  if (showFaces && mode != 'analyze') {
+    deactivateFaces();
+  }
+
   // add labels if option selected
   vertices.selectAll(".vertex-label").data(data.vertices)
-    .join(
-      (enter) => 
-        enter
-          .append("text")
-          .attr("class", "vertex-label")
-          .attr("x", function(d) {
-            return x(d.x-0.3)
-          })
-          .attr("y", function(d) {
-            return y(d.y+0.3)
-          })
-          .text(function(d) {
-            if (!showLabels) {
-              return "";
-            }
-            return d.id;
-          }),
-      (update) => 
-        update
-          .attr("x", function(d) {
-            return x(d.x-0.3)
-          })
-          .attr("y", function(d) {
-            return y(d.y+0.3)
-          })
-          .text(function(d) {
-            if (!showLabels) {
-              return "";
-            }
-            return d.id;
-          })
-    );
+    .join("text")
+    .attr("class", "vertex-label")
+    .attr("x", function(d) {
+      return x(d.x-0.3)
+    })
+    .attr("y", function(d) {
+      return y(d.y+0.3)
+    })
+    .text(function(d) {
+      if (!showLabels) {
+        return "";
+      }
+      return d.id;
+    });
 }
 
 // add edges to graph based on selected vertices
@@ -399,8 +387,8 @@ function activateFaces() {
   // if faces already exist, remove them
   d3.selectAll(".face").remove();
 
-  if (showFaces == true) {
-    showFaces = false;
+  if (showFaces) {
+    deactivateFaces();
     return;
   }
 
@@ -458,12 +446,20 @@ function activateFaces() {
         if (moveMode == false) {
           return;
         }
-        else if (moveMode = 'benzene') {
+        else if (moveMode === 'benzene') {
           benzeneMove(face_vertices);
+        }
+        else if (moveMode === 'square') {
+          squareMove(face_vertices);
         }
       })
       .attr("class", "face");
   });
+}
+
+function deactivateFaces() {
+  d3.selectAll(".face").remove();
+  showFaces = false;
 }
 
 
@@ -480,6 +476,21 @@ function benzeneMove(vertex_ids) {
     preprocess_data();
     update();
   });
+}
+
+function squareMove(vertex_ids) {
+  // call backend fn and update graph
+  eel.square_move(vertex_ids)((d) => {
+    // check for error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+
+    data = d;
+    preprocess_data();
+    update();
+  })
 }
 
 
