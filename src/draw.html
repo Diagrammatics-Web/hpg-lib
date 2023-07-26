@@ -314,25 +314,17 @@ function update() {
 
   // add circle html element for each vertex
   vertices.selectAll(".vertex").data(data.vertices)
-    .join(
-      (enter) => 
-        enter
-          .append("circle")
-          .attr("class", "vertex")
-          .classed("unfilled", d=>d.type=="unfilled")
-          .classed("filled", d=>d.type=="filled")
-          .attr("cx", function(d) {
-            return x(d.x)
-          })
-          .attr("cy", function(d) {
-            return y(d.y)
-          })
-          .attr("r", 4)
-      ,
-      update => update
-        .classed("unfilled", d=>d.type=="unfilled")
-        .classed("filled", d=>d.type=="filled")
-    );
+    .join("circle")
+    .attr("class", "vertex")
+    .classed("unfilled", d=>d.type=="unfilled")
+    .classed("filled", d=>d.type=="filled")
+    .attr("cx", function(d) {
+      return x(d.x)
+    })
+    .attr("cy", function(d) {
+      return y(d.y)
+    })
+    .attr("r", 4);
 
   // deactivate faces if not in analyze mode
   if (showFaces && mode != 'analyze') {
@@ -489,7 +481,9 @@ function squareMove(vertex_ids) {
 
     data = d;
     preprocess_data();
+    deactivateFaces();
     update();
+    activateFaces();
   })
 }
 
