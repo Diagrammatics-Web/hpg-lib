@@ -11,7 +11,7 @@ Large list of tasks in progress and to start:
 - [x] separate analyze and edit modes, possibly begin structuring functionality for modes to be added in future
 - [x] faces
 - [x] benzene move on faces
-- [ ] square move on faces
+- [x] square move on faces
     - refer to [fig2](/imgs/fig2.png)
 - [ ] snap vertices to boundary
 - [ ] benzene and square move equivalence methods
@@ -36,6 +36,5 @@ ability to get dual graph
 ## Open questions
 Some questions I have accumulated while implementing features above
 
-- How to create faces in graphs such as the following, where there is a disconnected component?
-![](imgs/fig1.png) Currently, we require planarity and connectedness before generating faces.
+- When there is a disconnected component in the graph, should I create faces for the separate components and disregard the face between components? Or should I render that face as well?
 
