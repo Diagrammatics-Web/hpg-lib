@@ -44,10 +44,6 @@ var modes = {
     activate: activateTrip3,
     deactivate: deactivateTrip3
   },
-  "toggle_labels": {
-    activate: show_labels,
-    deactivate: hide_labels
-  },
   "benzene_move": {
     activate: activateBenzene,
     deactivate: deactivateFaceMove
@@ -206,15 +202,10 @@ function deactivateMove(obj) {
 }
 
 // toggle labels
-function show_labels(obj) {
-  showLabels = true;
+function toggle_labels() {
+  showLabels = !showLabels;
   update();
 }
-function hide_labels(obj) {
-  showLabels = false;
-  update();
-}
-
 
 // add filled vertex on click
 function activateFilled(obj) {

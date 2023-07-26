@@ -24,6 +24,7 @@
   <div id="paper-container"></div>
   <button id="btn-tikz" onclick="changeMode('edit')">Edit</button>
   <button id="btn-tikz" onclick="changeMode('analyze')">Analyze</button>
+  <button id="btn-toggle_labels" onclick="toggle_labels()">Toggle vertex labels</button>
 </div>
 
 <br>
@@ -50,7 +51,7 @@ function changeMode(newMode) {
     <button id="btn-add_edge" onclick="activateButton(this,'place_edge')">Add edge</button>
     <button id="btn-add_hourglass" onclick="activateButton(this,'place_hourglass')">Add hourglass</button>
     <button id="btn-add_khourglass" onclick="activateButton(this,'place_khourglass')">Add k-hourglass</button>
-    <button id="btn-toggle_labels" onclick="activateButton(this,'toggle_labels')">Toggle vertex labels</button>
+  
     `
 
     actions.appendChild(container);
