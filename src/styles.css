@@ -5,6 +5,8 @@
   stroke-dasharray: 5 2;
 }
 
+/* active class allows highlighting on hover, e.g. when choosing 
+  vertices to move */
 .active:hover {
   filter: drop-shadow(0 0 5px rgba(0, 0, 0, 1));
 }

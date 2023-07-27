@@ -91,6 +91,7 @@ function activateButton(obj, mode) {
       modes[mode].activate();
     }
   }
+  // else
 
   // if other type of button
   else {
@@ -134,37 +135,36 @@ var draggroup = d3.drag()
         return y(d.y);
       });
 
-      // save to backend
+      // rerender
+      update();
+  })
+  .on("end", e => {
+    svg.style('cursor', 'pointer');
+    d3.selectAll(selected)
+      .attr("cx", function(d) {
+        const snap_dist = 1;
+        let dist = Math.sqrt(Math.pow(d.x,2) + Math.pow(d.y,2));
+
+        // if withing epsilon of radius, snap to radius
+        if (Math.abs(dist - radius) < snap_dist) {
+          var angle = Math.atan2(d.y, d.x);
+          d.x = radius * Math.cos(angle);
+          d.y = radius * Math.sin(angle);
+        }
+
+        return x(d.x);
+      })
+      .attr("cy", function(d) {
+        return y(d.y);
+      });
+
+      // save to backend and rerender
       eel.import_data(data_compressed())((d) => {
         data = d;
         preprocess_data();
         update();
         console.log("updated");
       });
-  })
-  .on("end", e => {
-    svg.style('cursor', 'pointer');
-    // d3.selectAll(selected)
-    //   .attr("cx", function(d) {
-    //     // if euclidean distance close to radius, snap to radius
-    //     if (abs(Math.sqrt(Math.pow(d.x,2) + Math.pow(d.y,2)) - radius) < 2) {
-    //       // get closest point on circle
-    //       var angle = Math.atan2(d.y, d.x);
-    //       d.x = radius * Math.cos(angle);
-    //       d.y = radius * Math.sin(angle);
-    //     }
-    //     return x(d.x);
-    //   })
-    //   .attr("cy", function(d) {
-    //     // if euclidean distance close to radius, snap to radius
-    //     if (abs(Math.sqrt(Math.pow(d.x,2) + Math.pow(d.y,2)) - radius) < 2) {
-    //       // get closest point on circle
-    //       var angle = Math.atan2(d.y, d.x);
-    //       d.x = radius * Math.cos(angle);
-    //       d.y = radius * Math.sin(angle);
-    //     }
-    //     return y(d.y);
-    //   });
   });
 
 // init d3 object for stopping drag events
@@ -182,11 +182,12 @@ body.on("keypress", function(e) {
 // move object
 function activateMove(obj) {
   svg.style('cursor', 'pointer');
-  activateObjects(".vertex");
+  activateObjects(".vertex"); // FIXME: is this necessary?
   svg.selectAll(".vertex")
-    .on("mousedown", function(e) {
+    .on("mousedown", function(e, d) {
       d3.select(this).classed("selected", !d3.select(this).classed("selected"));
       addOrRemove(selected, this);
+      addOrRemove(selectedIds, d.id);
     });
   svg.call(draggroup);
 }
@@ -202,7 +203,7 @@ function deactivateMove(obj) {
 }
 
 // toggle labels
-function toggle_labels() {
+function toggleLabels() {
   showLabels = !showLabels;
   update();
 }
@@ -233,7 +234,7 @@ function deactivateUnfilled(obj) {
 
 // change vertex color on click
 function activateToggle(obj) {
-  activateObjects(".vertex");
+  activateObjects(".vertex"); // FIXME: is this necessary?
   svg.selectAll(".vertex")
     .on("click", function(e) {
       v = d3.select(this);
@@ -370,7 +371,7 @@ function deactivateEdge(obj) {
 
 // create edge path for Trip and update graph
 function activateTrip(tripIndex) {
-  activateObjects(".vertex");
+  activateObjects(".vertex"); // FIXME: is this necessary?
   svg.selectAll(".vertex")
     .on("click", async function(e) {
       v = d3.select(this);
@@ -453,3 +454,4 @@ function addOrRemove(array, value) {
       array.splice(index, 1);
   }
 }
+

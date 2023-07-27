@@ -24,7 +24,7 @@
   <div id="paper-container"></div>
   <button id="btn-tikz" onclick="changeMode('edit')">Edit</button>
   <button id="btn-tikz" onclick="changeMode('analyze')">Analyze</button>
-  <button id="btn-toggle_labels" onclick="toggle_labels()">Toggle vertex labels</button>
+  <button id="btn-toggle_labels" onclick="toggleLabels()">Toggle vertex labels</button>
 </div>
 
 <br>
@@ -65,7 +65,7 @@ function changeMode(newMode) {
     <button id="btn-trip1" onclick="activateButton(this,'trip1')">Trip1</button>
     <button id="btn-trip2" onclick="activateButton(this,'trip2')">Trip2</button>
     <button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button>
-    <button id="btn-faces" onclick="activateFaces()">Toggle Faces</button>
+    <button id="btn-faces" onclick="toggleFaces()">Toggle Faces</button>
     <button id="btn-benzene" onclick="activateButton(this, 'benzene_move')">Benzene move</button>
     <button id="btn-square" onclick="activateButton(this, 'square_move')">Square move</button>
     `
@@ -98,7 +98,8 @@ var body = d3.select("body");
 var x = d3.scaleLinear().domain([-radius*1.1,radius*1.1]).range([0, size]);
 var y = d3.scaleLinear().domain([-radius*1.1,radius*1.1]).range([size, 0]);
 
-var selected = [];
+var selectedIds = []; // ids of selected vertices
+var selected = []; // selected vertices
 
 // init graph canvas
 var svg = d3.select("#paper-container")
@@ -325,11 +326,15 @@ function update() {
     .attr("cy", function(d) {
       return y(d.y)
     })
-    .attr("r", 4);
+    .attr("r", 4)
+    .classed("selected", d => {
+      return selectedIds.indexOf(d.id) > -1;
+    })
+
 
   // deactivate faces if not in analyze mode
   if (showFaces && mode != 'analyze') {
-    deactivateFaces();
+    toggleFaces(false);
   }
 
   // add labels if option selected
@@ -376,83 +381,69 @@ function addEdge(weight) {
 /*
  *  Fns for generating polygon hull html elements for boundary shapes
  */
-function activateFaces() {
-  // if faces already exist, remove them
-  d3.selectAll(".face").remove();
+function toggleFaces(arg=null) {
+  // define helper functions
+  // one for activating faces
+  function activateFaces() {
+    // if faces already exist, remove them
+    d3.selectAll(".face").remove();
 
-  if (showFaces) {
-    deactivateFaces();
-    return;
+    eel.get_planar_faces()((face_data) => {
+
+      // draw lines for each face
+      let polygon = d3.line().curve(d3.curveLinearClosed);
+
+      // add polygons to svg
+      // generate pseudodata for each face
+      faces.selectAll(".face")
+        .data(face_data)
+        .join("path")
+        // pseudo data for each face
+        .attr("d", d => {
+          let polygon = d3.line().curve(d3.curveLinearClosed);
+
+          // preprocess data
+          let pts = [];
+          for (v of d) {pts.push([x(v[1]), y(v[2])]);}
+          const polygon_hull = polygon(pts.map(d => [d[0], d[1]]));
+
+          return polygon_hull;
+        })
+        .on("click", (e, d) => {
+          // select all vertices in face
+          let face_vertices = d.map(v => v[0]);
+
+          // depending on mode, perform different move
+          if (moveMode == false) {
+            return;
+          }
+          else if (moveMode === 'benzene') {
+            benzeneMove(face_vertices);
+          }
+          else if (moveMode === 'square') {
+            squareMove(face_vertices);
+          }
+        })
+        .attr("class", "face");
+    });
+  }
+  // and one for deactivating faces
+  function deactivateFaces() {
+    d3.selectAll(".face").remove();
   }
 
-  showFaces = true;
-  eel.get_planar_faces()((face_data) => {
+  // if arg is null, toggle faces
+  if (arg == null) {
+    showFaces = !showFaces;
+  } else {
+    showFaces = arg;
+  }
 
-    // draw lines for each face
-    let polygon = d3.line().curve(d3.curveLinearClosed);
-
-    // add polygons to svg
-    // generate pseudodata for each face
-    faces.selectAll(".face")
-      .data(face_data)
-      .join("path")
-      // pseudo data for each face
-      .attr("d", d => {
-        let polygon = d3.line().curve(d3.curveLinearClosed);
-
-        // preprocess data
-        let pts = [];
-        for (v of d) {pts.push([x(v[1]), y(v[2])]);}
-        const polygon_hull = polygon(pts.map(d => [d[0], d[1]]));
-
-        // get boundary vertices
-        // let boundary_pts = [];
-        // for (const v of d) {
-        //   // if vertex is new boundary vertex, add to list
-        //   if (boundaryVertices.indexOf(v[0]) != -1) {
-        //     boundary_pts.push([v[1], v[2]]);
-        //   }
-        // }
-
-        // // if central face, return polygon hull
-        // if (boundary_pts.length != 2) {
-        //   return polygon_hull;
-        // }
-
-        // create arc
-        // arc = d3.path();
-        // const angles = [-Math.atan2(boundary_pts[0][1], boundary_pts[0][0]),
-        //                 -Math.atan2(boundary_pts[1][1], boundary_pts[1][0])]
-        // const start_angle = Math.min(...angles);
-        // const end_angle = Math.max(...angles);
-        // // FIXME: find circle center
-        // arc.arc(x(0), y(0), x(radius)-x(0), start_angle, end_angle);
-        // arc.closePath();
-
-        return polygon_hull;
-      })
-      .on("click", (e, d) => {
-        // select all vertices in face
-        let face_vertices = d.map(v => v[0]);
-
-        // depending on mode, perform different move
-        if (moveMode == false) {
-          return;
-        }
-        else if (moveMode === 'benzene') {
-          benzeneMove(face_vertices);
-        }
-        else if (moveMode === 'square') {
-          squareMove(face_vertices);
-        }
-      })
-      .attr("class", "face");
-  });
-}
-
-function deactivateFaces() {
-  d3.selectAll(".face").remove();
-  showFaces = false;
+  if (showFaces) {
+    activateFaces();
+  } else {
+    deactivateFaces();
+  }
 }
 
 
@@ -482,9 +473,9 @@ function squareMove(vertex_ids) {
 
     data = d;
     preprocess_data();
-    deactivateFaces();
     update();
-    activateFaces();
+    // update faces
+    toggleFaces(true);
   })
 }
 

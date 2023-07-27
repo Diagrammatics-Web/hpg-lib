@@ -4,6 +4,7 @@
 - [x] fix vertex label enter, update, exit structure to be more concise
     - can probably just use `.join()`
 - [x] fix connectedness issue with the face rendering
+- [x] maintain `selected` status of vertices as we move them on canvas. This requires maintaining `selected` state as we pass data between frontend/backend
 
 ## TODOs
 Large list of tasks in progress and to start:
@@ -13,7 +14,7 @@ Large list of tasks in progress and to start:
 - [x] benzene move on faces
 - [ ] square move on faces
     - refer to [fig2](/imgs/fig2.png)
-- [ ] snap vertices to boundary
+- [x] snap vertices to boundary
 - [ ] benzene and square move equivalence methods
     - [ ] benzene move
     - [ ] square move
@@ -24,11 +25,10 @@ Large list of tasks in progress and to start:
 - [ ] proper labelings
     - s.t. around each internal vertex, the numbers 1-4 appear once each
     - this is already implemented in Dr. Swanson’s research code for smaller webs
-- [ ] tagging vertices with edge starting point
-ability to get dual graph
+- [ ] tagging vertices with edge starting point — "tags"
+- [ ] ability to get dual graph
 - [ ] permutations of the boundary vertices — trouble is this model is very unstructured, so may not be interesting enough to warrant implementing
 - [ ] symmetrized six-vertex pictures: convert to plabic, partial convert from plabic in contracted case
-- [ ] tags
 - [ ] Chris Fraser 2-column case
 - [ ] uncrossing rules, other reduction rules, formal sums of webs
 - [ ] separation labeling
