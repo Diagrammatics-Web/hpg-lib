@@ -12,7 +12,7 @@ Large list of tasks in progress and to start:
 - [x] separate analyze and edit modes, possibly begin structuring functionality for modes to be added in future
 - [x] faces
 - [x] benzene move on faces
-- [ ] square move on faces
+- [x] square move on faces
     - refer to [fig2](/imgs/fig2.png)
 - [x] snap vertices to boundary
 - [ ] benzene and square move equivalence methods
@@ -25,10 +25,11 @@ Large list of tasks in progress and to start:
 - [ ] proper labelings
     - s.t. around each internal vertex, the numbers 1-4 appear once each
     - this is already implemented in Dr. Swanson’s research code for smaller webs
-- [ ] tagging vertices with edge starting point — "tags"
-- [ ] ability to get dual graph
+- [ ] tagging vertices with edge starting point
+ability to get dual graph
 - [ ] permutations of the boundary vertices — trouble is this model is very unstructured, so may not be interesting enough to warrant implementing
 - [ ] symmetrized six-vertex pictures: convert to plabic, partial convert from plabic in contracted case
+- [ ] tags
 - [ ] Chris Fraser 2-column case
 - [ ] uncrossing rules, other reduction rules, formal sums of webs
 - [ ] separation labeling
@@ -36,6 +37,4 @@ Large list of tasks in progress and to start:
 ## Open questions
 Some questions I have accumulated while implementing features above
 
-- How to create faces in graphs such as the following, where there is a disconnected component?
-![](imgs/fig1.png) Currently, we require planarity and connectedness before generating faces.
-
+- When there is a disconnected component in the graph, should I create faces for the separate components and disregard the face between components? Or should I render that face as well?
