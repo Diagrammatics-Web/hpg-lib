@@ -15,6 +15,8 @@ Large list of tasks in progress and to start:
 - [x] square move on faces
     - refer to [fig2](/imgs/fig2.png)
 - [x] snap vertices to boundary
+- [x] fix vertex selection so elements added to selected arrays on both clicking and dragging, but if dragged, deselected on release
+- [ ] force layout?
 - [ ] benzene and square move equivalence methods
     - [ ] benzene move
     - [ ] square move

@@ -123,8 +123,18 @@ function activateButton(obj, mode) {
 
 // init d3 object for drag events
 var draggroup = d3.drag()
-  .on("start", e => svg.style('cursor', 'grabbing'))
-  .on("drag", function(e) {
+  .on("start", (e) => {
+    svg.style('cursor', 'grabbing');
+  })
+  .on("drag", function(e, d) {
+    // select current vertex if not already selected
+    if (!d3.select(this).classed("selected")) {
+      d3.select(this).classed("selected", true);
+      addOrRemove(selected, this);
+      addOrRemove(selectedIds, d.id);
+    }
+
+    // update position of selected vertices
     d3.selectAll(selected)
       .attr("cx", function(d) {
         d.x += x.invert(e.dx)-x.invert(0);
@@ -182,14 +192,14 @@ body.on("keypress", function(e) {
 // move object
 function activateMove(obj) {
   svg.style('cursor', 'pointer');
-  activateObjects(".vertex"); // FIXME: is this necessary?
+  activateObjects(".vertex");
   svg.selectAll(".vertex")
-    .on("mousedown", function(e, d) {
+    .call(draggroup)
+    .on("click", function(e, d) {
       d3.select(this).classed("selected", !d3.select(this).classed("selected"));
       addOrRemove(selected, this);
       addOrRemove(selectedIds, d.id);
     });
-  svg.call(draggroup);
 }
 
 // finish moving object
