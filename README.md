@@ -37,6 +37,11 @@ Large list of tasks in progress and to start:
 - *[ ] separation labeling
 
 ## Ordering of TODOs
-1. [ ] compute plannar dual
-2. [ ] proper labelings
-3. [ ] algorithm for applying rules to the linear order style and converting to a circular style of graph
+1. [x] compute plannar dual
+    - [ ] make sure this can only be done once
+    - [ ] make sure trips stopped when calculating planar dual
+2. [x] undo feature
+    - [ ] change to be stack-based
+3. [ ] fix edges not creatd properly
+3. [ ] proper labelings
+4. [ ] algorithm for applying rules to the linear order style and converting to a circular style of graph

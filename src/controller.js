@@ -71,6 +71,7 @@ var trips = [];
 function deselect() {
   d3.selectAll(selected).classed("selected", false);
   selected = [];
+  selectedIds = [];
 }
 
 
@@ -91,7 +92,6 @@ function activateButton(obj, mode) {
       modes[mode].activate();
     }
   }
-  // else
 
   // if other type of button
   else {
@@ -176,13 +176,14 @@ var draggroup = d3.drag()
         data = d;
         preprocess_data();
         update();
-        console.log("updated");
       });
   });
 
 // init d3 object for stopping drag events
 var nodrag = d3.drag()
-  .on("drag", null);
+  .on("start", null)
+  .on("drag", null)
+  .on("end", null);
 
 // deselect on 'space' or 'enter' keypress
 body.on("keypress", function(e) {
@@ -208,11 +209,14 @@ function activateMove(obj) {
 // finish moving object
 function deactivateMove(obj) {
   svg.style('cursor', 'default');
-  deselect();
-  svg.selectAll(".vertex").on("mousedown", null);
-  svg.call(nodrag);
-  svg.on('mousedown.drag', null);
   deactivateAllObjects();
+  svg.selectAll(".vertex")
+    .call(nodrag)
+    .on("click", null)
+    .on("mousedown.drag", null);
+
+  deselect();
+  console.log("deactivate move");
 }
 
 // toggle labels
@@ -327,11 +331,13 @@ function addFilledVertex(e) {
 
 // create edge on click and update graph
 function activateEdge(obj) {
+  console.log("activateEdge", activeMode);
   deselect();
   svg.selectAll(".vertex")
     .on("mousedown", function(e) {
       console.log("place_edge");
       d3.select(this).classed("selected", !d3.select(this).classed("selected"));
+      console.log(this);
       addOrRemove(selected, this);
       if(selected.length == 2) {
         addEdge(1);
