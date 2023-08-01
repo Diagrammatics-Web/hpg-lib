@@ -21,24 +21,22 @@ Large list of tasks in progress and to start:
     - [ ] benzene move
     - [ ] square move
 - [ ] algorithm for applying rules to the linear order style and converting to a circular style of graph
-- [ ] conversion routine from stacked box picture to graph
+- *[ ] conversion routine from stacked box picture to graph
 - [ ] conversion from alternating sign matrices (these matrices and plane partitions are already implemented in sage)
-- [ ] translation from conventional plabic graph
+- *[ ] translation from conventional plabic graph
 - [ ] proper labelings
     - s.t. around each internal vertex, the numbers 1-4 appear once each
     - this is already implemented in Dr. Swanson’s research code for smaller webs
-- [ ] tagging vertices with edge starting point
-ability to get dual graph
-- [ ] permutations of the boundary vertices — trouble is this model is very unstructured, so may not be interesting enough to warrant implementing
-- [ ] symmetrized six-vertex pictures: convert to plabic, partial convert from plabic in contracted case
+- *[ ] tagging vertices with edge starting point
+- [ ] ability to get dual graph
+- *[ ] permutations of the boundary vertices — trouble is this model is very unstructured, so may not be interesting enough to warrant implementing
+- *[ ] symmetrized six-vertex pictures: convert to plabic, partial convert from plabic in contracted case
 - [ ] tags
-- [ ] Chris Fraser 2-column case
-- [ ] uncrossing rules, other reduction rules, formal sums of webs
-- [ ] separation labeling
+- *[ ] Chris Fraser 2-column case
+- *[ ] uncrossing rules, other reduction rules, formal sums of webs
+- *[ ] separation labeling
 
-## Open questions
-Some questions I have accumulated while implementing features above
-
-- How to create faces in graphs such as the following, where there is a disconnected component?
-![](imgs/fig1.png) Currently, we require planarity and connectedness before generating faces.
-
+## Ordering of TODOs
+1. [ ] compute plannar dual
+2. [ ] proper labelings
+3. [ ] algorithm for applying rules to the linear order style and converting to a circular style of graph

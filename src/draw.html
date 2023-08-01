@@ -51,7 +51,8 @@ function changeMode(newMode) {
     <button id="btn-add_edge" onclick="activateButton(this,'place_edge')">Add edge</button>
     <button id="btn-add_hourglass" onclick="activateButton(this,'place_hourglass')">Add hourglass</button>
     <button id="btn-add_khourglass" onclick="activateButton(this,'place_khourglass')">Add k-hourglass</button>
-  
+    <button id="planar-dual" onclick="planarDual()">Planar dual</button>
+    <button id="undo" onclick="undo()">Undo</button>
     `
 
     actions.appendChild(container);
@@ -389,6 +390,26 @@ function toggleFaces(arg=null) {
     d3.selectAll(".face").remove();
 
     eel.get_planar_faces()((face_data) => {
+      // add labels for each face
+      faces.selectAll(".face-label")
+        .data(face_data)
+        .join("text")
+        .attr("class", "face-label")
+        .attr("x", function(d) {
+          let x_sum = 0;
+          for (v of d) {x_sum += v[1];}
+          return x(x_sum/d.length);
+        })
+        .attr("y", function(d) {
+          let y_sum = 0;
+          for (v of d) {y_sum += v[2];}
+          return y(y_sum/d.length);
+        })
+        .attr("height", 10)
+        .attr("width", 10)
+        .text(function(d) {
+          return face_data.indexOf(d);
+        });
 
       // draw lines for each face
       let polygon = d3.line().curve(d3.curveLinearClosed);
@@ -430,6 +451,7 @@ function toggleFaces(arg=null) {
   // and one for deactivating faces
   function deactivateFaces() {
     d3.selectAll(".face").remove();
+    d3.selectAll(".face-label").remove();
   }
 
   // if arg is null, toggle faces
@@ -477,6 +499,36 @@ function squareMove(vertex_ids) {
     // update faces
     toggleFaces(true);
   })
+}
+
+function planarDual() {
+  // call backend fn and update graph
+  eel.planar_dual()((d) => {
+    // check for error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+
+    data = d;
+    preprocess_data();
+    update();
+  })
+}
+
+function undo() {
+  // call backend fn and update graph
+  eel.undo()((d) => {
+    // check for error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+
+    data = d;
+    preprocess_data();
+    update();
+  });
 }
 
 

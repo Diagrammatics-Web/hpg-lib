@@ -128,10 +128,12 @@ var draggroup = d3.drag()
   })
   .on("drag", function(e, d) {
     // select current vertex if not already selected
+    let temporaryDrag = false;
     if (!d3.select(this).classed("selected")) {
       d3.select(this).classed("selected", true);
       addOrRemove(selected, this);
       addOrRemove(selectedIds, d.id);
+      temporaryDrag = true;
     }
 
     // update position of selected vertices
@@ -149,6 +151,7 @@ var draggroup = d3.drag()
       update();
   })
   .on("end", e => {
+    console.log(this);
     svg.style('cursor', 'pointer');
     d3.selectAll(selected)
       .attr("cx", function(d) {
