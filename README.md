@@ -42,6 +42,7 @@ Large list of tasks in progress and to start:
     - [ ] make sure trips stopped when calculating planar dual
 2. [x] undo feature
     - [ ] change to be stack-based
-3. [ ] fix edges not creatd properly
-3. [ ] proper labelings
-4. [ ] algorithm for applying rules to the linear order style and converting to a circular style of graph
+3. [x] fix edges not created properly
+4. [ ] fix how hourglass edges and k-hg edges not created properly
+5. [ ] proper labelings
+6. [ ] algorithm for applying rules to the linear order style and converting to a circular style of graph
