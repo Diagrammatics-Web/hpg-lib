@@ -1,3 +1,7 @@
+html {
+  background-color: white;
+}
+
 #boundary_circle {
   fill: none;
   stroke: grey;

@@ -584,6 +584,8 @@ function importJson() {
 // store graph data to python and close session
 function end_session() {
   eel.import_data(data_compressed());
+  // disable all interactions
+  d3.select("*").style("pointer-events", "none");
   eel.update_server_status(false);
 }
 

@@ -5,6 +5,7 @@
     - can probably just use `.join()`
 - [x] fix connectedness issue with the face rendering
 - [x] maintain `selected` status of vertices as we move them on canvas. This requires maintaining `selected` state as we pass data between frontend/backend
+- [ ] fix port overlap issue
 
 ## TODOs
 Large list of tasks in progress and to start:
