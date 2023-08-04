@@ -371,10 +371,18 @@ function activatekHourglass(obj) {
   svg.selectAll(".vertex")
     .on("mousedown", function(e) {
       console.log("place_edge");
-      d3.select(this).classed("selected", !d3.select(this).classed("selected"));
+      d3.select(this).classed("selected", !d3.select(this).classed("selected") && selected.length < 2);
       addOrRemove(selected, this);
       if(selected.length == 2) {
-        var k = prompt("Enter degree",3);
+        let k = document.getElementById("btn-add_khourglass-val").value;
+        if (k == "" || k <= 0) {
+          document.getElementById("btn-add_khourglass-val").style.border = "2px solid red";
+          deselect();
+        }
+        else {
+          document.getElementById("btn-add_khourglass-val").style.border = "1px solid black";
+        }
+        
         addEdge(parseInt(k)); // pass in int
         deselect();
       }
@@ -385,6 +393,7 @@ function activatekHourglass(obj) {
 // finish creating edge
 function deactivateEdge(obj) {
   svg.selectAll(".vertex").on("mousedown", null);
+  document.getElementById("btn-add_khourglass-val").style.border = "1px solid black";
 }
 
 

@@ -9,6 +9,16 @@ html {
   stroke-dasharray: 5 2;
 }
 
+#btn-new-val {
+  transition: 150ms ease-in-out;
+  width: 160px;
+}
+
+#btn-add_khourglass-val {
+  transition: 150ms ease-in-out;
+  width: 30px;
+}
+
 /* active class allows highlighting on hover, e.g. when choosing 
   vertices to move */
 .active:hover {
