@@ -11,6 +11,8 @@
 - [ ] Eel has trouble handling multiple instances of the app object instantiated
     - solve this by: making one webserver in hourglass module, but when we can instantiate as many apps as we want
     - need to read into this more: in particular, how to restart an eel server after closed
+    - this may have to do with the overlap between exposed functions — i.e. we may need to completely separate the exposure of functions from the inner workings of the graph object, and make the exposed functions universal.
+        - single app object in hourglass module can handle exposing functions, and the source of information comes from whichever graph object is "current"
 
 ## Relevant TODOs
 Large list of tasks in progress and to start:
