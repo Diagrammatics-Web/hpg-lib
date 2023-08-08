@@ -133,6 +133,19 @@ eel.get_graph()((g) => {
   update();
 });
 
+// update graph on call from backend
+eel.expose(update_from_backend);
+function update_from_backend(comment) {
+  console.log("update from backend");
+  eel.get_graph()((g) => {
+    console.log(comment)
+    data = g['data'];
+    boundaryVertices = g['boundary_vertices'];
+    preprocess_data();
+    update();
+  });
+}
+
 // create new graph, prompt for number of vertices
 function newGraph() {
   let nvertices = document.getElementById("btn-new-val").value;
