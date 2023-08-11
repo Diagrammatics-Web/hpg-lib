@@ -48,3 +48,8 @@ Large list of tasks in progress and to start:
 5. [ ] algorithm for applying rules to the linear order style and converting to a circular style of graph
 6. [ ] conversion from alternating sign matrics
 7. [ ] conversion from plane partitions
+
+
+## Random thoughts
+- [ ] making sure a user cannot add an edge twice
+- [ ] easy rotation of graph canvas
