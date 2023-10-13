@@ -32,12 +32,36 @@ var modes = {
     activate: activatekHourglass,
     deactivate: deactivateEdge
   },
+  "trip1": {
+    activate: activateTrip1,
+    deactivate: deactivateTrip1
+  },
+  "trip2": {
+    activate: activateTrip2,
+    deactivate: deactivateTrip2
+  },
+  "trip3": {
+    activate: activateTrip3,
+    deactivate: deactivateTrip3
+  },
+  "tripk": {
+    activate: activateTripk,
+    deactivate: deactivateTripk
+  },
+  "benzene_move": {
+    activate: activateBenzene,
+    deactivate: deactivateFaceMove
+  },
+  "square_move": {
+    activate: activateSquare,
+    deactivate: deactivateFaceMove
+  }
 };
 
 
 /*
   *  Maintain state of app with global variables,
-  *  one tracking active button, one tracking active mode,
+  *  one tracking active button, one tracking active mode, 
   *  and one tracking a selected element.
   *  Depending on action, update graph interface.
 */
@@ -45,6 +69,7 @@ var activeButton = false;
 var activeMode = false;
 var moveMode = false;
 var selectedElement = false;
+var trips = [];
 
 // remove any vertices from selected class
 function deselect() {
@@ -151,12 +176,11 @@ var draggroup = d3.drag()
       });
 
       // save to backend and rerender
-      /*eel.import_data(data_compressed())((d) => {
+      eel.import_data(data_compressed())((d) => {
         data = d;
         preprocess_data();
         update();
-      });*/
-      update();
+      });
   });
 
 // init d3 object for stopping drag events
@@ -235,12 +259,11 @@ function activateToggle(obj) {
   svg.selectAll(".vertex")
     .on("click", function(e) {
       v = d3.select(this);
-      /*if(v.datum().type == "filled") {
+      if(v.datum().type == "filled") {
         v.datum().type = "unfilled";
       } else if (v.datum().type == "unfilled") {
         v.datum().type = "filled";
-      }*/
-      v.datum().filled = !v.datum().filled;
+      }
       update();
     });
 }
@@ -261,56 +284,53 @@ function deactivateAllObjects() {
   svg.selectAll("*").classed("active", false);
 }
 
+// FIXME: alter vertex functions to udpate backend
 // init new vertex object
-function newVertex(x, y, filled, boundary) {
+function newVertex(x, y, type) {
   console.log("New vertex: " + x + ", " + y + ", " + (maxVertexId + 1));
-  return {x:x, y:y, id: ++maxVertexId, filled:filled, boundary:boundary};
+  return {x:x, y:y, id: ++maxVertexId, type:type};
 }
 
 // add vertex on click and update graph
 function addVertex(e) {
-  var filled = true;
+  var vertexType = "filled";
   if (e.shiftKey) {
-    filled = false
+    vertexType = "unfilled"
   }
-  data.vertices.push(newVertex(x.invert(e.offsetX), y.invert(e.offsetY), filled, false));
+  data.vertices.push(newVertex(x.invert(e.offsetX), y.invert(e.offsetY), vertexType));
 
-  // TODO: do only at end
   // save to backend
-  /*eel.import_data(data_compressed())((d) => {
+  eel.import_data(data_compressed())((d) => {
     data = d;
     preprocess_data();
     update();
-  });*/
-  update();
+  });
 }
 
 // add unfilled vertex on click and update graph
 function addUnfilledVertex(e) {
-  //vertexType = "unfilled"
-  data.vertices.push(newVertex(x.invert(e.offsetX), y.invert(e.offsetY), false, false));
-
+  vertexType = "unfilled"
+  data.vertices.push(newVertex(x.invert(e.offsetX), y.invert(e.offsetY), vertexType));
+  
   // save to backend
-  /*eel.import_data(data_compressed())((d) => {
+  eel.import_data(data_compressed())((d) => {
     data = d;
     preprocess_data();
     update();
-  });*/
-  update();
+  });
 }
 
 // add filled vertex on click and update graph
 function addFilledVertex(e) {
-  //vertexType = "filled"
-  data.vertices.push(newVertex(x.invert(e.offsetX), y.invert(e.offsetY), true, false));
-
+  vertexType = "filled"
+  data.vertices.push(newVertex(x.invert(e.offsetX), y.invert(e.offsetY), vertexType));
+  
   // save to backend
-  /*eel.import_data(data_compressed())((d) => {
+  eel.import_data(data_compressed())((d) => {
     data = d;
     preprocess_data();
     update();
-  });*/
-  update();
+  });
 }
 
 // create edge on click and update graph
@@ -366,7 +386,7 @@ function activatekHourglass(obj) {
         else {
           document.getElementById("btn-add_khourglass-val").style.border = "1px solid black";
         }
-
+        
         addEdge(parseInt(k)); // pass in int
         deselect();
       }
@@ -380,6 +400,104 @@ function deactivateEdge(obj) {
   document.getElementById("btn-add_khourglass-val").style.border = "1px solid black";
 }
 
+
+// create edge path for Trip and update graph
+function activateTrip(tripIndex) {
+  activateObjects(".vertex"); // FIXME: is this necessary?
+  svg.selectAll(".vertex")
+    .on("click", async function(e) {
+      v = d3.select(this);
+      vertexId = v.datum().id;
+
+      // edgepath from python
+      eel.get_trip(tripIndex, vertexId)((ep) => {
+        // reset edgepaths for this trip type
+        edgePaths[tripIndex] = [];
+
+        for (var i = 0; i < ep.length; i++) {
+          // add edge to edgePaths
+          edgePaths[tripIndex].push(JSON.stringify(ep[i]));
+
+          // render graph
+          update();
+        }
+      });
+
+    });
+}
+
+// helper functions to activate/deactivate trip types 1, 2, and 3
+function activateTrip1(obj) {
+  activateTrip(1);
+}
+
+function deactivateTrip1(obj) {
+  svg.selectAll(".vertex").on("click", null);
+  edgePaths[1] = [];
+  update();
+}
+
+function activateTrip2(obj) {;
+  activateTrip(2);
+}
+
+function deactivateTrip2(obj) {
+  svg.selectAll(".vertex").on("click", null);
+  edgePaths[2] = [];
+  update();
+}
+
+function activateTrip3(obj) {
+  activateTrip(3);
+}
+
+function deactivateTrip3(obj) {
+  svg.selectAll(".vertex").on("click", null);
+  edgePaths[3] = [];
+  update();
+}
+
+
+function activateTripk(obj) {
+        let k = document.getElementById("btn-tripk-val").value;
+        if (k == "" || k <= 0) {
+          document.getElementById("btn-tripk-val").style.border = "2px solid red";
+          deselect();
+        }
+        else {
+          document.getElementById("btn-tripk-val").style.border = "1px solid black";
+        }
+        
+  activateTrip(parseInt(k));
+}
+
+function deactivateTripk(obj) {
+    let k = document.getElementById("btn-tripk-val").value;
+    
+  svg.selectAll(".vertex").on("click", null);
+  edgePaths[parseInt(k)] = [];
+  update();
+}
+
+// create edge on click and update graph
+function activateBenzene(obj) {
+  // update move mode, so that benzene move can be activated
+  // from clicking on graph faces in draw.html
+  moveMode = 'benzene';
+}
+
+function activateSquare(obj) {
+  // face-wise square move
+  moveMode = 'square';
+}
+
+function deactivateFaceMove(obj) {
+  // face-wise square move
+  moveMode = false;
+}
+
+
+
 // helper fn: add value if missing, remove if present
 function addOrRemove(array, value) {
   var index = array.indexOf(value);
@@ -389,3 +507,4 @@ function addOrRemove(array, value) {
       array.splice(index, 1);
   }
 }
+

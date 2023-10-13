@@ -20,6 +20,7 @@ def editor(graph, use_notebook=True):
     _prepare_server()
     _start_server()
     _editor_thread(use_notebook)
+    return CURR_GRAPH
 
 def _editor_thread(use_notebook):
     """Run Eel thread for lifetime of app, checking for server status"""
@@ -45,12 +46,13 @@ def _editor_thread(use_notebook):
     except (SystemExit, MemoryError, KeyboardInterrupt):
         print("** Always click \'Save/Finish\' to close app. **")
         SERVER_ON = False
-        clear_output(wait=False)
+        #clear_output(wait=False)
         print("Editor closed.")
 
     # clear graph editor, wait for closing message
-    clear_output(wait=False)
+    #clear_output(wait=False)
     print("Editor closed.")
+
 
 ##
 ## Server / Eel maintenance functions
@@ -99,9 +101,13 @@ def _get_eel_fns():
     def get_graph():
         return CURR_GRAPH.to_dict()
 
-    def import_data():
-        return [1,2,3,4]
-        return CURR_GRAPH.to_dict()
+    def update_graph_from_editor(g):
+        global CURR_GRAPH
+        #print(g)
+        #print("we close now! go home")
+        #return [1,2,3,4]
+        CURR_GRAPH = HourglassPlabicGraph.from_dict(g);
+        #return CURR_GRAPH.to_dict()
         #CURR_GRAPH.prev_data = CURR_GRAPH._export_data()
         #CURR_GRAPH.data = data
         #CURR_GRAPH.boundary_vertices = []
@@ -115,5 +121,5 @@ def _get_eel_fns():
         'update_server_status': update_server_status,
         'print_from_js': print_from_js,
         'get_graph': get_graph,
-        'import_data': import_data,
+        'update_graph_from_editor': update_graph_from_editor,
     }

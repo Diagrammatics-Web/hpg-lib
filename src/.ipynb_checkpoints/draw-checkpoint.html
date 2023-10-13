@@ -24,12 +24,27 @@
 
 <div>
   <div id="paper-container"></div>
+  <button id="btn-tikz" onclick="changeMode('edit')">Edit</button>
+  <button id="btn-tikz" onclick="changeMode('analyze')">Analyze</button>
   <button id="btn-toggle_labels" onclick="toggleLabels()">Toggle vertex labels</button>
 </div>
 
 <br>
 <!-- empty div where buttons dynamically rendered -->
-<div id="actions">
+<div id="actions"></div>
+
+
+<script>
+function changeMode(newMode) {
+  mode = newMode;
+  actions.innerHTML = '';
+
+  // conditionally render buttons for each mode
+  if (mode === 'edit') {
+    const actions = document.getElementById('actions');
+
+    const container = document.createElement('div');
+    container.innerHTML = `
     <button id="btn-deselect" onclick="deselect()">Deselect all</button>
     <button id="btn-move" onclick="activateButton(this,'move')">Move</button>
     <button id="btn-place_filled" onclick="activateButton(this,'place_filled')">Place filled vertex</button>
@@ -42,19 +57,44 @@
       <input id="btn-add_khourglass-val" type="number" placeholder="k">
     <button id="planar-dual" onclick="planarDual()">Planar dual</button>
     <button id="undo" onclick="undo()">Undo</button>
-</div>
+    `
 
+    actions.appendChild(container);
+  }
 
-<script>
+  else if (mode === 'analyze') {
+    const actions = document.getElementById('actions');
+    const container = document.createElement('div');
+    container.innerHTML = `
+    <button id="btn-deselect" onclick="deselect()">Deselect all</button>
+    <button id="btn-trip1" onclick="activateButton(this,'trip1')">Trip1</button>
+    <button id="btn-trip2" onclick="activateButton(this,'trip2')">Trip2</button>
+    <button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button>
+    <button id="btn-faces" onclick="toggleFaces()">Toggle Faces</button>
+    <button id="btn-benzene" onclick="activateButton(this, 'benzene_move')">Benzene move</button>
+    <button id="btn-square" onclick="activateButton(this, 'square_move')">Square move</button>
+    `
+
+    actions.appendChild(container);
+  }
+}
 
 // global state variables
+let mode = "";
 const radius = 10;
 var data = {vertices: [], edges:[]};
 var boundaryVertices = [];
+var edgePaths = {
+  1: [],
+  2: [],
+  3: [],
+}
+var edgePathsCnt = {}
 var showLabels = false;
+var showFaces = false;
 
 
-/*
+/* 
  *  Initialize Canvas
  */
 var maxVertexId = 0;
@@ -73,7 +113,7 @@ var svg = d3.select("#paper-container")
  .attr("width", size)
  .attr("height", size);
 
-// init boundary circle
+// init boundary circcle
 var boundary_circle = svg.append("circle")
     .attr('id', 'boundary_circle')
     .attr('cx',x(0) )
@@ -81,20 +121,17 @@ var boundary_circle = svg.append("circle")
     .attr('r',x(radius)-x(0));
 
 // init groups for edges and vertices
+var faces = svg.append("g").attr("id", "faces");
 var edges = svg.append("g").attr("id", "edges");
 var vertices = svg.append("g").attr("id", "vertices");
 
 // get initial graph from backend
 eel.get_graph()((g) => {
-  //console.log(g);
-  data = g;//['data'];
-  //boundaryVertices = g['boundary_vertices'];
+  data = g['data'];
+  boundaryVertices = g['boundary_vertices'];
   preprocess_data();
   update();
 });
-
-
-
 
 // create new graph, prompt for number of vertices
 function newGraph() {
@@ -124,21 +161,20 @@ function newGraph() {
       x: radius*Math.sin(i*2*Math.PI/nvertices),
       y: radius*Math.cos(i*2*Math.PI/nvertices),
       id: i,
-      filled: true
+      type: "filled"
     };
   }
 
   // send new graph to python
-  update();
-  /*eel.import_data(data_compressed())((d) => {
+  eel.import_data(data_compressed())((d) => {
     data = d;
     preprocess_data();
-
+    
     // FIXME: need to do the following
     // 1. update boundary vertices
 
     update();
-  });*/
+  });
 }
 
 
@@ -153,7 +189,7 @@ function hourglassPath(edge, hourglass_idx, trip_idx) {
   if (edgePathsCnt[edge.id].length <= hourglass_idx) {
       edgePathsCnt[edge.id][hourglass_idx] = [];
   }
-
+  
 
   let pos = edgePathsCnt[edge.id][hourglass_idx].indexOf(trip_idx);
 
@@ -191,7 +227,7 @@ function hourglassPath(edge, hourglass_idx, trip_idx) {
 
   var d = "";
 
-  var factor = (-(edge.multiplicity-1)/2+hourglass_idx);
+  var factor = (-(edge.weight-1)/2+hourglass_idx);
   var points = [
     [pos1_x, pos1_y],
     [quater1_x+factor*dy/8, quater1_y-factor*dx/8],
@@ -229,18 +265,18 @@ function update() {
             edgePathsCnt[e.id] = {}
 
             // add array for each hourglass index
-            for (var i=0; i<e.multiplicity; i++) {
+            for (var i=0; i<e.weight; i++) {
               edgePathsCnt[e.id][i] = [];
             }
         }
 
-        for (var i=0; i<e.multiplicity; i++) {
+        for (var i=0; i<e.weight; i++) {
           let cnt = 0;
 
           // generate edge to render each time this edge appears in path
-          /*if (edgePaths[1].indexOf(JSON.stringify([e.id, i])) > -1) {
+          if (edgePaths[1].indexOf(JSON.stringify([e.id, i])) > -1) {
             edgs.push({
-              edge:e,
+              edge:e, 
               hourglass_idx:i,
               path: 1});
             cnt++;
@@ -250,7 +286,7 @@ function update() {
           }
           if (edgePaths[2].indexOf(JSON.stringify([e.id, i])) > -1) {
             edgs.push({
-              edge:e,
+              edge:e, 
               hourglass_idx:i,
               path: 2});
             cnt++;
@@ -258,12 +294,12 @@ function update() {
           }
           if (edgePaths[3].indexOf(JSON.stringify([e.id, i])) > -1) {
             edgs.push({
-              edge:e,
+              edge:e, 
               hourglass_idx:i,
               path: 3});
             cnt++;
             edgePathsCnt[e.id][i].push(3);
-          }*/
+          }
 
           // if it doesn't appear in any edge path, push it once
           if (cnt == 0) {
@@ -281,7 +317,7 @@ function update() {
     })
     .attr("fill", "none")
     // color edges if in edge path
-    /*.classed("path_1", (d) => {
+    .classed("path_1", (d) => {
       var idx = edgePaths[1].indexOf(JSON.stringify([d.edge.id, d.hourglass_idx]));
       return (idx > -1 && d.path == 1);
     })
@@ -292,14 +328,14 @@ function update() {
     .classed("path_3", (d) => {
       var idx = edgePaths[3].indexOf(JSON.stringify([d.edge.id, d.hourglass_idx]));
       return (idx > -1 && d.path == 3);
-    })*/;
+    });
 
   // add circle html element for each vertex
   vertices.selectAll(".vertex").data(data.vertices)
     .join("circle")
     .attr("class", "vertex")
-    .classed("unfilled", d=>!d.filled)
-    .classed("filled", d=>d.filled)
+    .classed("unfilled", d=>d.type=="unfilled")
+    .classed("filled", d=>d.type=="filled")
     .attr("cx", function(d) {
       return x(d.x)
     })
@@ -312,7 +348,10 @@ function update() {
     })
 
 
-
+  // deactivate faces if not in analyze mode
+  if (showFaces && mode != 'analyze') {
+    toggleFaces(false);
+  }
 
   // add labels if option selected
   vertices.selectAll(".vertex-label").data(data.vertices)
@@ -333,32 +372,184 @@ function update() {
 }
 
 // add edges to graph based on selected vertices
-function addEdge(multiplicity) {
+function addEdge(weight) {
   var selection = d3.selectAll(selected);
   console.log(selection)
   var selectedVertices = selection.data();
   for(var i=0; i < selectedVertices.length-1; i++) {
     data.edges.push({
-      sourceId: selectedVertices[i].id,
-      targetId: selectedVertices[i+1].id,
-      source: selectedVertices[i],
-      target: selectedVertices[i+1],
-      multiplicity: multiplicity
+      sourceId: selectedVertices[i].id, 
+      targetId: selectedVertices[i+1].id, 
+      weight: weight
     });
   }
 
   // FIXME: improve method for incremental updates
-  update();
-  /*eel.import_data(data_compressed())((d) => {
+  eel.import_data(data_compressed())((d) => {
     data = d;
     preprocess_data();
     update();
-  });*/
+  });
 }
 
 
 
 /*
+ *  Fns for generating polygon hull html elements for boundary shapes
+ */
+function toggleFaces(arg=null) {
+  // define helper functions
+  // one for activating faces
+  function activateFaces() {
+    // if faces already exist, remove them
+    d3.selectAll(".face").remove();
+
+    eel.get_planar_faces()((face_data) => {
+      // add labels for each face
+      faces.selectAll(".face-label")
+        .data(face_data)
+        .join("text")
+        .attr("class", "face-label")
+        .attr("x", function(d) {
+          let x_sum = 0;
+          for (v of d) {x_sum += v[1];}
+          return x(x_sum/d.length);
+        })
+        .attr("y", function(d) {
+          let y_sum = 0;
+          for (v of d) {y_sum += v[2];}
+          return y(y_sum/d.length);
+        })
+        .attr("height", 10)
+        .attr("width", 10)
+        .text(function(d) {
+          return face_data.indexOf(d);
+        });
+
+      // draw lines for each face
+      let polygon = d3.line().curve(d3.curveLinearClosed);
+
+      // add polygons to svg
+      // generate pseudodata for each face
+      faces.selectAll(".face")
+        .data(face_data)
+        .join("path")
+        // pseudo data for each face
+        .attr("d", d => {
+          let polygon = d3.line().curve(d3.curveLinearClosed);
+
+          // preprocess data
+          let pts = [];
+          for (v of d) {pts.push([x(v[1]), y(v[2])]);}
+          const polygon_hull = polygon(pts.map(d => [d[0], d[1]]));
+
+          return polygon_hull;
+        })
+        .on("click", (e, d) => {
+          // select all vertices in face
+          let face_vertices = d.map(v => v[0]);
+
+          // depending on mode, perform different move
+          if (moveMode == false) {
+            return;
+          }
+          else if (moveMode === 'benzene') {
+            benzeneMove(face_vertices);
+          }
+          else if (moveMode === 'square') {
+            squareMove(face_vertices);
+          }
+        })
+        .attr("class", "face");
+    });
+  }
+  // and one for deactivating faces
+  function deactivateFaces() {
+    d3.selectAll(".face").remove();
+    d3.selectAll(".face-label").remove();
+  }
+
+  // if arg is null, toggle faces
+  if (arg == null) {
+    showFaces = !showFaces;
+  } else {
+    showFaces = arg;
+  }
+
+  if (showFaces) {
+    activateFaces();
+  } else {
+    deactivateFaces();
+  }
+}
+
+
+function benzeneMove(vertex_ids) {
+  // call backend fn and update graph  
+  eel.benzene_move(vertex_ids)((d) => {
+    // check if error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+    
+    data = d;
+    preprocess_data();
+    update();
+  });
+}
+
+function squareMove(vertex_ids) {
+  // call backend fn and update graph
+  eel.square_move(vertex_ids)((d) => {
+    // check for error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+
+    data = d;
+    preprocess_data();
+    update();
+    // update faces
+    toggleFaces(true);
+  })
+}
+
+function planarDual() {
+  // call backend fn and update graph
+  eel.planar_dual()((d) => {
+    // check for error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+
+    data = d;
+    preprocess_data();
+    update();
+  })
+}
+
+function undo() {
+  // call backend fn and update graph
+  eel.undo()((d) => {
+    // check for error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+
+    data = d;
+    preprocess_data();
+    update();
+  });
+}
+
+
+
+
+/* 
  *  Graph Import/Export fns
  */
 // export graph data to JSON to clipboard
@@ -374,7 +565,7 @@ function export_tikz() {
     navigator.clipboard.writeText(tikzString);
   })
 }
-
+  
 // import graph data from json
 function importJson() {
   let newData = prompt("Paste JSON here:");
@@ -394,21 +585,20 @@ function importJson() {
   data = JSON.parse(newData);
 
   // save to backend
-  /*eel.import_data(data_compressed())((d) => {
+  eel.import_data(data_compressed())((d) => {
     data = d;
     preprocess_data();
     update();
-  });*/
-  update();
+  });
 }
 
 
-/*
+/* 
  *  Backend Frontend Communication fns
  */
 // store graph data to python and close session
 function end_session() {
-  eel.update_graph_from_editor(data_compressed());
+  eel.import_data(data_compressed());
   // disable all interactions
   d3.select("*").style("pointer-events", "none");
   eel.update_server_status(false);
@@ -433,7 +623,7 @@ function data_compressed() {
   // add edge info
   data.edges.forEach(function(edge) {
     let f = {
-      multiplicity : edge.multiplicity,
+      weight : edge.weight,
       sourceId : edge.sourceId,
       targetId : edge.targetId
     };
@@ -446,8 +636,7 @@ function data_compressed() {
         x : vertex.x,
         y : vertex.y,
         id : vertex.id,
-        filled : vertex.filled,
-        boundary : vertex.boundary
+        type : vertex.type
       };
     d.vertices.push(f);
   });
@@ -457,6 +646,6 @@ function data_compressed() {
 
 
 </script>
-<script src="controller_editor.js"></script>
+<script src="controller.js"></script>
 </body>
 </html>
