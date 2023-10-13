@@ -99,14 +99,16 @@ def _get_eel_fns():
     def get_graph():
         return CURR_GRAPH.to_dict()
 
-    def import_data(data):
-        CURR_GRAPH.prev_data = CURR_GRAPH._export_data()
-        CURR_GRAPH.data = data
-        CURR_GRAPH.boundary_vertices = []
-        CURR_GRAPH._prepare_data()
+    def import_data():
+        return [1,2,3,4]
+        return CURR_GRAPH.to_dict()
+        #CURR_GRAPH.prev_data = CURR_GRAPH._export_data()
+        #CURR_GRAPH.data = data
+        #CURR_GRAPH.boundary_vertices = []
+        #CURR_GRAPH._prepare_data()
 
         # send updated copy of graph
-        return CURR_GRAPH._export_data()
+        #return CURR_GRAPH._export_data()
 
     # return dict of functions
     return {
@@ -115,4 +117,3 @@ def _get_eel_fns():
         'get_graph': get_graph,
         'import_data': import_data,
     }
-

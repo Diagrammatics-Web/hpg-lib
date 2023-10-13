@@ -54,7 +54,7 @@ var boundaryVertices = [];
 var showLabels = false;
 
 
-/* 
+/*
  *  Initialize Canvas
  */
 var maxVertexId = 0;
@@ -86,8 +86,8 @@ var vertices = svg.append("g").attr("id", "vertices");
 
 // get initial graph from backend
 eel.get_graph()((g) => {
-  data = g['data'];
-  boundaryVertices = g['boundary_vertices'];
+  data = g;//['data'];
+  //boundaryVertices = g['boundary_vertices'];
   preprocess_data();
   update();
 });
@@ -128,7 +128,7 @@ function newGraph() {
   eel.import_data(data_compressed())((d) => {
     data = d;
     preprocess_data();
-    
+
     // FIXME: need to do the following
     // 1. update boundary vertices
 
@@ -148,7 +148,7 @@ function hourglassPath(edge, hourglass_idx, trip_idx) {
   if (edgePathsCnt[edge.id].length <= hourglass_idx) {
       edgePathsCnt[edge.id][hourglass_idx] = [];
   }
-  
+
 
   let pos = edgePathsCnt[edge.id][hourglass_idx].indexOf(trip_idx);
 
@@ -235,7 +235,7 @@ function update() {
           // generate edge to render each time this edge appears in path
           if (edgePaths[1].indexOf(JSON.stringify([e.id, i])) > -1) {
             edgs.push({
-              edge:e, 
+              edge:e,
               hourglass_idx:i,
               path: 1});
             cnt++;
@@ -245,7 +245,7 @@ function update() {
           }
           if (edgePaths[2].indexOf(JSON.stringify([e.id, i])) > -1) {
             edgs.push({
-              edge:e, 
+              edge:e,
               hourglass_idx:i,
               path: 2});
             cnt++;
@@ -253,7 +253,7 @@ function update() {
           }
           if (edgePaths[3].indexOf(JSON.stringify([e.id, i])) > -1) {
             edgs.push({
-              edge:e, 
+              edge:e,
               hourglass_idx:i,
               path: 3});
             cnt++;
@@ -337,8 +337,8 @@ function addEdge(weight) {
   var selectedVertices = selection.data();
   for(var i=0; i < selectedVertices.length-1; i++) {
     data.edges.push({
-      sourceId: selectedVertices[i].id, 
-      targetId: selectedVertices[i+1].id, 
+      sourceId: selectedVertices[i].id,
+      targetId: selectedVertices[i+1].id,
       weight: weight
     });
   }
@@ -444,14 +444,14 @@ function toggleFaces(arg=null) {
 
 
 function benzeneMove(vertex_ids) {
-  // call backend fn and update graph  
+  // call backend fn and update graph
   eel.benzene_move(vertex_ids)((d) => {
     // check if error
     if (typeof(d) == "string") {
       console.log(d);
       return;
     }
-    
+
     data = d;
     preprocess_data();
     update();
@@ -508,7 +508,7 @@ function undo() {
 
 
 
-/* 
+/*
  *  Graph Import/Export fns
  */
 // export graph data to JSON to clipboard
@@ -524,7 +524,7 @@ function export_tikz() {
     navigator.clipboard.writeText(tikzString);
   })
 }
-  
+
 // import graph data from json
 function importJson() {
   let newData = prompt("Paste JSON here:");
@@ -552,7 +552,7 @@ function importJson() {
 }
 
 
-/* 
+/*
  *  Backend Frontend Communication fns
  */
 // store graph data to python and close session
