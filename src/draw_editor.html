@@ -299,11 +299,28 @@ function update() {
       return y(d.y+0.3)
     })
     .text(function(d) {
-      if (!showLabels) {
+      if (!showLabels || showLabels) {
         return "";
       }
       return d.id;
     });
+
+    edges.selectAll(".hourglass-label").data(data.edges)
+    .join("text")
+    .attr("class", "hourglass-label")
+    .attr("x", function(d) {
+      return x((d.source.x+d.target.x)/2)
+    })
+    .attr("y", function(d) {
+      return y((d.source.y+d.target.y)/2)
+    })
+    .text(function(d) {
+      if (!showLabels) {
+        return "";
+      }
+      return d.label;
+    });
+
 }
 
 // add edges to graph based on selected vertices
@@ -409,7 +426,8 @@ function data_compressed() {
     let f = {
       multiplicity : edge.multiplicity,
       sourceId : edge.sourceId,
-      targetId : edge.targetId
+      targetId : edge.targetId,
+      label : edge.label,
     };
     d.edges.push(f);
   });
@@ -421,7 +439,8 @@ function data_compressed() {
         y : vertex.y,
         id : vertex.id,
         filled : vertex.filled,
-        boundary : vertex.boundary
+        boundary : vertex.boundary,
+        label : vertex.label,
       };
     d.vertices.push(f);
   });
