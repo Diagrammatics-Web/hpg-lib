@@ -189,84 +189,18 @@ function update() {
 
   // update path html element for each edge type
   // this generates pseudo-edges for each component of an hourglass edge
-  edges.selectAll(".edge")
-    .data(() => {
-      var edgs = [];
 
-      // clear count of paths on each edge
-      edgePathsCnt = {};
 
-      for (e of data.edges) {
 
-        // init edge path count if nonexistent
-        if (edgePathsCnt[e.id] == undefined) {
-            edgePathsCnt[e.id] = {}
-
-            // add array for each hourglass index
-            for (var i=0; i<e.multiplicity; i++) {
-              edgePathsCnt[e.id][i] = [];
-            }
-        }
-
-        for (var i=0; i<e.multiplicity; i++) {
-          let cnt = 0;
-
-          // generate edge to render each time this edge appears in path
-          /*if (edgePaths[1].indexOf(JSON.stringify([e.id, i])) > -1) {
-            edgs.push({
-              edge:e,
-              hourglass_idx:i,
-              path: 1});
-            cnt++;
-
-            // push trip index to edge path count
-            edgePathsCnt[e.id][i].push(1);
-          }
-          if (edgePaths[2].indexOf(JSON.stringify([e.id, i])) > -1) {
-            edgs.push({
-              edge:e,
-              hourglass_idx:i,
-              path: 2});
-            cnt++;
-            edgePathsCnt[e.id][i].push(2);
-          }
-          if (edgePaths[3].indexOf(JSON.stringify([e.id, i])) > -1) {
-            edgs.push({
-              edge:e,
-              hourglass_idx:i,
-              path: 3});
-            cnt++;
-            edgePathsCnt[e.id][i].push(3);
-          }*/
-
-          // if it doesn't appear in any edge path, push it once
-          if (cnt == 0) {
-            edgs.push({edge:e, hourglass_idx:i, path: 0});
-          }
-        }
-      }
-      return edgs;
-    })
-    .join("path")
-    .attr("id", d=>"e"+d.edge.id)
+  edges.selectAll(".edge").data(data.edges)
+    .join("line")
     .attr("class", "edge")
-    .attr("d", (d) => {
-      return hourglassPath(d.edge, d.hourglass_idx, d.path);
-    })
-    .attr("fill", "none")
-    // color edges if in edge path
-    /*.classed("path_1", (d) => {
-      var idx = edgePaths[1].indexOf(JSON.stringify([d.edge.id, d.hourglass_idx]));
-      return (idx > -1 && d.path == 1);
-    })
-    .classed("path_2", (d) => {
-      var idx = edgePaths[2].indexOf(JSON.stringify([d.edge.id, d.hourglass_idx]));
-      return (idx > -1 && d.path == 2);
-    })
-    .classed("path_3", (d) => {
-      var idx = edgePaths[3].indexOf(JSON.stringify([d.edge.id, d.hourglass_idx]));
-      return (idx > -1 && d.path == 3);
-    })*/;
+    .attr("x1", d=>x(d.source.x))
+    .attr("x2", d=>x(d.target.x))
+    .attr("y1", d=>y(d.source.y))
+    .attr("y2", d=>y(d.target.y))
+    .attr("stroke-width", d=>2*d.multiplicity);
+
 
   // add circle html element for each vertex
   vertices.selectAll(".vertex").data(data.vertices)
@@ -316,7 +250,7 @@ function update() {
     })
     .text(function(d) {
       if (!showLabels) {
-        return "";
+        return d.multiplicity;
       }
       return d.label;
     });
