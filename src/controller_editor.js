@@ -32,6 +32,10 @@ var modes = {
     activate: activatekHourglass,
     deactivate: deactivateEdge
   },
+  "remove_edge": {
+    activate: activateRemoveEdge,
+    deactivate: deactivateRemoveEdge
+  },
 };
 
 
@@ -388,4 +392,24 @@ function addOrRemove(array, value) {
   } else {
       array.splice(index, 1);
   }
+}
+
+
+
+function activateRemoveEdge(obj) {
+  console.log("activateRemoveEdge");
+  deselect();
+  svg.selectAll(".edge")
+    .on("mousedown", function(e,d) {
+        console.log(d);
+        var index = data.edges.indexOf(d);
+        data.edges.splice(index, 1);
+        update();
+        activateObjects(".edge");
+    })
+    .classed("active", true);
+}
+
+function deactivateRemoveEdge(obj) {
+  svg.selectAll(".edge").on("mousedown", null);
 }
