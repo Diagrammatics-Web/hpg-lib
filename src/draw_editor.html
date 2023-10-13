@@ -149,32 +149,6 @@ function hourglassPath(edge, hourglass_idx, trip_idx) {
   var pos2_x = edge.target.x;
   var pos2_y = edge.target.y;
 
-  // init edge path count if nonexistent
-  if (edgePathsCnt[edge.id].length <= hourglass_idx) {
-      edgePathsCnt[edge.id][hourglass_idx] = [];
-  }
-
-
-  let pos = edgePathsCnt[edge.id][hourglass_idx].indexOf(trip_idx);
-
-  // Apply offset when multiple trips use same edge
-  // this offset scheme is a bit finicky with vertical edges
-  const offset = 0.08;
-  if (pos == 1) {
-    theta = (pos2_y - pos1_y)/(pos2_x - pos1_x);
-    pos1_x -= offset*Math.sin(theta);
-    pos2_x -= offset*Math.sin(theta);
-    pos1_y += offset*Math.cos(theta);
-    pos2_y += offset*Math.cos(theta);
-  }
-  else if (pos == 2) {
-    theta = (pos2_y - pos1_y)/(pos2_x - pos1_x);
-    pos1_x += offset*Math.sin(theta);
-    pos2_x += offset*Math.sin(theta);
-    pos1_y -= offset*Math.cos(theta);
-    pos2_y -= offset*Math.cos(theta);
-  }
-
   var dx = pos2_x - pos1_x;
   var dy = pos2_y - pos1_y;
   var mid_x = (pos1_x+pos2_x)/2;
