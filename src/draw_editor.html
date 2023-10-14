@@ -13,13 +13,17 @@
 
 <br>
 
+<div id="import-export-btns">
+  <button id="btn-off" onclick="end_session()">Save/Finish</button>
+</div>
+
 <div>
   <div id="paper-container"></div>
   <button id="btn-toggle_labels" onclick="toggleLabels()">Toggle vertex labels</button>
 </div>
 
 <br>
-<!-- empty div where buttons dynamically rendered -->
+
 <div id="actions">
     <button id="btn-deselect" onclick="deselect()">Deselect all</button>
     <button id="btn-move" onclick="activateButton(this,'move')">Move</button>
