@@ -37,6 +37,7 @@ html {
 .hourglass-label {
   font-size: 13px;
   fill: red;
+  text-anchor: middle;
 }
 
 .edge {
