@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="eel.js"></script>
+  <script src="d3.js"></script>
+  <script>
+    // notify server to render app
+    eel.update_server_status(true);
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<br>
+
+<div id="import-export-btns">
+  <button id="btn-off" onclick="end_session()">Save/Finish</button>
+</div>
+
+<div>
+  <div id="paper-container"></div>
+  <button id="btn-toggle_labels" onclick="toggleLabels()">Toggle vertex labels</button>
+</div>
+
+<br>
+
+<div id="actions">
+  <button id="btn-trip1" onclick="activateButton(this,'trip1')">Trip1</button>
+  <button id="btn-trip2" onclick="activateButton(this,'trip2')">Trip2</button>
+  <button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button>
+  <button id="btn-edgetrips" onclick="activateButton(this,'edge_trips')">Trips through edge</button>
+</div>
+
+
+<script>
+
+// global state variables
+const radius = 10;
+var data = {vertices: [], edges:[]};
+var boundaryVertices = [];
+var showLabels = false;
+var edgePaths = [];
+
+
+/*
+ *  Initialize Canvas
+ */
+var maxVertexId = 0;
+var size = 600;
+var body = d3.select("body");
+var x = d3.scaleLinear().domain([-radius*1.1,radius*1.1]).range([0, size]);
+var y = d3.scaleLinear().domain([-radius*1.1,radius*1.1]).range([size, 0]);
+
+var selectedIds = []; // ids of selected vertices
+var selected = []; // selected vertices
+
+// init graph canvas
+var svg = d3.select("#paper-container")
+ .append("svg")
+ .attr("id", "paper")
+ .attr("width", size)
+ .attr("height", size);
+
+// init boundary circle
+var boundary_circle = svg.append("circle")
+    .attr('id', 'boundary_circle')
+    .attr('cx',x(0) )
+    .attr('cy', y(0) )
+    .attr('r',x(radius)-x(0));
+
+// init groups for edges and vertices
+var edges = svg.append("g").attr("id", "edges");
+var vertices = svg.append("g").attr("id", "vertices");
+
+var paths = svg.append("g").attr("id", "edgePaths");
+
+// get initial graph from backend
+eel.get_graph()((g) => {
+  data = g;
+  preprocess_data();
+  update();
+});
+
+
+
+// return curve string for D3 to render edge
+function hourglassPath(edge, shift=0) {
+  const offset = 0.15;
+
+  var pos1_x = edge.source.x;
+  var pos1_y = edge.source.y;
+  var pos2_x = edge.target.x;
+  var pos2_y = edge.target.y;
+
+  theta = Math.atan2((pos2_y - pos1_y),(pos2_x - pos1_x));
+  pos1_x -= shift*offset*Math.sin(theta);
+  pos2_x -= shift*offset*Math.sin(theta);
+  pos1_y += shift*offset*Math.cos(theta);
+  pos2_y += shift*offset*Math.cos(theta);
+
+
+  var dx = pos2_x - pos1_x;
+  var dy = pos2_y - pos1_y;
+  var mid_x = (pos1_x+pos2_x)/2;
+  var mid_y = (pos1_y+pos2_y)/2;
+  var quater1_x = 0.75*pos1_x+0.25*pos2_x;
+  var quater1_y = 0.75*pos1_y+0.25*pos2_y;
+  var quater2_x = 0.25*pos1_x+0.75*pos2_x;
+  var quater2_y = 0.25*pos1_y+0.75*pos2_y;
+  var d = `M ${x(pos1_x)} ${y(pos1_y)} L ${x(pos2_x)} ${y(pos2_y)}`;
+
+  var curveGenerator = d3.line()
+    .curve(d3.curveNatural)
+    .x(d=>x(d[0])).y(d=>y(d[1]));
+
+  var d = "";
+
+  var factor = (-(edge.multiplicity-1)/2+edge.index);
+  var points = [
+    [pos1_x, pos1_y],
+    [quater1_x+factor*dy/8, quater1_y-factor*dx/8],
+    [mid_x, mid_y],
+    [quater2_x-factor*dy/8, quater2_y+factor*dx/8],
+    [pos2_x, pos2_y]
+  ];
+
+  d += curveGenerator(points);
+
+  return d;
+}
+
+// update graph svg based on data updates
+function update() {
+  if (data == null) {
+    console.log("data is null")
+    data = {vertices:[], edges:[]};
+  }
+
+  // update path html element for each edge type
+  // this generates pseudo-edges for each component of an hourglass edge
+
+
+  paths.selectAll(".edgePath").data(
+    function() {
+      var edgs = [];
+      edgePathsCnt = {};
+      for(i=0; i<edgePaths.length; i++)  {
+        path = edgePaths[i]
+        console.log(path);
+        for(j=0; j<path.length; j++){
+          if(edgePathsCnt[path[j]] == undefined) {
+            edgePathsCnt[path[j]] = 1;
+          }
+          edgs.push({edge:path[j], pathIdx:i, shift:edgePathsCnt[path[j]]});
+          edgePathsCnt[path[j]]++;
+        }
+      }
+      console.log(edgs);
+      return edgs;
+
+    })
+    .join("path")
+    .attr("class", "edgePath")
+    .attr("d", (d) => {
+      return hourglassPath(data.edges.filter(e => e.id == d.edge)[0], d.shift);
+    })
+    .attr("stroke", d=> d3.schemeCategory10[d.pathIdx])
+    .attr("stroke-width",2)
+    .attr("fill", "none");
+
+  edges.selectAll(".edge").data(data.edges)
+    .join("path")
+    .attr("class", "edge")
+    .attr("d", d=>hourglassPath(d))
+    .attr("fill", "none")
+    .attr("stroke-width",2)
+    .attr("stroke", "black");
+
+
+  // add circle html element for each vertex
+  vertices.selectAll(".vertex").data(data.vertices)
+    .join("circle")
+    .attr("class", "vertex")
+    .classed("unfilled", d=>!d.filled)
+    .classed("filled", d=>d.filled)
+    .attr("cx", function(d) {
+      return x(d.x)
+    })
+    .attr("cy", function(d) {
+      return y(d.y)
+    })
+    .attr("r", 4)
+    .classed("selected", d => {
+      return selectedIds.indexOf(d.id) > -1;
+    })
+
+
+  // add labels if option selected
+  vertices.selectAll(".vertex-label").data(data.vertices)
+    .join("text")
+    .attr("class", "vertex-label")
+    .attr("x", function(d) {
+      return x(d.x-0.3)
+    })
+    .attr("y", function(d) {
+      return y(d.y+0.3)
+    })
+    .text(function(d) {
+      if (!showLabels || showLabels) {
+        return "";
+      }
+      return d.id;
+    });
+
+    edges.selectAll(".hourglass-label").data(data.edges)
+    .join("text")
+    .attr("class", "hourglass-label")
+    .attr("x", function(d) {
+      return x((d.source.x+d.target.x)/2)
+    })
+    .attr("y", function(d) {
+      return y((d.source.y+d.target.y)/2)
+    })
+    .text(function(d) {
+      if (!showLabels) {
+        return d.multiplicity;
+      }
+      return d.label;
+    });
+
+}
+
+/*
+ *  Backend Frontend Communication fns
+ */
+// store graph data to python and close session
+function end_session() {
+  //eel.update_graph_from_editor(data_compressed());
+  // disable all interactions
+  d3.select("*").style("pointer-events", "none");
+  eel.update_server_status(false);
+}
+
+// bring graph to frontend and preprocess data
+function preprocess_data() {
+  maxVertexId = Math.max(...data.vertices.map(v => v.id)) + 1;
+
+  // add references to source and target vertices
+  data.edges.forEach(function(edge, i) {
+    edge.source = data.vertices.filter(vertex => vertex.id == edge.sourceId)[0];
+    edge.target = data.vertices.filter(vertex => vertex.id == edge.targetId)[0];
+    //edge.id = i;
+  });
+}
+
+
+</script>
+<script src="controller_analyzer.js"></script>
+</body>
+</html>
