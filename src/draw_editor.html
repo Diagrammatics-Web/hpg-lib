@@ -175,7 +175,7 @@ function update() {
       return y(d.y+0.3)
     })
     .text(function(d) {
-      if (!showLabels || showLabels) {
+      if (showLabels) {
         return "";
       }
       return d.id;
