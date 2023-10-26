@@ -25,6 +25,11 @@ var modes = {
     activate: activateEdgeTrips,
     deactivate: deactivateEdgeTrips
   },
+  "benzene_move": {
+    activate: activateBenzene,
+    deactivate: deactivateFaceMove,
+  },
+
 };
 
 
@@ -139,8 +144,6 @@ function deactivateEdgeTrips(obj) {
   update();
 }
 
-
-
 // helper functions to activate/deactivate trip types 1, 2, and 3
 function activateTrip1(obj) {
   activateTrip(1);
@@ -169,8 +172,16 @@ function deactivateTrip3(obj) {
   update();
 }
 
+function activateBenzene(obj) {
+  // update move mode, so that benzene move can be activated
+  // from clicking on graph faces in draw.html
+  moveMode = 'benzene';
+}
 
-
+function deactivateFaceMove(obj) {
+  // face-wise square move
+  moveMode = false;
+}
 
 // helper fn: add value if missing, remove if present
 function addOrRemove(array, value) {

@@ -29,6 +29,8 @@
   <button id="btn-trip2" onclick="activateButton(this,'trip2')">Trip2</button>
   <button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button>
   <button id="btn-edgetrips" onclick="activateButton(this,'edge_trips')">Trips through edge</button>
+  <button id="btn-faces" onclick="toggleFaces()">Toggle Faces</button>
+  <button id="btn-benzene" onclick="activateButton(this, 'benzene_move')">Benzene move</button>
 </div>
 
 
@@ -40,6 +42,7 @@ var data = {vertices: [], edges:[]};
 var boundaryVertices = [];
 var showLabels = false;
 var edgePaths = [];
+var showFaces = false;
 
 
 /*
@@ -69,6 +72,7 @@ var boundary_circle = svg.append("circle")
     .attr('r',x(radius)-x(0));
 
 // init groups for edges and vertices
+var faces = svg.append("g").attr("id", "faces");
 var edges = svg.append("g").attr("id", "edges");
 var vertices = svg.append("g").attr("id", "vertices");
 
@@ -128,6 +132,111 @@ function hourglassPath(edge, shift=0) {
 
   return d;
 }
+
+/*
+ *  Fns for generating polygon hull html elements for boundary shapes
+ */
+function toggleFaces(arg=null) {
+  // define helper functions
+  // one for activating faces
+  function activateFaces() {
+    // if faces already exist, remove them
+    d3.selectAll(".face").remove();
+
+    eel.get_planar_faces()((face_data) => {
+      // add labels for each face
+      faces.selectAll(".face-label")
+        .data(face_data)
+        .join("text")
+        .attr("class", "face-label")
+        .attr("x", function(d) {
+          let x_sum = 0;
+          for (v of d) {x_sum += v[1];}
+          return x(x_sum/d.length);
+        })
+        .attr("y", function(d) {
+          let y_sum = 0;
+          for (v of d) {y_sum += v[2];}
+          return y(y_sum/d.length);
+        })
+        .attr("height", 10)
+        .attr("width", 10)
+        .text(function(d) {
+          return face_data.indexOf(d);
+        });
+
+      // draw lines for each face
+      let polygon = d3.line().curve(d3.curveLinearClosed);
+
+      // add polygons to svg
+      // generate pseudodata for each face
+      faces.selectAll(".face")
+        .data(face_data)
+        .join("path")
+        // pseudo data for each face
+        .attr("d", d => {
+          let polygon = d3.line().curve(d3.curveLinearClosed);
+
+          // preprocess data
+          let pts = [];
+          for (v of d) {pts.push([x(v[1]), y(v[2])]);}
+          const polygon_hull = polygon(pts.map(d => [d[0], d[1]]));
+
+          return polygon_hull;
+        })
+        .on("click", (e, d) => {
+          // select all vertices in face
+          let face_vertices = d.map(v => v[0]);
+
+          // depending on mode, perform different move
+          if (moveMode == false) {
+            return;
+          }
+          else if (moveMode === 'benzene') {
+            benzeneMove(face_vertices);
+          }
+          else if (moveMode === 'square') {
+            squareMove(face_vertices);
+          }
+        })
+        .attr("class", "face");
+    });
+  }
+  // and one for deactivating faces
+  function deactivateFaces() {
+    d3.selectAll(".face").remove();
+    d3.selectAll(".face-label").remove();
+  }
+
+  // if arg is null, toggle faces
+  if (arg == null) {
+    showFaces = !showFaces;
+  } else {
+    showFaces = arg;
+  }
+
+  if (showFaces) {
+    activateFaces();
+  } else {
+    deactivateFaces();
+  }
+}
+
+function benzeneMove(vertex_ids) {
+  // call backend fn and update graph  
+  eel.benzene_move(vertex_ids)((d) => {
+    // check if error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+    
+    data = d;
+    preprocess_data();
+    update();
+  });
+}
+
 
 // update graph svg based on data updates
 function update() {
@@ -194,6 +303,10 @@ function update() {
       return selectedIds.indexOf(d.id) > -1;
     })
 
+  // deactivate faces if not in analyze mode
+  if (showFaces && mode != 'analyze') {
+    toggleFaces(false);
+  }
 
   // add labels if option selected
   vertices.selectAll(".vertex-label").data(data.vertices)
