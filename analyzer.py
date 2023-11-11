@@ -112,10 +112,28 @@ def _get_eel_fns():
 
         return []
 
+    def get_planar_faces():
+        """
+        Generate all faces, including those created with boundary vertices.
+
+        :return: list of faces, each face is a list of tuples, each of the form (id, x, y),
+                and the index of the face in the returned list corresponds to the face's id
+        """
+        faces = []
+        for face_id in sorted(CURR_GRAPH.faces.keys()):
+            faces.append([(v.id, v.x, v.y) for v in CURR_GRAPH.faces[face_id].vertices()])
+        return faces
+    
+    def benzene_move(vertices):
+        # TODO: UPDATE
+        return CURR_GRAPH.benzene_move(vertices)
+    
     # return dict of functions
     return {
         'update_server_status': update_server_status,
         'get_graph': get_graph,
         'get_trip': get_trip,
-        'get_edge_trips': get_edge_trips
+        'get_edge_trips': get_edge_trips,
+        'get_planar_faces': get_planar_faces,
+        'benzene_move': benzene_move,
     }
