@@ -171,6 +171,7 @@ function update() {
   edges.selectAll(".edge").data(data.edges)
     .join("path")
     .attr("class", "edge")
+    .attr("id", d=>d.id)
     .attr("d", d=>hourglassPath(d))
     .attr("fill", "none")
     .attr("stroke-width",2)
@@ -223,6 +224,7 @@ function update() {
     })
     .text(function(d) {
       if (!showLabels) {
+        return "";
         return d.multiplicity;
       }
       return d.label;
