@@ -125,7 +125,8 @@ def _get_eel_fns():
         return faces
     
     def cycle_face(face_id):
-        CURR_GRAPH.cycle_face(CURR_GRAPH.faces[face_id])
+        print("CYCLING FACE")
+        CURR_GRAPH.cycle_face(CURR_GRAPH.faces[6])
         return CURR_GRAPH.to_dict_analyzer()
     
     # return dict of functions

@@ -192,7 +192,7 @@ function toggleFaces(arg=null) {
           if (moveMode == false) {
             return;
           }
-          else if (moveMode === 'cycle') {
+          else if (moveMode === 'cycle_face') {
             cycleFace(face_vertices);
           }
         })
@@ -221,6 +221,7 @@ function toggleFaces(arg=null) {
 
 function cycleFace(vertex_ids) {
   // call backend fn and update graph  
+  console.log("Cycling face");
   eel.cycle_face(vertex_ids)((d) => {
     // check if error
     if (typeof(d) == "string") {
