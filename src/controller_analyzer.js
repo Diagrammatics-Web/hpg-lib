@@ -25,9 +25,9 @@ var modes = {
     activate: activateEdgeTrips,
     deactivate: deactivateEdgeTrips
   },
-  "benzene_move": {
-    activate: activateBenzene,
-    deactivate: deactivateFaceMove,
+  "cycle_face": {
+    activate: activateCycleFace,
+    deactivate: deactivateCycleFace,
   },
 
 };
@@ -172,14 +172,13 @@ function deactivateTrip3(obj) {
   update();
 }
 
-function activateBenzene(obj) {
-  // update move mode, so that benzene move can be activated
+function activateCycleFace(obj) {
+  // update move mode, so that face cycle move can be activated
   // from clicking on graph faces in draw.html
-  moveMode = 'benzene';
+  moveMode = 'cycle_face';
 }
 
-function deactivateFaceMove(obj) {
-  // face-wise square move
+function deactivateCycleFace(obj) {
   moveMode = false;
 }
 

@@ -30,7 +30,7 @@
   <button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button>
   <button id="btn-edgetrips" onclick="activateButton(this,'edge_trips')">Trips through edge</button>
   <button id="btn-faces" onclick="toggleFaces()">Toggle Faces</button>
-  <button id="btn-benzene" onclick="activateButton(this, 'benzene_move')">Benzene move</button>
+  <button id="btn-cycle-face" onclick="activateButton(this, 'cycle_face')">Cycle face</button>
 </div>
 
 
@@ -192,11 +192,8 @@ function toggleFaces(arg=null) {
           if (moveMode == false) {
             return;
           }
-          else if (moveMode === 'benzene') {
-            benzeneMove(face_vertices);
-          }
-          else if (moveMode === 'square') {
-            squareMove(face_vertices);
+          else if (moveMode === 'cycle') {
+            cycleFace(face_vertices);
           }
         })
         .attr("class", "face");
@@ -222,9 +219,9 @@ function toggleFaces(arg=null) {
   }
 }
 
-function benzeneMove(vertex_ids) {
+function cycleFace(vertex_ids) {
   // call backend fn and update graph  
-  eel.benzene_move(vertex_ids)((d) => {
+  eel.cycle_face(vertex_ids)((d) => {
     // check if error
     if (typeof(d) == "string") {
       console.log(d);

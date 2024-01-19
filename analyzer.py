@@ -124,9 +124,9 @@ def _get_eel_fns():
             faces.append([(v.id, v.x, v.y) for v in CURR_GRAPH.faces[face_id].vertices()])
         return faces
     
-    def benzene_move(vertices):
-        # TODO: UPDATE
-        return CURR_GRAPH.benzene_move(vertices)
+    def cycle_face(face_id):
+        CURR_GRAPH.cycle_face(CURR_GRAPH.faces[face_id])
+        return CURR_GRAPH.to_dict_analyzer()
     
     # return dict of functions
     return {
@@ -135,5 +135,5 @@ def _get_eel_fns():
         'get_trip': get_trip,
         'get_edge_trips': get_edge_trips,
         'get_planar_faces': get_planar_faces,
-        'benzene_move': benzene_move,
+        'cycle_face': cycle_face,
     }
