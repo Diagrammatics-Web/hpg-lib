@@ -181,7 +181,7 @@ function toggleFaces(arg=null) {
           return;
         }
         else if (moveMode === 'cycle_face') {
-          cycleFace(d.id);
+          cycleFace(d.id, e.shiftKey);
         }
       })
       .attr("class", "face");
@@ -206,11 +206,12 @@ function toggleFaces(arg=null) {
   }
 }
 
-function cycleFace(vertex_ids) {
+function cycleFace(vertex_ids, inverse) {
   // call backend fn and update graph
   console.log("Cycling face");
   console.log(vertex_ids);
-  eel.cycle_face(vertex_ids)((d) => {
+  console.log(inverse);
+  eel.cycle_face(vertex_ids, inverse)((d) => {
     // check if error
     if (typeof(d) == "string") {
       console.log(d);

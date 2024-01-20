@@ -124,9 +124,9 @@ def _get_eel_fns():
             faces.append([(v.id, v.x, v.y) for v in CURR_GRAPH.faces[face_id].vertices()])
         return faces
 
-    def cycle_face(face_id):
-        print("CYCLING FACE", face_id)
-        CURR_GRAPH.cycle_face(CURR_GRAPH.faces[face_id])
+    def cycle_face(face_id, inverse):
+        print("CYCLING FACE", face_id, inverse)
+        CURR_GRAPH.cycle_face(CURR_GRAPH.faces[face_id], inverse)
         return CURR_GRAPH.to_dict_analyzer()
 
     # return dict of functions
