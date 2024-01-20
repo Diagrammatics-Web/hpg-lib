@@ -79,6 +79,11 @@ function activateButton(obj, mode) {
     activeMode.activate();
 }
 
+// toggle labels
+function toggleLabels() {
+  showLabels = !showLabels;
+  update();
+}
 
 
 // create edge path for Trip and update graph

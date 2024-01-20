@@ -291,11 +291,6 @@ function update() {
       return selectedIds.indexOf(d.id) > -1;
     })
 
-  // deactivate faces if not in analyze mode
-  if (showFaces && mode != 'analyze') {
-    toggleFaces(false);
-  }
-
   // add labels if option selected
   vertices.selectAll(".vertex-label").data(data.vertices)
     .join("text")
@@ -307,7 +302,7 @@ function update() {
       return y(d.y+0.3)
     })
     .text(function(d) {
-      if (!showLabels || showLabels) {
+      if (!showLabels) {
         return "";
       }
       return d.id;
