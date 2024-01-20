@@ -123,12 +123,12 @@ def _get_eel_fns():
         for face_id in sorted(CURR_GRAPH.faces.keys()):
             faces.append([(v.id, v.x, v.y) for v in CURR_GRAPH.faces[face_id].vertices()])
         return faces
-    
+
     def cycle_face(face_id):
-        print("CYCLING FACE")
-        CURR_GRAPH.cycle_face(CURR_GRAPH.faces[6])
+        print("CYCLING FACE", face_id)
+        CURR_GRAPH.cycle_face(CURR_GRAPH.faces[face_id])
         return CURR_GRAPH.to_dict_analyzer()
-    
+
     # return dict of functions
     return {
         'update_server_status': update_server_status,

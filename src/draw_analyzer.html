@@ -38,7 +38,7 @@
 
 // global state variables
 const radius = 10;
-var data = {vertices: [], edges:[]};
+var data = {vertices: [], edges:[], faces:[]};
 var boundaryVertices = [];
 var showLabels = false;
 var edgePaths = [];
@@ -143,61 +143,48 @@ function toggleFaces(arg=null) {
     // if faces already exist, remove them
     d3.selectAll(".face").remove();
 
-    eel.get_planar_faces()((face_data) => {
-      // add labels for each face
-      faces.selectAll(".face-label")
-        .data(face_data)
-        .join("text")
-        .attr("class", "face-label")
-        .attr("x", function(d) {
-          let x_sum = 0;
-          for (v of d) {x_sum += v[1];}
-          return x(x_sum/d.length);
-        })
-        .attr("y", function(d) {
-          let y_sum = 0;
-          for (v of d) {y_sum += v[2];}
-          return y(y_sum/d.length);
-        })
-        .attr("height", 10)
-        .attr("width", 10)
-        .text(function(d) {
-          return face_data.indexOf(d);
-        });
+    faces.selectAll(".face-label")
+      .data(data.faces)
+      .join("text")
+      .attr("class", "face-label")
+      .attr("x", d => x(d.center.x))
+      .attr("y", d => y(d.center.y))
+      .attr("height", 10)
+      .attr("width", 10)
+      .text(d => d.id);
 
-      // draw lines for each face
-      let polygon = d3.line().curve(d3.curveLinearClosed);
+    // draw lines for each face
+    let polygon = d3.line().curve(d3.curveLinearClosed);
 
-      // add polygons to svg
-      // generate pseudodata for each face
-      faces.selectAll(".face")
-        .data(face_data)
-        .join("path")
-        // pseudo data for each face
-        .attr("d", d => {
-          let polygon = d3.line().curve(d3.curveLinearClosed);
+    // add polygons to svg
+    // generate pseudodata for each face
+    faces.selectAll(".face")
+      .data(data.faces)
+      .join("path")
+      // pseudo data for each face
+      .attr("d", d => {
+        let polygon = d3.line().curve(d3.curveLinearClosed);
 
-          // preprocess data
-          let pts = [];
-          for (v of d) {pts.push([x(v[1]), y(v[2])]);}
-          const polygon_hull = polygon(pts.map(d => [d[0], d[1]]));
+        // preprocess data
+        let pts = [];
+        //for (v of d) {pts.push([x(v[1]), y(v[2])]);}
+        const polygon_hull = polygon(d.vertices.map(v => [x(v.x), y(v.y)]));
 
-          return polygon_hull;
-        })
-        .on("click", (e, d) => {
-          // select all vertices in face
-          let face_vertices = d.map(v => v[0]);
+        return polygon_hull;
+      })
+      .on("click", (e, d) => {
+        // select all updatevertices in face
+        //let face_vertices = d.map(v => v[0]);
 
-          // depending on mode, perform different move
-          if (moveMode == false) {
-            return;
-          }
-          else if (moveMode === 'cycle_face') {
-            cycleFace(face_vertices);
-          }
-        })
-        .attr("class", "face");
-    });
+        // depending on mode, perform different move
+        if (moveMode == false) {
+          return;
+        }
+        else if (moveMode === 'cycle_face') {
+          cycleFace(d.id);
+        }
+      })
+      .attr("class", "face");
   }
   // and one for deactivating faces
   function deactivateFaces() {
@@ -220,15 +207,16 @@ function toggleFaces(arg=null) {
 }
 
 function cycleFace(vertex_ids) {
-  // call backend fn and update graph  
+  // call backend fn and update graph
   console.log("Cycling face");
+  console.log(vertex_ids);
   eel.cycle_face(vertex_ids)((d) => {
     // check if error
     if (typeof(d) == "string") {
       console.log(d);
       return;
     }
-    
+
     data = d;
     preprocess_data();
     update();
@@ -240,7 +228,7 @@ function cycleFace(vertex_ids) {
 function update() {
   if (data == null) {
     console.log("data is null")
-    data = {vertices:[], edges:[]};
+    data = {vertices:[], edges:[], faces:[]};
   }
 
   // update path html element for each edge type
@@ -363,6 +351,13 @@ function preprocess_data() {
     edge.source = data.vertices.filter(vertex => vertex.id == edge.sourceId)[0];
     edge.target = data.vertices.filter(vertex => vertex.id == edge.targetId)[0];
     //edge.id = i;
+  });
+
+  data.faces.forEach(function(face, i) {
+    face.vertices = face.vertexIds.map(id => data.vertices.filter(vertex => vertex.id == id)[0]);
+    face.center = {};
+    face.center.x = d3.mean(face.vertices, vertex => vertex.x);
+    face.center.y = d3.mean(face.vertices, vertex => vertex.y);
   });
 }
 
