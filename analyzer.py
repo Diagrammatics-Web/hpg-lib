@@ -129,6 +129,11 @@ def _get_eel_fns():
         CURR_GRAPH.cycle_face(CURR_GRAPH.faces[face_id], inverse)
         return CURR_GRAPH.to_dict_analyzer()
 
+    def square_move(face_id):
+        print("CYCLING FACE", face_id)
+        CURR_GRAPH.square_move(CURR_GRAPH.faces[face_id])
+        return CURR_GRAPH.to_dict_analyzer()
+
     # return dict of functions
     return {
         'update_server_status': update_server_status,
@@ -137,4 +142,5 @@ def _get_eel_fns():
         'get_edge_trips': get_edge_trips,
         'get_planar_faces': get_planar_faces,
         'cycle_face': cycle_face,
+        'square_move': square_move
     }

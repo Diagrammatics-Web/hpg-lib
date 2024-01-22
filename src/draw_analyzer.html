@@ -31,6 +31,7 @@
   <button id="btn-edgetrips" onclick="activateButton(this,'edge_trips')">Trips through edge</button>
   <button id="btn-faces" onclick="toggleFaces()">Toggle Faces</button>
   <button id="btn-cycle-face" onclick="activateButton(this, 'cycle_face')">Cycle face</button>
+  <button id="btn-cycle-face" onclick="activateButton(this, 'square_move')">Square move</button>
 </div>
 
 
@@ -49,13 +50,14 @@ var showFaces = false;
  *  Initialize Canvas
  */
 var maxVertexId = 0;
-var size = 600;
+var size = 800;
 var body = d3.select("body");
 var x = d3.scaleLinear().domain([-radius*1.1,radius*1.1]).range([0, size]);
 var y = d3.scaleLinear().domain([-radius*1.1,radius*1.1]).range([size, 0]);
 
 var selectedIds = []; // ids of selected vertices
 var selected = []; // selected vertices
+var highlightedPath = null;
 
 // init graph canvas
 var svg = d3.select("#paper-container")
@@ -182,6 +184,8 @@ function toggleFaces(arg=null) {
         }
         else if (moveMode === 'cycle_face') {
           cycleFace(d.id, e.shiftKey);
+        } else if (moveMode === 'square_move') {
+          squareMove(d.id);
         }
       })
       .attr("class", "face");
@@ -206,12 +210,30 @@ function toggleFaces(arg=null) {
   }
 }
 
-function cycleFace(vertex_ids, inverse) {
+function cycleFace(face_id, inverse) {
   // call backend fn and update graph
   console.log("Cycling face");
-  console.log(vertex_ids);
+  console.log(face_id);
   console.log(inverse);
-  eel.cycle_face(vertex_ids, inverse)((d) => {
+  eel.cycle_face(face_id, inverse)((d) => {
+    // check if error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+
+    data = d;
+    preprocess_data();
+    update();
+  });
+}
+
+
+function squareMove(face_id) {
+  // call backend fn and update graph
+  console.log("Square move");
+  console.log(face_id);
+  eel.cycle_face(face_id)((d) => {
     // check if error
     if (typeof(d) == "string") {
       console.log(d);
@@ -236,7 +258,7 @@ function update() {
   // this generates pseudo-edges for each component of an hourglass edge
 
 
-  paths.selectAll(".edgePath").data(
+  /*paths.selectAll(".edgePath").data(
     function() {
       var edgs = [];
       edgePathsCnt = {};
@@ -262,16 +284,95 @@ function update() {
     })
     .attr("stroke", d=> d3.schemeCategory10[d.pathIdx])
     .attr("stroke-width",2)
-    .attr("fill", "none");
+    .attr("fill", "none");*/
+
+    //d3.selectAll(".edgePath").remove();
+    paths.selectAll(".edgePath").data(
+      function() {
+        var edgs = [];
+        edgePathsCnt = {};
+        for(i=0; i<edgePaths.length; i++)  {
+          path = edgePaths[i]
+          for(j=0; j<path.length; j++){
+            if(edgePathsCnt[path[j]] == undefined) {
+              edgePathsCnt[path[j]] = 1;
+            }
+            edgs.push({edge:path[j], pathIdx:i, shift:edgePathsCnt[path[j]]});
+            edgePathsCnt[path[j]]++;
+          }
+        }
+        for(i=0; i<edgs.length; i++) {
+          edgs[i].total = edgePathsCnt[edgs[i].edge]-1;
+        }
+        return edgs;
+
+      })
+      .join("circle")
+      .attr("class", "edgePath")
+      .attr("cx", (d) => {
+        var pnode = d3.select("#"+d.edge).node();
+        var plen = pnode.getTotalLength()/2;
+        var pos = (d.shift-0.5)*plen/d.total;
+        var point = pnode.getPointAtLength(pos);
+        console.log(point.x);
+        return point.x;
+      })
+      .attr("cy", (d) => {
+        var pnode = d3.select("#"+d.edge).node();
+        var plen = pnode.getTotalLength()/2;
+        var pos = (d.shift-0.5)*plen/d.total;
+        var point = pnode.getPointAtLength(pos);
+        return point.y;
+      })
+      .attr("r", 2)
+      .attr("stroke", d=> d3.schemeCategory10[d.pathIdx])
+      .attr("fill", d=> d3.schemeCategory10[d.pathIdx])
+      .attr("stroke-width",2)
+      .on("mousemove", function(e,d) {
+        highlightedPath = d.pathIdx;
+        update();
+      });
+
+    function hp(edge) {
+      var path = d3.path();
+      var start = edge.source;
+      var end = edge.target;
+      var v = {x: (end.x-start.x)/4, y: (end.y-start.y)/4};
+      var factor = (-(edge.multiplicity-1)/2+edge.index);
+      var phi = 40*Math.PI/180;
+      var looseness = 1.5;
+      var dir = {x:v.x*Math.cos(factor*phi)+v.y*Math.sin(factor*phi),y:-v.x*Math.sin(factor*phi)+v.y*Math.cos(factor*phi)};
+
+      path.moveTo(x(start.x), y(start.y));
+
+  		path.bezierCurveTo(x(start.x+looseness*dir.x),
+                         y(start.y+looseness*dir.y),
+                         x(end.x-looseness*dir.x),
+                         y(end.y-looseness*dir.y),
+                         x(end.x),
+                         y(end.y));
+      //console.log(path);
+      return path;
+    }
 
   edges.selectAll(".edge").data(data.edges)
     .join("path")
     .attr("class", "edge")
     .attr("id", d=>d.id)
-    .attr("d", d=>hourglassPath(d))
+    .attr("d", d=>hp(d))
     .attr("fill", "none")
-    .attr("stroke-width",2)
-    .attr("stroke", "black");
+    .attr("stroke-width",d => {
+      if(highlightedPath != null && edgePaths[highlightedPath].indexOf(d.id) > -1) {
+        return 4;
+      }
+      return 2;
+    })
+    .attr("stroke", d => {
+      if(highlightedPath != null && edgePaths[highlightedPath].indexOf(d.id) > -1) {
+        return d3.schemeCategory10[highlightedPath];
+      }
+      return "black";
+    });
 
 
   // add circle html element for each vertex

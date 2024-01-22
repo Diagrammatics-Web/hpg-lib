@@ -29,7 +29,10 @@ var modes = {
     activate: activateCycleFace,
     deactivate: deactivateCycleFace,
   },
-
+  "square_move": {
+    activate: activateSquareMove,
+    deactivate: deactivateSquareMove,
+  },
 };
 
 
@@ -93,7 +96,7 @@ function activateTrip(tripIndex) {
     .on("click", async function(e) {
       v = d3.select(this);
       vertexId = v.datum().id;
-
+      //edgePaths = [];
       // edgepath from python
       eel.get_trip(vertexId, tripIndex)((ep) => {
         // reset edgepaths for this trip type
@@ -119,6 +122,7 @@ function activateEdgeTrips(obj) {
   activateObjects(".edge"); // FIXME: is this necessary?
   svg.selectAll(".edge")
     .on("click", async function(e) {
+      //edgePaths = [];
       edge = d3.select(this);
       edgeId = edge.datum().id;
 
@@ -183,9 +187,18 @@ function activateCycleFace(obj) {
   moveMode = 'cycle_face';
 }
 
+function deactivateSquareMove(obj) {
+  moveMode = false;
+}
+
+function activateSquareMove(obj) {
+  moveMode = 'square_move';
+}
+
 function deactivateCycleFace(obj) {
   moveMode = false;
 }
+
 
 // helper fn: add value if missing, remove if present
 function addOrRemove(array, value) {
