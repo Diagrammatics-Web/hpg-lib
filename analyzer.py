@@ -130,7 +130,7 @@ def _get_eel_fns():
         return CURR_GRAPH.to_dict_analyzer()
 
     def square_move(face_id):
-        print("CYCLING FACE", face_id)
+        print("Square move", face_id)
         CURR_GRAPH.square_move(CURR_GRAPH.faces[face_id])
         return CURR_GRAPH.to_dict_analyzer()
 

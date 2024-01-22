@@ -233,7 +233,7 @@ function squareMove(face_id) {
   // call backend fn and update graph
   console.log("Square move");
   console.log(face_id);
-  eel.cycle_face(face_id)((d) => {
+  eel.square_move(face_id)((d) => {
     // check if error
     if (typeof(d) == "string") {
       console.log(d);
