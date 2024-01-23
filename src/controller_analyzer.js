@@ -204,12 +204,41 @@ function deactivateCycleFace(obj) {
 }
 
 
+
+function calculateSeparationLabeling(face_id) {
+  // call backend fn and update graph
+  console.log("separation labeling");
+  console.log(face_id);
+  eel.separation_labeling(face_id)((d) => {
+    // check if error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+    showEdgeLabels = true;
+    data = d;
+    preprocess_data();
+    update();
+    activateObjects(".face");
+  });
+}
+
 function activateSeparationLabeling(obj) {
-  moveMode = 'separation_labeling';
+  activateObjects(".face");
+  svg.selectAll(".face")
+    .on("click", (e, d) => {
+      calculateSeparationLabeling(d.id);
+      update();
+      activateObjects(".face");
+  });
+
+
+
 }
 
 function deactivateSeparationLabeling(obj) {
-  moveMode = false;
+  deactivateAllObjects();
+  svg.selectAll(".face").on("click", null);
 }
 
 

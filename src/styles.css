@@ -56,19 +56,27 @@ html {
   border: 1px solid grey;
 }
 
+
 .face {
-  fill: greenyellow;
-  opacity: 0.5;
-  stroke-width: 2px;
-  /* stroke: red; */
+  fill: none;
+  pointer-events: all;
 }
-.face:hover {
-  fill: rgb(159, 239, 40);
+
+/*.face.active {
+  fill: white;
+  fill: none;
+  pointer-events: all;
+}*/
+
+.face.active:hover {
+  fill: gray;
+  opacity: 20%;
+  filter: none;
 }
-.face:active {
+/*.face:active {
   transition: 150ms ease-in-out;
   fill: rgb(147, 224, 31);
-}
+}*/
 
 
 .face-label {

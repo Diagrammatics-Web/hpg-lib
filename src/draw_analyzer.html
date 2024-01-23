@@ -45,6 +45,7 @@ var boundaryVertices = [];
 var showLabels = false;
 var edgePaths = [];
 var showFaces = false;
+var showEdgeLabels = false;
 
 
 /*
@@ -161,37 +162,6 @@ function toggleFaces(arg=null) {
 
     // add polygons to svg
     // generate pseudodata for each face
-    faces.selectAll(".face")
-      .data(data.faces)
-      .join("path")
-      // pseudo data for each face
-      .attr("d", d => {
-        let polygon = d3.line().curve(d3.curveLinearClosed);
-
-        // preprocess data
-        let pts = [];
-        //for (v of d) {pts.push([x(v[1]), y(v[2])]);}
-        const polygon_hull = polygon(d.vertices.map(v => [x(v.x), y(v.y)]));
-
-        return polygon_hull;
-      })
-      .on("click", (e, d) => {
-        // select all updatevertices in face
-        //let face_vertices = d.map(v => v[0]);
-
-        // depending on mode, perform different move
-        if (moveMode == false) {
-          return;
-        }
-        else if (moveMode === 'cycle_face') {
-          cycleFace(d.id, e.shiftKey);
-        } else if (moveMode === 'square_move') {
-          squareMove(d.id);
-        } else if (moveMode === 'separation_labeling') {
-          calculateSeparationLabeling(d.id);
-        }
-      })
-      .attr("class", "face");
   }
   // and one for deactivating faces
   function deactivateFaces() {
@@ -249,22 +219,7 @@ function squareMove(face_id) {
   });
 }
 
-function calculateSeparationLabeling(face_id) {
-  // call backend fn and update graph
-  console.log("separation labeling");
-  console.log(face_id);
-  eel.separation_labeling(face_id)((d) => {
-    // check if error
-    if (typeof(d) == "string") {
-      console.log(d);
-      return;
-    }
-    showLabels = true;
-    data = d;
-    preprocess_data();
-    update();
-  });
-}
+
 
 
 // update graph svg based on data updates
@@ -273,6 +228,9 @@ function update() {
     console.log("data is null")
     data = {vertices:[], edges:[], faces:[]};
   }
+
+
+
 
   // update path html element for each edge type
   // this generates pseudo-edges for each component of an hourglass edge
@@ -332,18 +290,12 @@ function update() {
       .attr("cx", (d) => {
         var pnode = d3.select("#"+d.edge).node();
         var plen = pnode.getTotalLength()/2;
-        var pos = (d.shift-0.5)*plen/d.total;
-        var point = pnode.getPointAtLength(pos);
-        console.log(point.x);
-        return point.x;
+        var pos = plen+(d.shift-0.5)*plen/d.total;
+        d.point = pnode.getPointAtLength(pos);
+        console.log(d.point.x);
+        return d.point.x;
       })
-      .attr("cy", (d) => {
-        var pnode = d3.select("#"+d.edge).node();
-        var plen = pnode.getTotalLength()/2;
-        var pos = (d.shift-0.5)*plen/d.total;
-        var point = pnode.getPointAtLength(pos);
-        return point.y;
-      })
+      .attr("cy", (d) => d.point.y)
       .attr("r", 2)
       .attr("stroke", d=> d3.schemeCategory10[d.pathIdx])
       .attr("fill", d=> d3.schemeCategory10[d.pathIdx])
@@ -445,12 +397,45 @@ function update() {
     .attr("text-anchor", "middle")
     .attr("dominant-baseline", "central")
     .text(function(d) {
-      if (!showLabels) {
+      if (!showEdgeLabels) {
         return "";
         //return d.multiplicity;
       }
       return d.label;
     });
+
+
+    faces.selectAll(".face")
+      .data(data.faces)
+      .join("path")
+      // pseudo data for each face
+      .attr("d", d => {
+        let polygon = d3.line().curve(d3.curveLinearClosed);
+
+        // preprocess data
+        let pts = [];
+        //for (v of d) {pts.push([x(v[1]), y(v[2])]);}
+        const polygon_hull = polygon(d.vertices.map(v => [x(v.x), y(v.y)]));
+
+        return polygon_hull;
+      })
+      /*.on("click", (e, d) => {
+        // select all updatevertices in face
+        //let face_vertices = d.map(v => v[0]);
+
+        // depending on mode, perform different move
+        if (moveMode == false) {
+          return;
+        }
+        else if (moveMode === 'cycle_face') {
+          cycleFace(d.id, e.shiftKey);
+        } else if (moveMode === 'square_move') {
+          squareMove(d.id);
+        }
+      })*/
+      .attr("class", "face");
+
+
 
 }
 
