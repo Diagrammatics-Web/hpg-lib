@@ -33,6 +33,10 @@ var modes = {
     activate: activateSquareMove,
     deactivate: deactivateSquareMove,
   },
+  "separation_labeling": {
+    activate: activateSeparationLabeling,
+    deactivate: deactivateSeparationLabeling,
+  },
 };
 
 
@@ -196,6 +200,15 @@ function activateSquareMove(obj) {
 }
 
 function deactivateCycleFace(obj) {
+  moveMode = false;
+}
+
+
+function activateSeparationLabeling(obj) {
+  moveMode = 'separation_labeling';
+}
+
+function deactivateSeparationLabeling(obj) {
   moveMode = false;
 }
 

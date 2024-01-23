@@ -134,6 +134,12 @@ def _get_eel_fns():
         CURR_GRAPH.square_move(CURR_GRAPH.faces[face_id])
         return CURR_GRAPH.to_dict_analyzer()
 
+    def separation_labeling(face_id):
+        print("separating labeling", face_id)
+        rank = max(v.total_degree() for v in CURR_GRAPH.vertices.values() if v.is_interior_vertex)
+        CURR_GRAPH.separation_labeling(CURR_GRAPH.faces[face_id], rank, check=False)
+        return CURR_GRAPH.to_dict_analyzer()
+
     # return dict of functions
     return {
         'update_server_status': update_server_status,
@@ -142,5 +148,6 @@ def _get_eel_fns():
         'get_edge_trips': get_edge_trips,
         'get_planar_faces': get_planar_faces,
         'cycle_face': cycle_face,
-        'square_move': square_move
+        'square_move': square_move,
+        'separation_labeling': separation_labeling
     }

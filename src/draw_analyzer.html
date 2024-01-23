@@ -32,6 +32,7 @@
   <button id="btn-faces" onclick="toggleFaces()">Toggle Faces</button>
   <button id="btn-cycle-face" onclick="activateButton(this, 'cycle_face')">Cycle face</button>
   <button id="btn-cycle-face" onclick="activateButton(this, 'square_move')">Square move</button>
+  <button id="btn-cycle-face" onclick="activateButton(this, 'separation_labeling')">Separtaion Labeling</button>
 </div>
 
 
@@ -186,6 +187,8 @@ function toggleFaces(arg=null) {
           cycleFace(d.id, e.shiftKey);
         } else if (moveMode === 'square_move') {
           squareMove(d.id);
+        } else if (moveMode === 'separation_labeling') {
+          calculateSeparationLabeling(d.id);
         }
       })
       .attr("class", "face");
@@ -240,6 +243,23 @@ function squareMove(face_id) {
       return;
     }
 
+    data = d;
+    preprocess_data();
+    update();
+  });
+}
+
+function calculateSeparationLabeling(face_id) {
+  // call backend fn and update graph
+  console.log("separation labeling");
+  console.log(face_id);
+  eel.separation_labeling(face_id)((d) => {
+    // check if error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+    showLabels = true;
     data = d;
     preprocess_data();
     update();
