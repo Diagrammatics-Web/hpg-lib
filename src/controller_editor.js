@@ -106,17 +106,28 @@ function activateButton(obj, mode) {
 
 // init d3 object for drag events
 var draggroup = d3.drag()
-  .on("start", (e) => {
+  .on("start", (e, d) => {
     svg.style('cursor', 'grabbing');
+
   })
   .on("drag", function(e, d) {
     // select current vertex if not already selected
-    let temporaryDrag = false;
+    /*let temporaryDrag = false;
     if (!d3.select(this).classed("selected")) {
       d3.select(this).classed("selected", true);
       addOrRemove(selected, this);
       addOrRemove(selectedIds, d.id);
       temporaryDrag = true;
+    }*/
+    if(e.sourceEvent.shiftKey) {
+      d3.select(this).classed("selected", !d3.select(this).classed("selected"));
+      addOrRemove(selected, this);
+      addOrRemove(selectedIds, d.id);
+      console.log("shift");
+    } else {
+      deselect();
+      d3.select(this).classed("selected", true);
+      selected = [this];
     }
 
     // update position of selected vertices
@@ -161,6 +172,7 @@ var draggroup = d3.drag()
         update();
       });*/
       update();
+      activateObjects(".vertex");
   });
 
 // init d3 object for stopping drag events
@@ -184,9 +196,16 @@ function activateMove(obj) {
   svg.selectAll(".vertex")
     .call(draggroup)
     .on("click", function(e, d) {
-      d3.select(this).classed("selected", !d3.select(this).classed("selected"));
-      addOrRemove(selected, this);
-      addOrRemove(selectedIds, d.id);
+      if(e.shiftKey) {
+        d3.select(this).classed("selected", !d3.select(this).classed("selected"));
+        addOrRemove(selected, this);
+        addOrRemove(selectedIds, d.id);
+      } else {
+        deselect();
+        d3.select(this).classed("selected", true);
+        selected = [this];
+      }
+
     });
 }
 
