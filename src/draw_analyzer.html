@@ -413,15 +413,21 @@ function update() {
     .join("text")
     .attr("class", "hourglass-label")
     .attr("x", function(d) {
-      return x((d.source.x+d.target.x)/2)
+      var pnode = d3.select("#"+d.id).node();
+      var plen = pnode.getTotalLength();
+      var pos = 0.25;
+      d.label_pos = pnode.getPointAtLength(pos*plen);
+      return d.label_pos.x;
     })
     .attr("y", function(d) {
-      return y((d.source.y+d.target.y)/2)
+      return d.label_pos.y;
     })
+    .attr("text-anchor", "middle")
+    .attr("dominant-baseline", "central")
     .text(function(d) {
       if (!showLabels) {
         return "";
-        return d.multiplicity;
+        //return d.multiplicity;
       }
       return d.label;
     });
