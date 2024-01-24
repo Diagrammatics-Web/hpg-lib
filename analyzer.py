@@ -140,6 +140,14 @@ def _get_eel_fns():
         CURR_GRAPH.separation_labeling(CURR_GRAPH.faces[face_id], rank, check=False)
         return CURR_GRAPH.to_dict_analyzer()
 
+    def tutte_layout():
+        CURR_GRAPH.tutte_layout()
+        return CURR_GRAPH.to_dict_analyzer()
+
+    def lloyd_layout():
+        CURR_GRAPH.lloyd_layout()
+        return CURR_GRAPH.to_dict_analyzer()
+
     # return dict of functions
     return {
         'update_server_status': update_server_status,
@@ -149,5 +157,7 @@ def _get_eel_fns():
         'get_planar_faces': get_planar_faces,
         'cycle_face': cycle_face,
         'square_move': square_move,
-        'separation_labeling': separation_labeling
+        'separation_labeling': separation_labeling,
+        'tutte_layout': tutte_layout,
+        'lloyd_layout': lloyd_layout
     }

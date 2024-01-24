@@ -29,7 +29,9 @@
   <button id="btn-trip2" onclick="activateButton(this,'trip2')">Trip2</button>
   <button id="btn-trip3" onclick="activateButton(this,'trip3')">Trip3</button>
   <button id="btn-edgetrips" onclick="activateButton(this,'edge_trips')">Trips through edge</button>
-  <button id="btn-faces" onclick="toggleFaces()">Toggle Faces</button>
+  <!--<button id="btn-faces" onclick="toggleFaces()">Toggle Faces</button>-->
+  <button id="btn-faces" onclick="tutteLayout()">Compute Tutte layout</button>
+  <button id="btn-faces" onclick="lloydLayout()">Apply Lloyd's algorithm</button>
   <button id="btn-cycle-face" onclick="activateButton(this, 'cycle_face')">Cycle face</button>
   <button id="btn-cycle-face" onclick="activateButton(this, 'square_move')">Square move</button>
   <button id="btn-cycle-face" onclick="activateButton(this, 'separation_labeling')">Separation Labeling</button>
@@ -68,19 +70,34 @@ var svg = d3.select("#paper-container")
  .attr("width", size)
  .attr("height", size);
 
+var maingroup = svg.append("g");
+
 // init boundary circle
-var boundary_circle = svg.append("circle")
+var boundary_circle = maingroup.append("circle")
     .attr('id', 'boundary_circle')
     .attr('cx',x(0) )
     .attr('cy', y(0) )
     .attr('r',x(radius)-x(0));
 
 // init groups for edges and vertices
-var faces = svg.append("g").attr("id", "faces");
-var edges = svg.append("g").attr("id", "edges");
-var vertices = svg.append("g").attr("id", "vertices");
+var faces = maingroup.append("g").attr("id", "faces");
+var edges = maingroup.append("g").attr("id", "edges");
+var vertices = maingroup.append("g").attr("id", "vertices");
 
-var paths = svg.append("g").attr("id", "edgePaths");
+var paths = maingroup.append("g").attr("id", "edgePaths");
+
+
+svg.call(d3.zoom()
+    .translateExtent([[0, 0], [size, size]])
+    .scaleExtent([1, 8])
+    .on("zoom", zoomed));
+
+function zoomed(e) {
+  //edges.attr("transform", d => `translate(${transform.apply(d)})`);
+  maingroup.attr("transform", d => e.transform);
+  //edges.attr("transform", d => e.transform);
+}
+
 
 // get initial graph from backend
 eel.get_graph()((g) => {
@@ -90,6 +107,22 @@ eel.get_graph()((g) => {
 });
 
 
+function tutteLayout() {
+  eel.tutte_layout()((g) => {
+    data = g;
+    preprocess_data();
+    update();
+  });
+}
+
+
+function lloydLayout() {
+  eel.lloyd_layout()((g) => {
+    data = g;
+    preprocess_data();
+    update();
+  });
+}
 
 // return curve string for D3 to render edge
 function hourglassPath(edge, shift=0) {
@@ -183,41 +216,10 @@ function toggleFaces(arg=null) {
   }
 }
 
-function cycleFace(face_id, inverse) {
-  // call backend fn and update graph
-  console.log("Cycling face");
-  console.log(face_id);
-  console.log(inverse);
-  eel.cycle_face(face_id, inverse)((d) => {
-    // check if error
-    if (typeof(d) == "string") {
-      console.log(d);
-      return;
-    }
-
-    data = d;
-    preprocess_data();
-    update();
-  });
-}
 
 
-function squareMove(face_id) {
-  // call backend fn and update graph
-  console.log("Square move");
-  console.log(face_id);
-  eel.square_move(face_id)((d) => {
-    // check if error
-    if (typeof(d) == "string") {
-      console.log(d);
-      return;
-    }
 
-    data = d;
-    preprocess_data();
-    update();
-  });
-}
+
 
 
 
@@ -228,7 +230,7 @@ function update() {
     console.log("data is null")
     data = {vertices:[], edges:[], faces:[]};
   }
-
+  activeObjects = svg.selectAll(".active")
 
 
 
@@ -362,7 +364,7 @@ function update() {
     .attr("r", 4)
     .classed("selected", d => {
       return selectedIds.indexOf(d.id) > -1;
-    })
+    });
 
   // add labels if option selected
   vertices.selectAll(".vertex-label").data(data.vertices)
@@ -381,6 +383,29 @@ function update() {
       return d.id;
     });
 
+
+    edges.selectAll(".hourglass-label-background").data(data.edges)
+    .join("circle")
+    .attr("class", "hourglass-label-background")
+    .attr("cx", function(d) {
+      var pnode = d3.select("#"+d.id).node();
+      var plen = pnode.getTotalLength();
+      var pos = 0.25;
+      d.label_pos = pnode.getPointAtLength(pos*plen);
+      return d.label_pos.x;
+    })
+    .attr("cy", function(d) {
+      return d.label_pos.y;
+    })
+    .attr("r", 6)
+    .attr("fill", function(d) {
+      if (!showEdgeLabels) {
+        return "none";
+        //return d.multiplicity;
+      }
+      return "white";
+    });
+
     edges.selectAll(".hourglass-label").data(data.edges)
     .join("text")
     .attr("class", "hourglass-label")
@@ -394,8 +419,6 @@ function update() {
     .attr("y", function(d) {
       return d.label_pos.y;
     })
-    .attr("text-anchor", "middle")
-    .attr("dominant-baseline", "central")
     .text(function(d) {
       if (!showEdgeLabels) {
         return "";
@@ -403,6 +426,7 @@ function update() {
       }
       return d.label;
     });
+
 
 
     faces.selectAll(".face")
@@ -435,7 +459,7 @@ function update() {
       })*/
       .attr("class", "face");
 
-
+      activeObjects.classed("active", true);
 
 }
 

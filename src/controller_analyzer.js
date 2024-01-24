@@ -108,7 +108,7 @@ function activateTrip(tripIndex) {
         console.log(ep);
         edgePaths.push(ep);
         update();
-        activateObjects(".vertex");
+        //activateObjects(".vertex");
         //for (var i = 0; i < ep.length; i++) {
           // add edge to edgePaths
       //    edgePaths[tripIndex].push(JSON.stringify(ep[i]));
@@ -139,7 +139,7 @@ function activateEdgeTrips(obj) {
         }
 
         update();
-        activateObjects(".edge");
+        //activateObjects(".edge");
         //for (var i = 0; i < ep.length; i++) {
           // add edge to edgePaths
       //    edgePaths[tripIndex].push(JSON.stringify(ep[i]));
@@ -154,7 +154,9 @@ function activateEdgeTrips(obj) {
 
 function deactivateEdgeTrips(obj) {
   svg.selectAll(".edge").on("click", null);
+  deactivateAllObjects();
   update();
+
 }
 
 // helper functions to activate/deactivate trip types 1, 2, and 3
@@ -164,6 +166,7 @@ function activateTrip1(obj) {
 
 function deactivateTrip1(obj) {
   svg.selectAll(".vertex").on("click", null);
+  deactivateAllObjects();
   update();
 }
 
@@ -173,6 +176,7 @@ function activateTrip2(obj) {;
 
 function deactivateTrip2(obj) {
   svg.selectAll(".vertex").on("click", null);
+  deactivateAllObjects();
   update();
 }
 
@@ -182,26 +186,77 @@ function activateTrip3(obj) {
 
 function deactivateTrip3(obj) {
   svg.selectAll(".vertex").on("click", null);
+  deactivateAllObjects();
   update();
 }
 
+function cycleFace(face_id, inverse) {
+  // call backend fn and update graph
+  console.log("Cycling face");
+  console.log(face_id);
+  console.log(inverse);
+  eel.cycle_face(face_id, inverse)((d) => {
+    // check if error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+
+    data = d;
+    preprocess_data();
+    update();
+  });
+}
+
 function activateCycleFace(obj) {
-  // update move mode, so that face cycle move can be activated
-  // from clicking on graph faces in draw.html
-  moveMode = 'cycle_face';
-}
-
-function deactivateSquareMove(obj) {
-  moveMode = false;
-}
-
-function activateSquareMove(obj) {
-  moveMode = 'square_move';
+  activateObjects(".face");
+  svg.selectAll(".face")
+    .on("click", (e, d) => {
+      cycleFace(d.id, e.shiftKey);
+      update();
+      ///activateObjects(".face");
+  });
 }
 
 function deactivateCycleFace(obj) {
-  moveMode = false;
+  deactivateAllObjects();
+  svg.selectAll(".face").on("click", null);
 }
+
+
+function squareMove(face_id) {
+  // call backend fn and update graph
+  console.log("Square move");
+  console.log(face_id);
+  eel.square_move(face_id)((d) => {
+    // check if error
+    if (typeof(d) == "string") {
+      console.log(d);
+      return;
+    }
+
+    data = d;
+    preprocess_data();
+    update();
+    //activateObjects(".face");
+  });
+}
+
+function activateSquareMove(obj) {
+  activateObjects(".face");
+  svg.selectAll(".face")
+    .on("click", (e, d) => {
+      squareMove(d.id);
+      update();
+      //activateObjects(".face");
+  });
+}
+
+function deactivateSquareMove(obj) {
+  deactivateAllObjects();
+  svg.selectAll(".face").on("click", null);
+}
+
 
 
 
@@ -219,7 +274,7 @@ function calculateSeparationLabeling(face_id) {
     data = d;
     preprocess_data();
     update();
-    activateObjects(".face");
+    //activateObjects(".face");
   });
 }
 
@@ -229,11 +284,8 @@ function activateSeparationLabeling(obj) {
     .on("click", (e, d) => {
       calculateSeparationLabeling(d.id);
       update();
-      activateObjects(".face");
+      //activateObjects(".face");
   });
-
-
-
 }
 
 function deactivateSeparationLabeling(obj) {
