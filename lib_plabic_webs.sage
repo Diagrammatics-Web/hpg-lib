@@ -1,3 +1,14 @@
+def is_prom_minimal(L, r):
+    '''Determines if L is lex-minimal among all of its promotions.'''
+    L0 = list(L)
+    while True:
+       L = promotion_L(L, r)
+       if L < L0:
+           return False
+       if L == L0:
+           break
+    return True
+
 def get_G_from_L(L, r, ignore_trips_above=-1):
     '''Iterates over all solutions of get_G_from_trips for the prom permutations
        of the oscillating word L.'''
@@ -5,9 +16,9 @@ def get_G_from_L(L, r, ignore_trips_above=-1):
     boundary_type=[1 if el > 0 else -1 for el in L]
     yield from get_G_from_trips(ps, r, boundary_type=boundary_type, ignore_trips_above=ignore_trips_above)
 
-def plot_hpg(H):
+def plot_hpg(H, edge_labels=True, **kwds):
     vertex_colors = {"gray":[k for k,v in H.vertices.items() if v.is_filled()],  "white":[k for k,v in H.vertices.items() if v.is_unfilled()]}
-    return H.to_graph().plot(edge_labels=True, vertex_colors=vertex_colors)
+    return H.to_graph().plot(edge_labels=edge_labels, vertex_colors=vertex_colors, **kwds)
 
 def get_fluctuating_Ls(content, r, flatten=True):
     '''Iterates over all rectangular fluctuating tableau of the given content with r rows.'''
