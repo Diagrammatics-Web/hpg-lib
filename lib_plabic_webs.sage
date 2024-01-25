@@ -1,3 +1,20 @@
+def get_fluctuating_Ls(content, r, flatten=True):
+    '''Iterates over all rectangular fluctuating tableau of the given content with r rows.'''
+    content_SSYT = [c if c > 0 else r+c for c in content]
+    for T in SemistandardTableaux([r]*(sum(content_SSYT)//r), eval=content_SSYT):
+        L = []
+        for i in range(len(content_SSYT)):
+            L.append([y+1 for x,y in T.cells_containing(i+1)])
+        for i in range(len(content)):
+            if content[i] < 0:
+                L[i] = [j for j in range(-r, 0) if -j not in L[i]]
+        if flatten:
+            L = _flatten(L)
+        yield L
+
+def _flatten(xss):
+    return [x for xs in xss for x in xs]
+
 def Aexc(pi):
     '''Returns the list of anti-excedances of the permutation pi in sorted order.'''
     return sorted(pi[i] for i in range(len(pi)) if i+1 > pi[i])
