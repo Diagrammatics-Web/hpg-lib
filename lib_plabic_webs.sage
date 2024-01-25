@@ -16,10 +16,6 @@ def get_G_from_L(L, r, ignore_trips_above=-1):
     boundary_type=[1 if el > 0 else -1 for el in L]
     yield from get_G_from_trips(ps, r, boundary_type=boundary_type, ignore_trips_above=ignore_trips_above)
 
-def plot_hpg(H, edge_labels=True, **kwds):
-    vertex_colors = {"gray":[k for k,v in H.vertices.items() if v.is_filled()],  "white":[k for k,v in H.vertices.items() if v.is_unfilled()]}
-    return H.to_graph().plot(edge_labels=edge_labels, vertex_colors=vertex_colors, **kwds)
-
 def get_fluctuating_Ls(content, r, flatten=True):
     '''Iterates over all rectangular fluctuating tableau of the given content with r rows.'''
     content_SSYT = [c if c > 0 else r+c for c in content]
