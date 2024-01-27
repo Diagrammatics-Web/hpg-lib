@@ -1,5 +1,5 @@
-def is_prom_minimal(L, r):
-    '''Determines if L is lex-minimal among all of its promotions.'''
+def is_prom_evac_minimal(L, r):
+    '''Determines if L is lex-minimal among all of its promotion and evacuation orbit.'''
     L0 = list(L)
     while True:
        L = promotion_L(L, r)
@@ -7,14 +7,29 @@ def is_prom_minimal(L, r):
            return False
        if L == L0:
            break
+    
+    L = evacuation(L, r)
+    if L < L0:
+        return False
+    if L == L0:
+        return True
+
+    L1 = list(L)
+    while True:
+        L = promotion_L(L, r)
+        if L < L0:
+            return False
+        if L == L1:
+            break
+
     return True
 
-def get_G_from_L(L, r, ignore_trips_above=-1):
+def get_G_from_L(L, r):
     '''Iterates over all solutions of get_G_from_trips for the prom permutations
        of the oscillating word L.'''
     ps = prom_perms_L(L, r)
     boundary_type=[1 if el > 0 else -1 for el in L]
-    yield from get_G_from_trips(ps, r, boundary_type=boundary_type, ignore_trips_above=ignore_trips_above)
+    yield from get_G_from_trips(ps, r, boundary_type=boundary_type)
 
 def get_fluctuating_Ls(content, r, flatten=True):
     '''Iterates over all rectangular fluctuating tableau of the given content with r rows.'''
