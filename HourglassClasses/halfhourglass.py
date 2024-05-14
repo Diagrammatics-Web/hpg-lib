@@ -29,14 +29,30 @@ class HalfHourglass:
         self.ccw_next = self
 
     def add_strand(self):
-        strand_count++
-        twin.strand_count++
+        strand_count += 1
+        twin.strand_count += 1
+    def thicken(self): # alias
+        self.add_strand()
 
     def remove_strand(self):
-        # hourglass must have 
+        # hourglass must have at least one strand 
         if (strand_count > 1): 
-            strand_count--
-            twin.strand_count--
+            strand_count -= 1
+            twin.strand_count -= 1
+    def thin(self): # alias
+        self.remove_strand()
+
+    def insert_cw_next(self, hh):
+        hh.ccw_next = self
+        hh.cw_next = self.cw_next
+        self.cw_next.ccw_next = hh
+        self.cw_next = hh
+
+    def insert_ccw_next(self, hh):
+        hh.cw_next = self
+        hh.ccw_next = self.ccw_next
+        self.ccw_next.cw_next = hh
+        self.ccw_next = hh
 
     def is_phantom(self):
         return strand_count == 0

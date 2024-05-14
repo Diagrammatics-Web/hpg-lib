@@ -25,14 +25,29 @@ class Vertex:
         return "HourglassPlabicGraph Vertex object: id=%s, label=%s"%(str(self.id), str(self.label))
 
     def create_hourglass_to(self, v_to, strand_count):
-
+       pass 
         
-    def insert_hourglass(self, hourglass):
-        ''' Inserts a half hourglass into the list, sorted based on arctan.'''
-        hh_angle = hourglass.get_angle()
+    def insert_hourglass(self, hh):
+        ''' Inserts a half hourglass into the list. Maintains the list with the first angle being the one with the smallest angle ccw from the x-axis.'''
+        # empty list case
+        if (self._half_hourglasses == None): 
+            self._half_hourglasses = hh
+            return
+        
+        # find first edge with greater angle, then insert_cw_next
+        hh_angle = hh.get_angle()
         iter = self._half_hourglasses
-        while(hh_angle > iter.angle):
+        while True: # runs until first edge with greater angle found or entire list is exhausted
+            if (hh_angle < iter.get_angle()):
+                iter.insert_cw_next(hh)
+                return
+            # otherwise, continue iterating through loop
             iter = iter.ccw_next
+            if (iter == self.half_hourglasses):
+                # we've run the entire loop, so angle is greater than every other edge
+                iter.insert_ccw_next(hh)
+                return
+                
         
     def total_degree(self):
         '''Returns the number of strands around self.'''
@@ -54,6 +69,6 @@ class Vertex:
         count = 1
         iter = self._half_hourglasses.cw_next
         while(iter != self._half_hourglasses):
-            count ++
+            count += 1
             iter = iter.cw_next
         return count
