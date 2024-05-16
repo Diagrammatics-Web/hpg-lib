@@ -22,13 +22,15 @@ class HalfHourglass:
         self.ccw_next = self
 
     def add_strand(self):
-        self.strand_count += 1
-        self.twin.strand_count += 1
+        # do not thicken phantom edges
+        if (self.strand_count > 0): 
+            self.strand_count += 1
+            self.twin.strand_count += 1
     def thicken(self): # alias
         self.add_strand()
 
     def remove_strand(self):
-        # hourglass must have at least one strand 
+        # do not thin phantom edges
         if (self.strand_count > 1): 
             self.strand_count -= 1
             self.twin.strand_count -= 1

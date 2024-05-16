@@ -23,6 +23,9 @@ class Vertex:
         self.first = False
         self.last = False
         self.label = label
+        # this is a circularly double linked list of half hourglasses, connected using
+        # ccw_next and cw_next. the first element should be the one making the smallest
+        # angle with the x-axis.
         self._half_hourglasses = None
 
     def __repr__(self):
@@ -56,7 +59,15 @@ class Vertex:
                 iter.insert_ccw_next(hh)
                 return
                 
-        
+    def get_neighbors(self):
+        '''Returns all adjacent vertices in a list.'''
+        neighbors = []
+        iter = self._half_hourglasses
+        while True:
+            neighbors.append(iter)
+            iter = iter.ccw_next
+            if (iter == self._half_hourglasses): return
+    
     def total_degree(self):
         '''Returns the number of strands around self.'''
         if (self._half_hourglasses == None):
