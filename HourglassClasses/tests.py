@@ -1,5 +1,6 @@
 from .halfhourglass import HalfHourglass
 from .vertex import Vertex
+from .hourglassplabicgraph import HourglassPlabicGraph
 import math
 
 class _TestVertex:
@@ -47,5 +48,64 @@ def vertex_tests():
     assert v4.total_degree() == 5, "v4 should have 5 strands around it"
 
     print("Vertex tests complete.")
+
+def trip_tests():
+    print("Testing trips.")
+    HPG = create_test_HPG()
+    print(HPG.get_trip_perms())
+
+def create_test_HPG():
+    '''Creates the graph seen at https://youtu.be/wsltX4aTjbc?t=2272'''
+    inner_vertices = []
+    boundary_vertices = []
+
+    boundary_vertices.append(Vertex(id=1, x=1, y=1, filled=True, boundary=True))
+    boundary_vertices.append(Vertex(id=2, x=1, y=0, filled=False, boundary=True))
+    boundary_vertices.append(Vertex(id=3, x=1, y=-1, filled=True, boundary=True))
+    boundary_vertices.append(Vertex(id=4, x=0, y=-1, filled=True, boundary=True))
+    boundary_vertices.append(Vertex(id=5, x=-1, y=-1, filled=False, boundary=True))
+    boundary_vertices.append(Vertex(id=6, x=-1, y=0, filled=True, boundary=True))
+    boundary_vertices.append(Vertex(id=7, x=-1, y=1, filled=False, boundary=True))
+
+    inner_vertices.append(Vertex(id=11, x=.5, y=.5, filled=False))
+    inner_vertices.append(Vertex(id=12, x=.5, y=0, filled=True))
+    inner_vertices.append(Vertex(id=13, x=.5, y=-.5, filled=False))
+    inner_vertices.append(Vertex(id=14, x=0, y=-.5, filled=False))
+    inner_vertices.append(Vertex(id=15, x=-.5, y=-.5, filled=True))
+    inner_vertices.append(Vertex(id=16, x=-.5, y=0, filled=False))
+    inner_vertices.append(Vertex(id=17, x=-.5, y=.5, filled=True))
+
+    boundary_vertices[0].create_hourglass_between(boundary_vertices[1], 0)
+    boundary_vertices[1].create_hourglass_between(boundary_vertices[2], 0)
+    boundary_vertices[2].create_hourglass_between(boundary_vertices[3], 0)
+    boundary_vertices[3].create_hourglass_between(boundary_vertices[4], 0)
+    boundary_vertices[4].create_hourglass_between(boundary_vertices[5], 0)
+    boundary_vertices[5].create_hourglass_between(boundary_vertices[6], 0)
+    boundary_vertices[6].create_hourglass_between(boundary_vertices[0], 0)
+    
+    boundary_vertices[0].create_hourglass_between(inner_vertices[0], 2)
+    boundary_vertices[1].create_hourglass_between(inner_vertices[1], 1)
+    boundary_vertices[2].create_hourglass_between(inner_vertices[2], 2)
+    boundary_vertices[3].create_hourglass_between(inner_vertices[3], 1)
+    boundary_vertices[4].create_hourglass_between(inner_vertices[4], 2)
+    boundary_vertices[5].create_hourglass_between(inner_vertices[5], 2)
+    boundary_vertices[6].create_hourglass_between(inner_vertices[6], 1)
+
+    inner_vertices[0].create_hourglass_between(inner_vertices[1], 1)
+    inner_vertices[1].create_hourglass_between(inner_vertices[2], 1)
+    inner_vertices[3].create_hourglass_between(inner_vertices[4], 1)
+    inner_vertices[4].create_hourglass_between(inner_vertices[5], 1)
+    inner_vertices[5].create_hourglass_between(inner_vertices[6], 1)
+    inner_vertices[6].create_hourglass_between(inner_vertices[0], 1)
+
+    inner_vertices[1].create_hourglass_between(inner_vertices[3], 1)
+    inner_vertices[3].create_hourglass_between(inner_vertices[6], 1)
+
+    HPG = HourglassPlabicGraph()
+    HPG.boundary_vertices = boundary_vertices
+    HPG.inner_vertices = inner_vertices
+
+    return HPG
+    
 
     

@@ -35,10 +35,10 @@ class Vertex:
         ''' Creates a half hourglass to and from v_to, inserting it into each vertex's hourglass list.'''
         hh = HalfHourglass(str(self.id) + "_" + str(v_to.id), self, v_to, strand_count)
 
-        self.insert_hourglass(hh)
-        v_to.insert_hourglass(hh.twin)
+        self._insert_hourglass(hh)
+        v_to._insert_hourglass(hh.twin)
 
-    def insert_hourglass(self, hh):
+    def _insert_hourglass(self, hh):
         '''Inserts hh into the hourglass list. Maintains the list with the first angle being the one with the smallest angle ccw from the x-axis.'''
         # empty list case
         if (self._half_hourglasses == None): 
@@ -58,6 +58,32 @@ class Vertex:
                 # we've run the entire loop, so angle is greater than every other edge
                 iter.insert_ccw_next(hh)
                 return
+
+    def get_trip(self, i):
+        '''Traverses the graph to compute trip i and returns an array of all visited half hourglasses.'''
+        assert self.boundary, "vertex should be on the boundary."
+        assert self.total_degree() == 1, "multiplicity of vertex should be 1."
+
+        # return the array of visited hourglasses
+        hourglasses = []
+
+        # find the hourglass to the graph interior
+        hh = self._half_hourglasses
+        while hh.strand_count != 1: hh = hh.cw_next()
+        hourglasses.append(hh)
+
+        vertex = hh.v_to
+        strand_index = 0
+        while(not vertex.boundary):
+            # get the next hourglass and its strand
+            # note that the ith strand of the hourglass is the ith strand of its twin
+            hh = hh.twin
+            if (vertex.filled): hh, strand_index = hh.get_get_ccw_ith_strand(i, strand_index)
+            else: hh, strand_index = hh.get_get_cw_ith_strand(i, strand_index)
+            vertex = hh.v_to
+            hourglasses.append(hh)
+
+        return hourglasses
                 
     def get_neighbors(self):
         '''Returns all adjacent vertices in a list.'''
