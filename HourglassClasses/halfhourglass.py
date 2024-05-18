@@ -1,72 +1,120 @@
 import math
+from dihedralelement import DihedralElement
 
-class HalfHourglass:
+class HalfHourglass(DihedralElement):
     ''' Represents part of an edge from one vertex to another in an hourglass plabic graph.
-        Strands are represented by the strand_count member, which can be considered a multiplicity/edge weight.
-        When "iterating" over strands, the first (0th) strand is the most counterclockwise.'''
-    def __init__(self, id, v_from, v_to, strand_count, label='', twin=None):
+        When iterating over strands, the head strand is the most counterclockwise.'''
+    def __init__(self, id, v_from, v_to, multiplicity, label='', twin=None):
         ''' id: an object, assumed unique, should be hashable
-            strand_count: number of strands between from and to. if 0, this is an edge boundary
-            label: an object
-        '''
+            multiplicity: number of strands between from and to. if 0, this is an edge boundary
+            label: an object'''
+        super().__init__(self)
         self.id = id
-        self.v_from = v_from
-        self.v_to = v_to
-        self.strand_count = strand_count
+        self._v_from = v_from
+        self._v_to = v_to
         self.label = label
-
+        
         # the half hourglass representing movement in the opposite direction, between the same vertices
-        self.twin = twin
-        # set up twin with swapped to/from vertices
-        if (twin == None):
-            self.twin = HalfHourglass("twin_" + str(id), v_to, v_from, strand_count, '', self)
-            
-        self.cw_next = self
-        self.ccw_next = self
+        # twin will have swapped to/from vertices
+        # only the "base" hourglass will need to set up strands
+        if twin == None:
+            self._twin = HalfHourglass("twin_" + str(id), v_to, v_from, strand_count, '', self)
 
-    def add_strand(self):
-        # do not thicken phantom edges
-        if (self.strand_count > 0): 
-            self.strand_count += 1
-            self.twin.strand_count += 1
+            # Create half strands
+            if multiplicity == 0: 
+                self._half_strands_head = None
+                self._twin._half_strands_head = None
+            else:
+                self._half_strands_head = HalfStrand(str(id) + "_s0", self)
+                self._twin._half_strands_head = self._half_strands_head.twin()
+                for i in range(1, multiplicity):
+                    strand = HalfStrand(str(id) + "_s" + i, self)
+                    self._half_strands_head.append_cw(strand)
+                    self._twin._half_strands_head.append_cw(strand.twin())
+        else: self._twin = twin
+
+    # Insert/remove overrides. These must be overridden as strands must be linked up as well.
+
+    def insert_cw_next(self, element):
+        super().insert_cw_next(element)
+        if element._half_strands_head == None: return
+
+        # link up strands
+        next_strand = element.cw_next().get_first_strand()
+        prev_strand = next_strand.cw_prev() if next_strand != None else None
+        if next_strand != None: element._half_strands_head.cw_last().set_cw_next(next_strand)
+        if prev_strand != None: element._half_strands_head.set_cw_prev(prev_strand)
+
+    def insert_cw_next(self, element):
+        super().insert_cw_next(element)
+        if element._half_strands_head == None: return
+
+        # link up strands
+        next_strand = element.cw_next().get_first_strand()
+        prev_strand = next_strand.cw_prev() if next_strand != None else None
+        if next_strand != None: element._half_strands_head.cw_last().set_cw_next(next_strand)
+        if prev_strand != None: element._half_strands_head.set_cw_prev(prev_strand)
+
+    def remove(self):
+        if self_half_strands_head != None:
+            iter = self_half_strands_head
+            while iter.hourglass() == self and iter.cw_next() != iter: 
+                iter = iter.cw_next()
+                iter.cw_prev().remove()
+        super().remove()
+
+    # Strand modification and accessor functions
+    
+    def add_strand(self): #TODO
+        ''' Adds a strand to itself in the last position clockwise.
+            Will not work on phantom edges.'''
+        if (self.is_phantom()): return
+        self.strand_count += 1
+        self.twin.strand_count += 1
     def thicken(self): # alias of add_strand
         self.add_strand()
 
-    def remove_strand(self):
-        # do not thin phantom edges
-        if (self.strand_count > 1): 
-            self.strand_count -= 1
-            self.twin.strand_count -= 1
+    def remove_strand(self): #TODO
+        ''' Removes the clockwise last strand.
+            Will not work on phantom edges or on edges with only 1 strand left.'''
+        if (self.strand_count <= 1): return 
+        self.strand_count -= 1
+        self.twin.strand_count -= 1
     def thin(self): # alias of remove_strand
         self.remove_strand()
 
-    def insert_cw_next(self, hh):
-        hh.ccw_next = self
-        hh.cw_next = self.cw_next
-        self.cw_next.ccw_next = hh
-        self.cw_next = hh
-
-    def insert_ccw_next(self, hh):
-        hh.cw_next = self
-        hh.ccw_next = self.ccw_next
-        self.ccw_next.cw_next = hh
-        self.ccw_next = hh
-
-    def get_cw_ith_strand(self, i, strand_i):
+    def get_cw_ith_strand(self, i, strand_i): #TODO
         ''' Returns the HalfHourglass and strand index i strands clockwise over around v_from.
             This corresponds to the ith left from the incoming strand.
             i: how many strands to travel. Relates to trip i.
             strand_i: the index of the incoming strand to start from. Recall that the first (0th) strand is the most counterclockwise.'''
         if strand_i + i < strand_count: return self, strand_i + i
-        else: return self.cw_next.get_cw_ith_strand(i - self.strand_count + strand_i, 0)
+        else: return self._cw_next.get_cw_ith_strand(i - self.strand_count + strand_i, 0)
 
-    def get_ccw_ith_strand(self, i, strand_i):
+    def get_ccw_ith_strand(self, i, strand_i): #TODO
         ''' Returns the HalfHourglass and strand index i strands counterclockwise over around v_from.
             This corresponds to the ith right from the incoming strand.
             i: how many strands to travel. Relates to trip i.
             strand_i: the index of the incoming strand to start from. Recall that the first (0th) strand is the most counterclockwise.'''
         if strand_i - i >= 0: return self, strand_i - i
-        else: return self.ccw_next.get_ccw_ith_strand(i - strand_i, self.ccw_next.strand_count)  
+        else: return self._ccw_next.get_ccw_ith_strand(i - strand_i, self.ccw_next.strand_count)  
+
+    def get_first_strand(self):
+        ''' Returns the first strand clockwise around v_from relative to this hourglass.
+            Typically will return _half_strands_head, unless its multiplicity is 0.'''
+        return self._half_strands_head if self._half_strands_head != None or self._v_from.total_degree() == 0 else self._cw_next.get_first_strand()
+
+    # End strand accessor and modification functions
+
+    def v_from(self):
+        return self._v_from
+    def v_to():
+        return self._v_to
+
+    def strand_count(self): #TODO
+        pass
+    def multiplicity(self): #alias
+        return self.strand_count()
     
     def is_phantom(self):
         return self.strand_count == 0

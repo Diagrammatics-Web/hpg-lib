@@ -55,7 +55,7 @@ def trip_tests():
     print(HPG.get_trip_perms())
 
 def create_test_HPG():
-    '''Creates the graph seen at https://youtu.be/wsltX4aTjbc?t=2272'''
+    '''Creates the graph seen at https://youtu.be/wsltX4aTjbc?t=2565'''
     inner_vertices = []
     boundary_vertices = []
 

@@ -26,7 +26,7 @@ class Vertex:
         # this is a circularly double linked list of half hourglasses, connected using
         # ccw_next and cw_next. the first element should be the one making the smallest
         # angle with the x-axis.
-        self._half_hourglasses = None
+        self._half_hourglasses_head = None
 
     def __repr__(self):
         return "HourglassPlabicGraph Vertex object: id=%s, label=%s"%(str(self.id), str(self.label))
@@ -41,20 +41,20 @@ class Vertex:
     def _insert_hourglass(self, hh):
         '''Inserts hh into the hourglass list. Maintains the list with the first angle being the one with the smallest angle ccw from the x-axis.'''
         # empty list case
-        if (self._half_hourglasses == None): 
-            self._half_hourglasses = hh
+        if (self._half_hourglasses_head == None): 
+            self._half_hourglasses_head = hh
             return
         
         # find first edge with greater angle, then insert_cw_next
         hh_angle = hh.get_angle()
-        iter = self._half_hourglasses
+        iter = self._half_hourglasses_head
         while True: # runs until first edge with greater angle found or entire list is exhausted
             if (hh_angle < iter.get_angle()):
                 iter.insert_cw_next(hh)
                 return
             # otherwise, continue iterating through loop
             iter = iter.ccw_next
-            if (iter == self._half_hourglasses):
+            if (iter == self._half_hourglasses_head):
                 # we've run the entire loop, so angle is greater than every other edge
                 iter.insert_ccw_next(hh)
                 return
@@ -68,7 +68,7 @@ class Vertex:
         hourglasses = []
 
         # find the hourglass to the graph interior
-        hh = self._half_hourglasses
+        hh = self._half_hourglasses_head
         while hh.strand_count != 1: hh = hh.cw_next()
         hourglasses.append(hh)
 
@@ -88,31 +88,24 @@ class Vertex:
     def get_neighbors(self):
         '''Returns all adjacent vertices in a list.'''
         neighbors = []
-        iter = self._half_hourglasses
+        iter = self._half_hourglasses_head
         while True:
             neighbors.append(iter)
             iter = iter.ccw_next
-            if (iter == self._half_hourglasses): return
+            if (iter == self._half_hourglasses_head): return
     
     def total_degree(self):
         '''Returns the number of strands around self.'''
-        if (self._half_hourglasses == None):
-            return 0
-            
-        count = self._half_hourglasses.strand_count
-        iter = self._half_hourglasses.cw_next
-        while(iter != self._half_hourglasses):
-            count += iter.strand_count
-            iter = iter.cw_next
-        return count
+        if (self._half_hourglasses_head == None): return 0
+        return self_half_hourglasses_head.get_num_elements()
 
     def simple_degree(self):
         '''Returns the number of hourglasses around self.'''
-        if (self._half_hourglasses == None): return 0
+        if (self._half_hourglasses_head == None): return 0
             
         count = 1
-        iter = self._half_hourglasses.cw_next
-        while(iter != self._half_hourglasses):
+        iter = self._half_hourglasses_head.cw_next
+        while(iter != self._half_hourglasses_head):
             count += 1
             iter = iter.cw_next
         return count
