@@ -59,31 +59,30 @@ class Vertex:
                 iter.insert_ccw_next(hh)
                 return
 
-    def get_trip(self, i):
-        '''Traverses the graph to compute trip i and returns an array of all visited half hourglasses.'''
-        assert self.boundary, "vertex should be on the boundary."
-        assert self.total_degree() == 1, "multiplicity of vertex should be 1."
+    def get_trip(self, i, output='half_strands'):
+        ''' Traverses the graph to compute trip i and returns an array of all visited half hourglasses.
+            i: computes trip_i by taking the ith left at unfilled/ith right at filled
+            output: if output = 'half_strands', returns an array of HalfStrands. Otherwise, returns HalfHourglasses.'''
+        assert self.boundary, "Vertex " + self.id + " should be on the boundary."
+        assert self.total_degree() == 1, "multiplicity of vertex " + self.id + " should be 1."
 
-        # return the array of visited hourglasses
-        hourglasses = []
-
+        visited = []
+        
         # find the hourglass to the graph interior
         hh = self._half_hourglasses_head
-        while hh.strand_count != 1: hh = hh.cw_next()
-        hourglasses.append(hh)
+        while hh.is_boundary(): hh = hh.cw_next()
+        strand = hh._half_strands_head
+        visited.append(strand if output == 'half_strands' else strand.hourglass())
 
-        vertex = hh.v_to
-        strand_index = 0
+        vertex = strand.v_to()
         while(not vertex.boundary):
-            # get the next hourglass and its strand
-            # note that the ith strand of the hourglass is the ith strand of its twin
-            hh = hh.twin
-            if (vertex.filled): hh, strand_index = hh.get_get_ccw_ith_strand(i, strand_index)
-            else: hh, strand_index = hh.get_get_cw_ith_strand(i, strand_index)
-            vertex = hh.v_to
-            hourglasses.append(hh)
+            strand = strand.twin
+            if (vertex.filled): strand = strand.get_ccw_ith_element(i)
+            else: strand = strand = strand.get_cw_ith_element(i)
+            vertex = strand.v_to()
+        visited.append(strand if output == 'half_strands' else strand.hourglass())
 
-        return hourglasses
+        return visited
                 
     def get_neighbors(self):
         '''Returns all adjacent vertices in a list.'''
@@ -91,21 +90,15 @@ class Vertex:
         iter = self._half_hourglasses_head
         while True:
             neighbors.append(iter)
-            iter = iter.ccw_next
+            iter = iter.ccw_next()
             if (iter == self._half_hourglasses_head): return
     
     def total_degree(self):
         '''Returns the number of strands around self.'''
         if (self._half_hourglasses_head == None): return 0
-        return self_half_hourglasses_head.get_num_elements()
+        return self._half_hourglasses_head._half_strands_head.get_num_elements()
 
     def simple_degree(self):
         '''Returns the number of hourglasses around self.'''
         if (self._half_hourglasses_head == None): return 0
-            
-        count = 1
-        iter = self._half_hourglasses_head.cw_next
-        while(iter != self._half_hourglasses_head):
-            count += 1
-            iter = iter.cw_next
-        return count
+        return self._half_hourglasses_head.get_num_elements()
