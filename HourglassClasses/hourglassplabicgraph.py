@@ -5,6 +5,8 @@ class HourglassPlabicGraph:
     def __init__(self):
         self.inner_vertices = []
         self.boundary_vertices = []
+
+        self.faces = []
         
         self.layout = 'circular'
 

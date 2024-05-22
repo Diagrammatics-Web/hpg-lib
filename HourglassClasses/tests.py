@@ -18,6 +18,14 @@ class _TestVertex:
 
 # Begin tests
 
+def all_tests():
+    dihedral_element_tests()
+    half_strand_tests()
+    half_hourglass_tests()
+    vertex_tests()
+
+    print("Awaiting further tests.")
+
 def dihedral_element_tests():
     print("Testing DihedralElement class.")
 
@@ -113,7 +121,7 @@ def half_hourglass_tests():
     # list order should now be hh, hhp, hh3, hh4
     assert (hh.strand_count() == 1 and 
             hhp.strand_count() == 0 and 
-            hh3.strand_count == 5 and 
+            hh3.strand_count() == 5 and 
             hh4.strand_count() == 2), "Strands were not linked properly between hourglasses during insertions."
     assert hh._half_strands_head.get_num_elements() == 1 + 5 + 2, "Strands were not linked properly all the way around during insertions."
 

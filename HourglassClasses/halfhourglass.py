@@ -33,6 +33,9 @@ class HalfHourglass(DihedralElement):
                     self._twin._half_strands_head.append_cw(strand.twin())
         else: self._twin = twin
 
+        self.left_face = None
+        self.right_face = None
+
     # Insert/remove overrides. These must be overridden as strands must be linked up as well.
 
     def insert_cw_next(self, element):
@@ -56,13 +59,14 @@ class HalfHourglass(DihedralElement):
         if prev_strand != None: element._half_strands_head.set_cw_prev(prev_strand)
 
     def remove(self):
-        iter = self._half_strands_head
-        ''' either list is empty, we will remove iter when it is 
-         its own cw_next (see DihedralElement.remove()), or 
-         we will eventually run into another hourglass's strands'''
-        while iter.cw_next() != None and iter.hourglass() == self: 
-            iter = iter.cw_next()
-            iter.cw_prev().remove()
+        if self._half_strands_head != None:
+            iter = self._half_strands_head
+            ''' either list is empty, we will remove iter when it is 
+             its own cw_next (see DihedralElement.remove()), or 
+             we will eventually run into another hourglass's strands'''
+            while iter.cw_next() != None and iter.hourglass() == self: 
+                iter = iter.cw_next()
+                iter.cw_prev().remove()
         super().remove()
 
     # Strand modification and accessor functions
@@ -80,7 +84,7 @@ class HalfHourglass(DihedralElement):
         self.add_strand()
 
     def remove_strand(self):
-        ''' Removes the clockwise last strand.
+        ''' Removes the clockwise last strand for itself and its twin.
             Will not work on phantom edges or on edges with only 1 strand left.'''
         if (self.strand_count() <= 1): return 
             

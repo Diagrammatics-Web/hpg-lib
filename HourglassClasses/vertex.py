@@ -36,12 +36,12 @@ class Vertex:
         hh = HalfHourglass(str(self.id) + "_" + str(v_to.id), self, v_to, strand_count)
 
         self._insert_hourglass(hh)
-        v_to._insert_hourglass(hh.twin)
+        v_to._insert_hourglass(hh.twin())
 
     def _insert_hourglass(self, hh):
         '''Inserts hh into the hourglass list. Maintains the list with the first angle being the one with the smallest angle ccw from the x-axis.'''
         # empty list case
-        if (self._half_hourglasses_head == None): 
+        if self._half_hourglasses_head == None: 
             self._half_hourglasses_head = hh
             return
         
@@ -49,18 +49,18 @@ class Vertex:
         hh_angle = hh.get_angle()
         iter = self._half_hourglasses_head
         while True: # runs until first edge with greater angle found or entire list is exhausted
-            if (hh_angle < iter.get_angle()):
+            if hh_angle < iter.get_angle():
                 iter.insert_cw_next(hh)
                 return
             # otherwise, continue iterating through loop
-            iter = iter.ccw_next
-            if (iter == self._half_hourglasses_head):
+            iter = iter.ccw_next()
+            if iter == self._half_hourglasses_head:
                 # we've run the entire loop, so angle is greater than every other edge
                 iter.insert_ccw_next(hh)
                 return
 
     def get_trip(self, i, output='half_strands'):
-        ''' Traverses the graph to compute trip i and returns an array of all visited half hourglasses.
+        ''' Traverses the graph to compute trip i and returns an array of all visited half strands or half hourglasses.
             i: computes trip_i by taking the ith left at unfilled/ith right at filled
             output: if output = 'half_strands', returns an array of HalfStrands. Otherwise, returns HalfHourglasses.'''
         assert self.boundary, "Vertex " + self.id + " should be on the boundary."
