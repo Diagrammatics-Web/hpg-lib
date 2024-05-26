@@ -23,9 +23,9 @@ class Vertex:
         self.first = False
         self.last = False
         self.label = label
-        # this is a circularly double linked list of half hourglasses, connected using
-        # ccw_next and cw_next. the first element should be the one making the smallest
-        # angle with the x-axis.
+        ''' Some half hourglass around this vertex. When the graph is properly embedded,
+            the vertex will attempt to maintain this as the the one making the smallest
+            angle with the x-axis during insertions and deletions, but this behavior is not guaranteed.'''
         self._half_hourglasses_head = None
 
     def __repr__(self):
@@ -39,11 +39,16 @@ class Vertex:
         v_to._insert_hourglass(hh.twin())
 
     def _insert_hourglass(self, hh):
-        '''Inserts hh into the hourglass list. Maintains the list with the first angle being the one with the smallest angle ccw from the x-axis.'''
+        ''' Inserts a half hourglass into the hourglass list. 
+            Maintains the list with the first angle being the one with the smallest angle ccw from the x-axis.'''
         # empty list case
         if self._half_hourglasses_head == None: 
             self._half_hourglasses_head = hh
             return
+
+        # reset head
+        while self._half_hourglasses_head.get_angle() > self._half_hourglasses_head.cw_prev().get_angle():
+            self._half_hourglasses_head = self._half_hourglasses_head.cw_prev()
         
         # find first edge with greater angle, then insert_cw_next
         hh_angle = hh.get_angle()
@@ -62,7 +67,8 @@ class Vertex:
     def get_trip(self, i, output='half_strands'):
         ''' Traverses the graph to compute trip i and returns an array of all visited half strands or half hourglasses.
             i: computes trip_i by taking the ith left at unfilled/ith right at filled
-            output: if output = 'half_strands', returns an array of HalfStrands. Otherwise, returns HalfHourglasses.'''
+            output: if output = 'half_strands', returns an array of HalfStrands. If output = 'half_hourglasses', returns HalfHourglasses.
+                    Otherwise, returns the ids of the HalfStrands.'''
         assert self.boundary, "Vertex " + self.id + " should be on the boundary."
         assert self.total_degree() == 1, "multiplicity of vertex " + self.id + " should be 1."
 
@@ -72,7 +78,7 @@ class Vertex:
         hh = self._half_hourglasses_head
         while hh.is_boundary(): hh = hh.cw_next()
         strand = hh._half_strands_head
-        visited.append(strand if output == 'half_strands' else strand.hourglass())
+        visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)
 
         vertex = strand.v_to()
         while(not vertex.boundary):
@@ -80,7 +86,7 @@ class Vertex:
             if (vertex.filled): strand = strand.get_ccw_ith_element(i)
             else: strand = strand = strand.get_cw_ith_element(i)
             vertex = strand.v_to()
-        visited.append(strand if output == 'half_strands' else strand.hourglass())
+        visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)
 
         return visited
                 

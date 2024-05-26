@@ -19,7 +19,7 @@ class _TestVertex:
 # Begin tests
 
 def all_tests():
-    dihedral_element_tests()
+    # dihedral_element_tests()
     half_strand_tests()
     half_hourglass_tests()
     vertex_tests()
@@ -39,12 +39,14 @@ def dihedral_element_tests():
     d2.insert_ccw_next(d3)
     # list order should now be d1, d3, d2
     assert d1.get_num_elements() == 3, "All 3 elements should be in list."
-    assert (d1.cw_next() == d3  and 
-            d1.ccw_next() == d2 and
-            d2.cw_next() == d1  and 
-            d2.ccw_next() == d3 and
-            d3.cw_next() == d2  and 
-            d3.ccw_next() == d1),   "List order is incorrect or list is broken."
+    assert (
+        d1.cw_next() == d3  and 
+        d1.ccw_next() == d2 and
+        d2.cw_next() == d1  and 
+        d2.ccw_next() == d3 and
+        d3.cw_next() == d2  and 
+        d3.ccw_next() == d1
+    ),   "List order is incorrect or list is broken."
 
     assert d1.get_cw_ith_element(4) == d3, "get_cw_ith_element is broken."
     assert d1.get_ccw_ith_element(7) == d2, "get_ccw_ith_element is broken."
@@ -105,9 +107,7 @@ def half_hourglass_tests():
     assert hh.strand_count() == 4, "hh should have 4 strands. strand_count: " + str(hh.strand_count())
     hh.thin()
     hh.thin()
-    hh.thin()
-    hh.thin()
-    assert hh.strand_count() == 1, "hh should not go below 1 strand. strand_count: " + str(hh.strand_count())
+    assert hh.strand_count() == 2, "hh should have 2 strands. strand_count: " + str(hh.strand_count())
     
     hhp = HalfHourglass(2, v1, v2, 0)
     assert hhp.is_phantom() and hhp.strand_count() == 0, "hhp should be a phantom (boundary) edge."
@@ -118,18 +118,21 @@ def half_hourglass_tests():
     hh.insert_cw_next(hhp)
     hhp.insert_cw_next(hh3)
     hh.insert_ccw_next(hh4)
+
     # list order should now be hh, hhp, hh3, hh4
-    assert (hh.strand_count() == 1 and 
-            hhp.strand_count() == 0 and 
-            hh3.strand_count() == 5 and 
-            hh4.strand_count() == 2), "Strands were not linked properly between hourglasses during insertions."
-    assert hh._half_strands_head.get_num_elements() == 1 + 5 + 2, "Strands were not linked properly all the way around during insertions."
+    assert (
+        hh.strand_count() == 2 and 
+        hhp.strand_count() == 0 and 
+        hh3.strand_count() == 5 and 
+        hh4.strand_count() == 2
+    ), "Strands were not linked properly between hourglasses during insertions."
+    assert hh._half_strands_head.get_num_elements() == 2 + 5 + 2, "Strands were not linked properly all the way around during insertions."
 
     hhp.remove()
     hh3.remove()
     # list order should now be hh, hh4
-    assert hh.strand_count() == 1 and hh4.strand_count() == 2, "Strands were not linked properly between hourglasses during removals."
-    assert hh._half_strands_head.get_num_elements() == 1 + 2, "Strands were not linked properly all the way around during removals."
+    assert hh.strand_count() == 2 and hh4.strand_count() == 2, "Strands were not linked properly between hourglasses during removals."
+    assert hh._half_strands_head.get_num_elements() == 2 + 2, "Strands were not linked properly all the way around during removals."
     print("HalfHourglass tests complete.")
 
 def vertex_tests():

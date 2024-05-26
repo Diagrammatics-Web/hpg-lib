@@ -18,19 +18,23 @@ class HalfHourglass(DihedralElement):
         # twin will have swapped to/from vertices
         # only the "base" hourglass will need to set up strands
         if twin == None:
-            self._twin = HalfHourglass("twin_" + str(id), v_to, v_from, multiplicity, '', self)
+            self._twin = HalfHourglass(str(id) + "_t", v_to, v_from, multiplicity, '', self)
 
-            # Create half strands
+            # Create half strands and record head/tail
             if multiplicity == 0: 
                 self._half_strands_head = None
+                self._half_strands_tail = None
                 self._twin._half_strands_head = None
+                self._twin._half_strands_tail = None
             else:
-                self._half_strands_head = HalfStrand(str(id) + "_s0", self)
+                self._half_strands_head = HalfStrand(str(id) + "_s" + HalfStrand.get_new_id(), self)
                 self._twin._half_strands_head = self._half_strands_head.twin()
                 for i in range(1, multiplicity):
-                    strand = HalfStrand(str(id) + "_s" + str(i), self)
+                    strand = HalfStrand(str(id) + "_s" + HalfStrand.get_new_id(), self)
                     self._half_strands_head.append_cw(strand)
                     self._twin._half_strands_head.append_cw(strand.twin())
+                self._half_strands_tail = self._half_strands_head.cw_last()
+                self._twin._half_strands_tail = self._half_strands_tail.twin()
         else: self._twin = twin
 
         self.left_face = None
@@ -45,8 +49,9 @@ class HalfHourglass(DihedralElement):
         # link up strands
         next_strand = element.cw_next()._get_first_strand()
         prev_strand = next_strand.cw_prev() if next_strand != None else None
-        if next_strand != None: element._half_strands_head.cw_last().set_cw_next(next_strand)
-        if prev_strand != None: element._half_strands_head.set_cw_prev(prev_strand)
+        if next_strand != None: 
+            element._half_strands_tail.link_cw_next(next_strand)
+            element._half_strands_head.link_cw_prev(prev_strand)
 
     def insert_ccw_next(self, element):
         super().insert_ccw_next(element)
@@ -55,8 +60,9 @@ class HalfHourglass(DihedralElement):
         # link up strands - same procedure as for insert_cw_next
         next_strand = element.cw_next()._get_first_strand()
         prev_strand = next_strand.cw_prev() if next_strand != None else None
-        if next_strand != None: element._half_strands_head.cw_last().set_cw_next(next_strand)
-        if prev_strand != None: element._half_strands_head.set_cw_prev(prev_strand)
+        if next_strand != None: 
+            element._half_strands_tail.link_cw_next(next_strand)
+            element._half_strands_head.link_cw_prev(prev_strand)
 
     def remove(self):
         if self._half_strands_head != None:
@@ -74,23 +80,27 @@ class HalfHourglass(DihedralElement):
     def add_strand(self):
         ''' Adds a strand to itself (and its twin) in the last position clockwise.
             Will not work on phantom edges.'''
-        if (self.is_phantom()): return
+        if (self.is_phantom()): raise RuntimeError("Cannot add a strand to a phantom/boundary edge.")
             
-        last_strand = self._half_strands_head.get_last_strand_same_hourglass()
         new_strand = HalfStrand(str(id) + "_s", self) # warning: ID will not be unique
-        last_strand.insert_cw_next(new_strand)
-        last_strand.twin().insert_cw_next(new_strand.twin())
+        self._half_strands_tail.insert_cw_next(new_strand)
+        self._half_strands_tail.twin().insert_cw_next(new_strand.twin())
+        self._half_strands_tail = new_strand
+        self._twin._half_strands_tail = new_strand.twin()
     def thicken(self): # alias
         self.add_strand()
 
     def remove_strand(self):
         ''' Removes the clockwise last strand for itself and its twin.
             Will not work on phantom edges or on edges with only 1 strand left.'''
-        if (self.strand_count() <= 1): return 
+        if (self.strand_count() <= 1): 
+            if self.is_phantom(): raise RuntimeError("Cannot remove a strand from a phantom/boundary edge.") 
+            else: raise RuntimeError("Cannot remove a strand from an edge with only one strand.")
             
-        last_strand = self._half_strands_head.get_last_strand_same_hourglass()
-        last_strand.remove()
-        last_strand.twin().remove()
+        self._half_strands_tail = self._half_strands_tail.cw_prev()
+        self._twin._half_strands_tail = self._twin._half_strands_tail.cw_prev()
+        self._half_strands_tail.cw_next().remove()
+        self._twin._half_strands_tail.cw_next().remove()
     def thin(self): # alias
         self.remove_strand()
 
@@ -108,7 +118,13 @@ class HalfHourglass(DihedralElement):
 
     def strand_count(self):
         if self.is_phantom(): return 0
-        return self._half_strands_head.get_num_strands_same_hourglass()
+        
+        count = 1
+        iter = self._half_strands_head
+        while iter != self._half_strands_tail:
+            count += 1
+            iter = iter.cw_next()
+        return count
     def multiplicity(self): #alias
         return self.strand_count()
     
@@ -124,3 +140,18 @@ class HalfHourglass(DihedralElement):
         if angle < 0:
             angle += 2 * math.pi
         return angle
+
+    def is_left_face_valid(self): # TODO
+        '''Checks if the face to the left is valid, meaning there is a closed cycle with no loose paths inside.'''
+        start_vertex = self._v_from
+        visited = [start_vertex]
+
+        hh = self
+        while (hh._v_to not in visited):
+            visited.append(hh._v_to)
+            hh = hh._twin
+            hh = hh.cw_next()
+
+        return hh._v_to == start_vertex
+
+        

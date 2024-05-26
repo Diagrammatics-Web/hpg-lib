@@ -66,27 +66,27 @@ class DihedralElement:
         ''' Returns the element i elements clockwise.
             This corresponds to the ith left from this element's twin.
             i: how many elements to travel. Relates to trip i.'''
-        return self if i == 0 else self._cw_next.get_cw_ith_element(i-1)
+        return self._cw_next if i == 1 else self._cw_next.get_cw_ith_element(i-1)
 
     def get_ccw_ith_element(self, i):
         ''' Returns the element i elements counterclockwise.
             This corresponds to the ith right from this element's twin.
             i: how many elements to travel. Relates to trip i.'''
-        return self if i == 0 else self._ccw_next.get_ccw_ith_element(i-1)
+        return self._ccw_next if i == 1 else self._ccw_next.get_ccw_ith_element(i-1)
 
-    # CW/CCW next modifiers. Use insert functions instead if possible.
+    # Directly connects two elements. Use insert functions instead if possible.
     
-    def set_cw_next(self, element):
+    def link_cw_next(self, element):
         self._cw_next = element
         element._ccw_next = self
-    def set_ccw_prev(self, element): # alias
-        self.set_cw_next(element)
+    def link_ccw_prev(self, element): # alias
+        self.link_cw_next(element)
 
-    def set_ccw_next(self, element):
+    def link_ccw_next(self, element):
         self._ccw_next = element
         element._cw_next = self
-    def set_cw_prev(self, element): # alias
-        self.set_ccw_next(element)
+    def link_cw_prev(self, element): # alias
+        self.link_ccw_next(element)
 
     # List data functions
 

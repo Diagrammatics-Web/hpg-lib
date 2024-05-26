@@ -1,13 +1,15 @@
 from .dihedralelement import DihedralElement
 
 class HalfStrand(DihedralElement):
+    '''Represents movement along one direction of a strand of an edge in an hourglass plabic graph.'''
+    
     def __init__(self, id, hourglass, twin=None):
         '''Represents movement along one direction of a strand of an edge in an hourglass plabic graph.'''
         super().__init__(id)
         self._hourglass = hourglass
         
         # the half strand representing movement in the opposite direction, between the same vertices
-        self._twin = HalfStrand("twin_" + str(id), hourglass.twin(), self) if twin == None else twin
+        self._twin = HalfStrand(str(id) + "_t", hourglass.twin(), self) if twin == None else twin
 
     def hourglass(self):
         return self._hourglass
@@ -19,7 +21,8 @@ class HalfStrand(DihedralElement):
         return self._hourglass.v_from()
 
     def get_last_strand_same_hourglass(self):
-        '''Returns the last strand clockwise owned by the same parent hourglass.'''
+        ''' Returns the last strand clockwise owned by the same parent hourglass.
+            Avoid using instead of HalfHourglass._half_strands_tail.'''
         iter = self.cw_next()
         # Eventually, we will reach another hourglass or loop back around
         while iter.hourglass() == self.hourglass() and iter != self:
@@ -36,3 +39,11 @@ class HalfStrand(DihedralElement):
             count += 1
             iter = iter.cw_next()
         return count
+
+    # used for ID generation
+    _id = 0
+    @classmethod
+    def get_new_id(cls):
+        n_id = "strand" + str(cls._id)
+        cls._id += 1
+        return n_id
