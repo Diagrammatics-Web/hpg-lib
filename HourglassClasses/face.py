@@ -18,9 +18,11 @@ class Face:
         self.boundary = False
         iter = hh
         while True:
+            # take the sharpest left turn
             iter.left_face = self
             iter = iter.twin()
             iter.right_face = self
             iter = iter.cw_next()
             if iter.is_boundary(): self.boundary = True
-            if iter == hh: break
+            if iter == hh: return
+                

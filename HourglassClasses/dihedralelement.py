@@ -92,19 +92,41 @@ class DihedralElement:
 
     def get_num_elements(self):
         '''Returns the number of elements in the linked list.'''
-        count = 1
-        iter = self._cw_next
-        while(iter != self):
-            count += 1
-            iter = iter._cw_next
+        count = 0
+        for element in self.iterate_clockwise(): count += 1
         return count
 
     def get_elements_as_list(self, clockwise=True):
         ''' Returns the elements in an list.
             clockwise: The list will be in clockwise order. Otherwise it will be in counterclockwise order. Defaults to True.'''
-        list = [self]
-        iter = self._cw_next if clockwise else self._ccw_next
-        while(iter != self):
-            list.append(iter)
-            iter = iter._cw_next if clockwise else iter._ccw_next
-        return list
+        if clockwise: return [element for element in self.iterate_clockwise()]
+        else: [element for element in self.iterate_counterclockwise()]
+
+    def iterate_clockwise(self):
+        return _DihedralIterator(self, True)
+
+    def iterate_counterclockwise(self):
+        return _DihedralIterator(self, False)
+
+class _DihedralIterator:
+    '''Internal class for iterating over dihedral elements. Iteration can be specified to occur in clockwise or counterclockwise order.'''
+    def __init__(self, head, clockwise): 
+        self.head = head
+        self.iter = head
+        self.begin = False
+        self.clockwise = clockwise
+        
+    def __iter__(self):
+        return self
+        
+    def __next__(self):
+        if self.iter == self.head:
+            if self.begin: raise StopIteration
+            else: self.begin = True
+        if self.clockwise:
+            self.iter = self.iter.cw_next()
+            return self.iter.cw_prev()
+        else:
+            self.iter = self.iter.ccw_next()
+            return self.iter.ccw_prev()
+        

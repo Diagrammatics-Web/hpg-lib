@@ -39,6 +39,7 @@ def dihedral_element_tests():
     d2.insert_ccw_next(d3)
     # list order should now be d1, d3, d2
     assert d1.get_num_elements() == 3, "All 3 elements should be in list."
+    assert d1.get_elements_as_list() == [d1, d3, d2], "Iteration does not form proper list."
     assert (
         d1.cw_next() == d3  and 
         d1.ccw_next() == d2 and

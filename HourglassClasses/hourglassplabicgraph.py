@@ -1,19 +1,58 @@
 from sage.all import Graph
+from .vertex import Vertex
 
 class HourglassPlabicGraph:
     '''Represents an hourglass plabic graph.'''
     def __init__(self):
-        self.inner_vertices = []
-        self.boundary_vertices = []
+        # dictionaries pairing IDs to vertices
+        self._inner_vertices = {}
+        self._boundary_vertices = {}
 
         self.faces = []
         
         self.layout = 'circular'
 
+    # Construction functions
+
+    def create_boundary(self, num):
+        pass
+
+    def create_vertex(self, v_id, label, x, y, filled, boundary=False, verify_id=False):
+        ''' Adds a vertex to the graph.
+            v_id: The id given to the vertex. Should be unique.
+            label: 
+            x: The x position of the vertex
+            y: The y position of the vertex
+            filled: Whether the vertex is to be filled or not.
+            boundary: Whether the vertex is on the boundary. Defaults to False.
+            verify_id: Check whether v_id is already in use. Defaults to False.
+            '''
+        if verify_id and ((not boundary and v_id in self._inner_vertices) or (boundary and v_id in self._boundary_vertices)): raise ValueError("v_id already in use.")
+
+        vertex = Vertex(v_id, x, y, filled, boundary, label)
+        if boundary: self._inner_vertices[v_id] = vertex
+        else: self._boundary_vertices[v_id] = vertex
+
+    def remove_vertex(self, v_id):
+        self._get_vertex(v_id).clear_hourglasses()
+        
+    def create_hourglass(self, v1_id, v2_id, multiplicity, create_face=True, verify_face=True):
+        v1 = self._get_vertex(v1_id)
+        v2 = self._get_vertex(v2_id)
+
+        hh = v1.create_hourglass_between(v2, multiplicity)
+        # TODO: Create faces
+    
+    def remove_hourglass(self, v1_id, v2_id, create_face=True, verify_face=True):
+        v1 = self._get_vertex(v1_id)
+        v2 = self._get_vertex(v2_id)
+
+        
+
     # Layout functions
     
     def make_circular(self, radius=10): # TODO: TEST
-        n = len(self.boundary_vertices)
+        n = len(self.boundary_vertices.values())
         for i,v in self.boundary_vertices:
             v.x = radius*math.sin((i+0.5)*2*math.pi/n)
             v.y = radius*math.cos((i+0.5)*2*math.pi/n)
@@ -23,7 +62,7 @@ class HourglassPlabicGraph:
 
     def to_graph(self, hourglass_labels=False): # TODO: VERIFY/TEST
         '''Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.'''
-        vertices = inner_vertices + boundary_vertices
+        vertices = inner_vertices.values() + boundary_vertices.values()
         edges = [(h.v_from.id, h.v_to.id, h.label if hourglass_labels else h.strand_count) for h in self.hourglasses.values()]
         pos = {v:(v.x,v.y) for v in vertices}
         g = Graph([vertices,edges],format='vertices_and_edges', pos=pos)
@@ -72,3 +111,9 @@ class HourglassPlabicGraph:
            and r is the maximum degree of an internal vertex.'''
         r = max(v.total_degree() for v in self.inner_vertices)
         return [self.get_trip_perm(i) for i in range(1, r)]
+
+    def _get_vertex(id):
+        v = self._inner_vertices.get(v_id)
+        if v == None: 
+            v = self._boundary_vertices.get(v_id)
+            if v == None: raise ValueError("id " + str(id) + " does not correspond to any vertex.")

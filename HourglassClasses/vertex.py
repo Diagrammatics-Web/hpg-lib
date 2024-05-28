@@ -31,12 +31,18 @@ class Vertex:
     def __repr__(self):
         return "HourglassPlabicGraph Vertex object: id=%s, label=%s"%(str(self.id), str(self.label))
 
-    def create_hourglass_between(self, v_to, strand_count):
-        ''' Creates a half hourglass to and from v_to, inserting it into each vertex's hourglass list.'''
-        hh = HalfHourglass(str(self.id) + "_" + str(v_to.id), self, v_to, strand_count)
+    def create_hourglass_between(self, v_to, multiplicity):
+        ''' Creates a half hourglass to and from v_to, inserting it into each vertex's hourglass list.
+            v_to: The vertex to create the hourglass to.
+            multiplicity: the number of strands on the edge.
+            OUTPUT: The constructed hourglass.
+            '''
+        hh = HalfHourglass(str(self.id) + "_" + str(v_to.id), self, v_to, multiplicity)
 
         self._insert_hourglass(hh)
         v_to._insert_hourglass(hh.twin())
+
+        return hh
 
     def _insert_hourglass(self, hh):
         ''' Inserts a half hourglass into the hourglass list. 
@@ -52,17 +58,26 @@ class Vertex:
         
         # find first edge with greater angle, then insert_cw_next
         hh_angle = hh.get_angle()
-        iter = self._half_hourglasses_head
-        while True: # runs until first edge with greater angle found or entire list is exhausted
-            if hh_angle < iter.get_angle():
-                iter.insert_cw_next(hh)
+        for iter_hh in self._half_hourglasses_head.iterate_clockwise():
+            if hh_angle < iter_hh.get_angle():
+                iter_hh.insert_cw_next(hh)
                 return
-            # otherwise, continue iterating through loop
-            iter = iter.ccw_next()
-            if iter == self._half_hourglasses_head:
-                # we've run the entire loop, so angle is greater than every other edge
-                iter.insert_ccw_next(hh)
-                return
+        # we've run the entire loop, so angle is greater than every other edge
+        self._half_hourglasses_head.insert_ccw_next(hh)
+
+    def clear_hourglasses(self):
+        ''' Deletes all hourglasses (and their twins) attached to this vertex.'''
+        if self._half_hourglasses_head == None: return # hacky, there should be a cleaner way to do this
+        while True:
+            self._half_hourglasses_head = self._half_hourglasses_head.cw_next()
+            if self._half_hourglasses_head == None: break
+            self._half_hourglasses_head.cw_prev().remove()
+            self._half_hourglasses_head.cw_prev().twin().remove()
+
+    def get_hourglass_to(self, v_to):
+        for hh in self._half_hourglasses_head.iterate_clockwise():
+            if hh.v_to() == v_to: return hh
+        raise ValueError("Hourglass to vertex " + v_to.id() + " does not exist.")
 
     def get_trip(self, i, output='half_strands'):
         ''' Traverses the graph to compute trip i and returns an array of all visited half strands or half hourglasses.
@@ -81,7 +96,7 @@ class Vertex:
         visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)
 
         vertex = strand.v_to()
-        while(not vertex.boundary):
+        while not vertex.boundary:
             strand = strand.twin
             if (vertex.filled): strand = strand.get_ccw_ith_element(i)
             else: strand = strand = strand.get_cw_ith_element(i)
@@ -100,11 +115,11 @@ class Vertex:
             if (iter == self._half_hourglasses_head): return
     
     def total_degree(self):
-        '''Returns the number of strands around self.'''
+        '''Returns the number of strands around this vertex.'''
         if (self._half_hourglasses_head == None): return 0
         return self._half_hourglasses_head._half_strands_head.get_num_elements()
 
     def simple_degree(self):
-        '''Returns the number of hourglasses around self.'''
+        '''Returns the number of hourglasses around this vertex.'''
         if (self._half_hourglasses_head == None): return 0
         return self._half_hourglasses_head.get_num_elements()
