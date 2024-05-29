@@ -15,8 +15,22 @@ class HourglassPlabicGraph:
     # Construction functions
 
     def create_boundary(self, num):
-        pass
+        ''' Creates num boundary vertices, labeled from 0 to num-1, and connects them with phantom edges.
+            The vertices will be unfilled. This function can only be called on an empty graph.
+            num: the number of boundary vertices to create.
+            '''
+        assert self._inner_vertices.len() == 0 and self._boundary_vertices.len() == 0, "Cannot call create_boundary on a non-empty graph."
 
+        for i in range(0, num):
+            id = str(i)
+            self._boundary_vertices[i] = Vertex(id, 10*math.sin((i+0.5)*2*math.pi/num), 10*math.cos((i+0.5)*2*math.pi/num), False, True, id)
+
+        for i in range(0, num-1):
+            self._boundary_vertices[i].create_hourglass_between(self._boundary_vertices[i+1], 0)
+        hh = self._boundary_vertices[0].create_hourglass_between(self._boundary_vertices[num-1], 0)
+
+        # TODO: Create face
+            
     def create_vertex(self, v_id, label, x, y, filled, boundary=False, verify_id=False):
         ''' Adds a vertex to the graph.
             v_id: The id given to the vertex. Should be unique.
@@ -41,14 +55,19 @@ class HourglassPlabicGraph:
         v2 = self._get_vertex(v2_id)
 
         hh = v1.create_hourglass_between(v2, multiplicity)
+        
         # TODO: Create faces
     
     def remove_hourglass(self, v1_id, v2_id, create_face=True, verify_face=True):
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
 
-        
+        hh = v1.get_hourglass_to(v2)
+        hh.remove()
+        hh.twin().remove()
 
+        # TODO: reform faces
+    
     # Layout functions
     
     def make_circular(self, radius=10): # TODO: TEST
@@ -113,6 +132,7 @@ class HourglassPlabicGraph:
         return [self.get_trip_perm(i) for i in range(1, r)]
 
     def _get_vertex(id):
+        ''' Internal helper function that gets the vertex with the given id from either _inner_vertices or _boundary_vertices, and throws if the id is not found.'''
         v = self._inner_vertices.get(v_id)
         if v == None: 
             v = self._boundary_vertices.get(v_id)

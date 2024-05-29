@@ -134,6 +134,9 @@ def half_hourglass_tests():
     # list order should now be hh, hh4
     assert hh.strand_count() == 2 and hh4.strand_count() == 2, "Strands were not linked properly between hourglasses during removals."
     assert hh._half_strands_head.get_num_elements() == 2 + 2, "Strands were not linked properly all the way around during removals."
+
+    #TODO: test is_left_face_valid
+    
     print("HalfHourglass tests complete.")
 
 def vertex_tests():
@@ -153,6 +156,11 @@ def vertex_tests():
     assert v1.total_degree() == 8, "v1 should have 8 strands around it"
     assert v4.simple_degree() == 2, "v4 should have 2 hourglasses implicitly created around it"
     assert v4.total_degree() == 5, "v4 should have 5 strands around it"
+
+    assert v4.get_hourglass_to(v2).v_to() == v2, "v4 should be able to find an hourglass to v2"
+    assert v1.get_hourglass_to(v3).v_to() == v3, "v1 should be able to find an hourglass to v3"
+    v1.clear_hourglasses()
+    assert v1.simple_degree() == 0, "v1 should have no hourglasses around it"
 
     print("Vertex tests complete.")
 

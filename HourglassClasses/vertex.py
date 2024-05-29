@@ -68,12 +68,12 @@ class Vertex:
     def clear_hourglasses(self):
         ''' Deletes all hourglasses (and their twins) attached to this vertex.'''
         if self._half_hourglasses_head == None: return # hacky, there should be a cleaner way to do this
-        while True:
+        while self._half_hourglasses_head.cw_next() != None:
             self._half_hourglasses_head = self._half_hourglasses_head.cw_next()
-            if self._half_hourglasses_head == None: break
-            self._half_hourglasses_head.cw_prev().remove()
             self._half_hourglasses_head.cw_prev().twin().remove()
-
+            self._half_hourglasses_head.cw_prev().remove()
+        self._half_hourglasses_head = None
+    
     def get_hourglass_to(self, v_to):
         for hh in self._half_hourglasses_head.iterate_clockwise():
             if hh.v_to() == v_to: return hh
@@ -98,8 +98,7 @@ class Vertex:
         vertex = strand.v_to()
         while not vertex.boundary:
             strand = strand.twin
-            if (vertex.filled): strand = strand.get_ccw_ith_element(i)
-            else: strand = strand = strand.get_cw_ith_element(i)
+            strand = strand.get_ccw_ith_element(i) if vertex.filled else strand.get_cw_ith_element(i)
             vertex = strand.v_to()
         visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)
 
@@ -107,17 +106,13 @@ class Vertex:
                 
     def get_neighbors(self):
         '''Returns all adjacent vertices in a list.'''
-        neighbors = []
-        iter = self._half_hourglasses_head
-        while True:
-            neighbors.append(iter)
-            iter = iter.ccw_next()
-            if (iter == self._half_hourglasses_head): return
+        return [hh.v_to() for hh in self._half_hourglasses_head.iterate_clockwise()]
     
     def total_degree(self):
         '''Returns the number of strands around this vertex.'''
         if (self._half_hourglasses_head == None): return 0
-        return self._half_hourglasses_head._half_strands_head.get_num_elements()
+        s = self._half_hourglasses_head._get_first_strand()
+        return 0 if s == None else s.get_num_elements()
 
     def simple_degree(self):
         '''Returns the number of hourglasses around this vertex.'''
