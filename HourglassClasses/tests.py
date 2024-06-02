@@ -152,15 +152,15 @@ def vertex_tests():
     v1.create_hourglass_between(v4, 5)
     v2.create_hourglass_between(v4, 0)
 
-    assert v1.simple_degree() == 3, "v1 should have 3 hourglasses around it"
-    assert v1.total_degree() == 8, "v1 should have 8 strands around it"
-    assert v4.simple_degree() == 2, "v4 should have 2 hourglasses implicitly created around it"
-    assert v4.total_degree() == 5, "v4 should have 5 strands around it"
+    assert v1.simple_degree() == 3, "v1 should have 3 hourglasses around it."
+    assert v1.total_degree() == 8, "v1 should have 8 strands around it."
+    assert v4.simple_degree() == 2, "v4 should have 2 hourglasses implicitly created around it."
+    assert v4.total_degree() == 5, "v4 should have 5 strands around it."
 
-    assert v4.get_hourglass_to(v2).v_to() == v2, "v4 should be able to find an hourglass to v2"
-    assert v1.get_hourglass_to(v3).v_to() == v3, "v1 should be able to find an hourglass to v3"
+    assert v4.get_hourglass_to(v2).v_to() == v2, "v4 should be able to find an hourglass to v2."
+    assert v1.get_hourglass_to(v3).v_to() == v3, "v1 should be able to find an hourglass to v3."
     v1.clear_hourglasses()
-    assert v1.simple_degree() == 0, "v1 should have no hourglasses around it"
+    assert v1.simple_degree() == 0, "v1 should have no hourglasses around it."
 
     print("Vertex tests complete.")
 
@@ -168,6 +168,7 @@ def trip_tests():
     print("Testing trips.")
     HPG = create_test_HPG()
     print(HPG.get_trip_perms())
+    print("TODO")
 
 def create_test_HPG():
     '''Creates the graph seen at https://youtu.be/wsltX4aTjbc?t=2565'''

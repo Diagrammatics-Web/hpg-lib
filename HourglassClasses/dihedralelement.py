@@ -109,7 +109,8 @@ class DihedralElement:
         return _DihedralIterator(self, False)
 
 class _DihedralIterator:
-    '''Internal class for iterating over dihedral elements. Iteration can be specified to occur in clockwise or counterclockwise order.'''
+    ''' Internal class for iterating over dihedral elements. Iteration can be specified to occur in clockwise or counterclockwise order.
+        Modification of the list while iterating can cause errors with iteration.'''
     def __init__(self, head, clockwise): 
         self.head = head
         self.iter = head

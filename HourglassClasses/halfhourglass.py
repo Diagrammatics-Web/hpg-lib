@@ -36,7 +36,7 @@ class HalfHourglass(DihedralElement):
                 self._half_strands_tail = self._half_strands_head.cw_last()
                 self._twin._half_strands_tail = self._half_strands_tail.twin()
         else: self._twin = twin
-
+        
         self.left_face = None
         self.right_face = None
 
@@ -139,19 +139,4 @@ class HalfHourglass(DihedralElement):
         angle = math.atan2(self._v_to.y-self._v_from.y, self._v_to.x-self._v_from.x)
         if angle < 0:
             angle += 2 * math.pi
-        return angle
-
-    def is_left_face_valid(self):
-        '''Checks if the face to the left is valid, meaning there is a closed cycle with no loose paths inside.'''
-        start_vertex = self._v_from
-        visited = [start_vertex]
-
-        hh = self
-        while (hh._v_to not in visited):
-            visited.append(hh._v_to)
-            hh = hh._twin
-            hh = hh.cw_next()
-
-        return hh._v_to == start_vertex and visited.len() > 2
-
-        
+        return angle        

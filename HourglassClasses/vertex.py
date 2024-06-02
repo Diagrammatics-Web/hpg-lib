@@ -65,6 +65,15 @@ class Vertex:
         # we've run the entire loop, so angle is greater than every other edge
         self._half_hourglasses_head.insert_ccw_next(hh)
 
+    def _remove_hourglass(self, hh):
+        "Safely removes the provided hourglass from this vertex's hourglass list."
+        assert hh.v_from() == self, "Half hourglass " + str(hh.id) + " does not belong to this vertex."
+        if hh == self._half_hourglasses_head:
+            self._half_hourglasses_head = self._half_hourglasses_head.ccw_next()
+            if hh == self._half_hourglasses_head:
+                self._half_hourglasses_head == None
+        hh.remove()
+
     def clear_hourglasses(self):
         ''' Deletes all hourglasses (and their twins) attached to this vertex.'''
         if self._half_hourglasses_head == None: return # hacky, there should be a cleaner way to do this
@@ -118,3 +127,60 @@ class Vertex:
         '''Returns the number of hourglasses around this vertex.'''
         if (self._half_hourglasses_head == None): return 0
         return self._half_hourglasses_head.get_num_elements()
+
+    # Vertex manipulation functions
+
+    def is_contractible(self):
+        hh1 = self._half_hourglasses_head
+        hh2 = hh1.cw_next()
+        # Check if vertex is contractible
+        if (hh1 != hh2.cw_next() or hh1 == hh2): return false
+        if (hh1.v_to().filled and hh2.v_to().filled and not self.filled) or (not hh1.v_to().filled and not hh2.v_to().filled and self.filled):
+            return false
+        return true
+    
+    def contract(self):
+        hh1 = self._half_hourglasses_head
+        hh2 = hh1.cw_next()
+
+        # transfer hourglasses to one vertex, delete the other
+        rem_v = hh1.v_to() #remaining
+        del_v = hh2.v_to()
+
+        hh = del_v._half_hourglasses_head
+        while hh.v_from() != rem_v:
+            if hh == hh2.twin(): continue
+            
+            hh_next = hh.cw_next()
+            hh._v_from = rem_v
+            rem_v._insert_hourglass(hh)
+            hh = hh_next
+
+        rem_v.remove_hourglass(hh1.twin())
+
+    # Square move functions
+
+    def square_move_contract(self, hh):
+        raise NotImplementedError("square_move_contract not yet implemented")
+
+    def square_move_expand(self, hh1, hh2):
+        raise NotImplementedError("square_move_expand not yet implemented")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
