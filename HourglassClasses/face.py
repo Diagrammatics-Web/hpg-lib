@@ -44,10 +44,10 @@ class Face:
             alternating filled/unfilled status, with multiplicity 1 edges in between.
             Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.'''
         count = 0
-        should_be_filled = not self._half_hourglasses_head.v_from().filled
+        should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
         for hh in self:
             #checks
-            if hh.strand_count() != 1: return false
+            if hh.multiplicity() != 1: return false
             if hh.v_to().filled != should_be_filled: return false
             if count > 4: return false
             # iterate
@@ -57,15 +57,15 @@ class Face:
 
     def is_benzene_move_valid(self):
         ''' Verifies that this face can perform a square move. This requires the face to have an even number of
-            vertices, with alternating filled/unfilled status, and with edges of alternating 1/2 multiplicity in between.
+            vertices, with alternating filled/unfilled status, and with edges of alternating 1 or 2 multiplicity in between.
             The multiplicities of the edges are swapped.'''
         count = 0
-        should_be_filled = not self._half_hourglasses_head.v_from().filled
+        should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
         expected_mult = 1 if self._half_hourglasses_head.strand_count() == 1 else 2
         for hh in self:
             #checks
-            if iter.strand_count() != expected_mult: return false
-            if iter.v_to().filled != should_be_filled: return false
+            if hh.multiplicity() != expected_mult: return false
+            if hh.v_to().filled != should_be_filled: return false
             # iterate
             count += 1
             should_be_filled = not should_be_filled

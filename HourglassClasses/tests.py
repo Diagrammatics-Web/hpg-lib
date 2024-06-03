@@ -170,6 +170,12 @@ def trip_tests():
     print(HPG.get_trip_perms())
     print("TODO")
 
+def face_tests():
+    print("Face tests not written yet.")
+
+def hourglass_plabic_graph_tests():
+    print("HPG tests not written yet.")
+
 def create_test_HPG():
     '''Creates the graph seen at https://youtu.be/wsltX4aTjbc?t=2565'''
     inner_vertices = []

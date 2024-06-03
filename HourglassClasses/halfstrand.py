@@ -12,6 +12,7 @@ class HalfStrand(DihedralElement):
         self._twin = HalfStrand(str(id) + "_t", hourglass.twin(), self) if twin == None else twin
 
     def hourglass(self):
+        '''Returns the parent hourglass of this strand.'''
         return self._hourglass
 
     def v_to(self):

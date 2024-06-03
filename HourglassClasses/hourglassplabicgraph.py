@@ -14,20 +14,29 @@ class HourglassPlabicGraph:
 
     # Construction functions
 
-    def create_boundary(self, num):
-        ''' Creates num boundary vertices, labeled from 0 to num-1, and connects them with phantom edges.
-            The vertices will be unfilled. This function can only be called on an empty graph.
-            num: the number of boundary vertices to create.
-            '''
+    def create_boundary(self, n):
+        r"""
+        Creates n boundary vertices, labeled from 0 to n-1, and connects them with phantom edges.
+        The vertices will be unfilled. This function can only be called on an empty graph.
+
+        INPUT:
+    
+        - ``n`` -- integer; the number of boundary vertices to create.
+
+        EXAMPLES:
+    
+            sage: HPG = HourglassPlabicGraph()
+            sage: HPG.create_boundary()
+        """
         assert self._inner_vertices.len() == 0 and self._boundary_vertices.len() == 0, "Cannot call create_boundary on a non-empty graph."
 
-        for i in range(0, num):
+        for i in range(0, n):
             id = str(i)
-            self._boundary_vertices[i] = Vertex(id, 10*math.sin((i+0.5)*2*math.pi/num), 10*math.cos((i+0.5)*2*math.pi/num), False, True, id)
+            self._boundary_vertices[i] = Vertex(id, 10*math.sin((i+0.5)*2*math.pi/n), 10*math.cos((i+0.5)*2*math.pi/n), False, True, id)
 
-        for i in range(0, num-1):
+        for i in range(0, n-1):
             self._boundary_vertices[i].create_hourglass_between(self._boundary_vertices[i+1], 0)
-        hh = self._boundary_vertices[0].create_hourglass_between(self._boundary_vertices[num-1], 0)
+        hh = self._boundary_vertices[0].create_hourglass_between(self._boundary_vertices[n-1], 0)
 
         # TODO: Create face
             
@@ -79,14 +88,6 @@ class HourglassPlabicGraph:
         self.tutte_layout()
         self.layout = "circular"
 
-    def to_graph(self, hourglass_labels=False): # TODO: VERIFY/TEST
-        '''Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.'''
-        vertices = inner_vertices.values() + boundary_vertices.values()
-        edges = [(h.v_from.id, h.v_to.id, h.label if hourglass_labels else h.strand_count) for h in self.hourglasses.values()]
-        pos = {v:(v.x,v.y) for v in vertices}
-        g = Graph([vertices,edges],format='vertices_and_edges', pos=pos)
-        return g
-
     def tutte_layout(self, error=0.01, max_iter = 1000):
         '''from https://cs.brown.edu/people/rtamassi/gdhandbook/chapters/force-directed.pdf.'''
         for i in range(max_iter):
@@ -99,6 +100,14 @@ class HourglassPlabicGraph:
                 v.x, v.y = x_new, y_new
             if err < error:
                 break
+
+    def to_graph(self, hourglass_labels=False): # TODO: VERIFY/TEST
+        '''Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.'''
+        vertices = inner_vertices.values() + boundary_vertices.values()
+        edges = [(h.v_from.id, h.v_to.id, h.label if hourglass_labels else h.strand_count) for h in self.hourglasses.values()]
+        pos = {v:(v.x,v.y) for v in vertices}
+        g = Graph([vertices,edges],format='vertices_and_edges', pos=pos)
+        return g
 
     # Trip functions
 

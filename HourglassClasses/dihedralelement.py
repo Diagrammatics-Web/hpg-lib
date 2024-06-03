@@ -97,7 +97,7 @@ class DihedralElement:
         return count
 
     def get_elements_as_list(self, clockwise=True):
-        ''' Returns the elements in an list.
+        ''' Returns the elements in a list.
             clockwise: The list will be in clockwise order. Otherwise it will be in counterclockwise order. Defaults to True.'''
         if clockwise: return [element for element in self.iterate_clockwise()]
         else: [element for element in self.iterate_counterclockwise()]

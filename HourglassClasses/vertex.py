@@ -31,6 +31,8 @@ class Vertex:
     def __repr__(self):
         return "HourglassPlabicGraph Vertex object: id=%s, label=%s"%(str(self.id), str(self.label))
 
+    # Hourglass construction and manipulation functions
+    
     def create_hourglass_between(self, v_to, multiplicity):
         ''' Creates a half hourglass to and from v_to, inserting it into each vertex's hourglass list.
             v_to: The vertex to create the hourglass to.
@@ -84,6 +86,7 @@ class Vertex:
         self._half_hourglasses_head = None
     
     def get_hourglass_to(self, v_to):
+        '''Returns the half hourglass from this vertex to v_to.'''
         for hh in self._half_hourglasses_head.iterate_clockwise():
             if hh.v_to() == v_to: return hh
         raise ValueError("Hourglass to vertex " + v_to.id() + " does not exist.")
@@ -120,8 +123,9 @@ class Vertex:
     def total_degree(self):
         '''Returns the number of strands around this vertex.'''
         if (self._half_hourglasses_head == None): return 0
-        s = self._half_hourglasses_head._get_first_strand()
-        return 0 if s == None else s.get_num_elements()
+        count = 0
+        for hh in self._half_hourglasses_head.iterate_clockwise(): count += hh.strand_count()
+        return count
 
     def simple_degree(self):
         '''Returns the number of hourglasses around this vertex.'''
@@ -144,26 +148,42 @@ class Vertex:
         hh2 = hh1.cw_next()
 
         # transfer hourglasses to one vertex, delete the other
-        rem_v = hh1.v_to() #remaining
+        sur_v = hh1.v_to() # surviving vertex
         del_v = hh2.v_to()
 
         hh = del_v._half_hourglasses_head
-        while hh.v_from() != rem_v:
+        while hh.v_from() != sur_v:
             if hh == hh2.twin(): continue
             
             hh_next = hh.cw_next()
-            hh._v_from = rem_v
-            rem_v._insert_hourglass(hh)
+            hh._v_from = sur_v
+            sur_v._insert_hourglass(hh)
             hh = hh_next
 
-        rem_v.remove_hourglass(hh1.twin())
+        sur_v.remove_hourglass(hh1.twin())
 
-    # Square move functions
+    # Square move functions -- usable in SL4
 
-    def square_move_contract(self, hh):
-        raise NotImplementedError("square_move_contract not yet implemented")
+    def square_move_contract(self, out_hh):
+        ''' Contracts the vertex by replacing it with the vertex it is connected to outside the face.
+            This function should only be called on vertices with only one outgoing hourglass.
+            out_hh: the half hourglass from this vertex to the vertex it will contract with.'''
+        sur_v = out_hh.v_to()
+
+        # store in an array to make iteration safe while reparenting
+        hourglasses = [hh for hh in out_hh.iterate_clockwise() if hh != out_hh]
+        for hh in hourglasses:
+            hh._v_from = sur_v
+            sur_v._insert_hourglass(hh)
 
     def square_move_expand(self, hh1, hh2):
+        ''' Expands the vertex by creating another vertex of opposite fill and using it to take its place in the square face.
+            This function should only be called on vertices with two outgoing hourglasses.
+            hh1, hh2: the two half hourglasses adjacent to the square face. These will be reparented to the new vertex.
+            OUTPUT: Returns the created vertex.'''
+        x = (self.x + hh1.v_to().x + hh2.v_to().x) / 3
+        y = (self.y + hh1.v_to().y + hh2.v_to().y) / 3
+        new_v = Vertex("v_" + str(self.id), x, y, not self.filled):
         raise NotImplementedError("square_move_expand not yet implemented")
 
 

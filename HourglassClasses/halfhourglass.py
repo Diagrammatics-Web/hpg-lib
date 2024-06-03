@@ -12,6 +12,7 @@ class HalfHourglass(DihedralElement):
         super().__init__(id)
         self._v_from = v_from
         self._v_to = v_to
+        self._multiplicity = multiplicity
         self.label = label
         
         # the half hourglass representing movement in the opposite direction, between the same vertices
@@ -29,7 +30,8 @@ class HalfHourglass(DihedralElement):
             else:
                 self._half_strands_head = HalfStrand(str(id) + "_s" + HalfStrand.get_new_id(), self)
                 self._twin._half_strands_head = self._half_strands_head.twin()
-                for i in range(1, multiplicity):
+                for i in range(1, multiplicity): # runs multiplicity-1 times as we have already created a head strand
+                    # potentially use thicken() instead of doing this manually?
                     strand = HalfStrand(str(id) + "_s" + HalfStrand.get_new_id(), self)
                     self._half_strands_head.append_cw(strand)
                     self._twin._half_strands_head.append_cw(strand.twin())
@@ -78,15 +80,18 @@ class HalfHourglass(DihedralElement):
     # Strand modification and accessor functions
     
     def add_strand(self):
-        ''' Adds a strand to itself (and its twin) in the last position clockwise.
+        ''' Adds a strand to itself and its twin in the last position clockwise.
             Will not work on phantom edges.'''
         if (self.is_phantom()): raise RuntimeError("Cannot add a strand to a phantom/boundary edge.")
             
-        new_strand = HalfStrand(str(id) + "_s", self) # warning: ID will not be unique
+        new_strand = HalfStrand(str(id) + "_" + HalfStrand.get_new_id(), self)
         self._half_strands_tail.insert_cw_next(new_strand)
         self._half_strands_tail.twin().insert_cw_next(new_strand.twin())
         self._half_strands_tail = new_strand
         self._twin._half_strands_tail = new_strand.twin()
+
+        self._multiplicity += 1
+        self._twin._multiplicity += 1
     def thicken(self): # alias
         self.add_strand()
 
@@ -101,6 +106,9 @@ class HalfHourglass(DihedralElement):
         self._twin._half_strands_tail = self._twin._half_strands_tail.cw_prev()
         self._half_strands_tail.cw_next().remove()
         self._twin._half_strands_tail.cw_next().remove()
+        
+        self._multiplicity -= 1
+        self._twin._multiplicity -= 1
     def thin(self): # alias
         self.remove_strand()
 
@@ -116,21 +124,16 @@ class HalfHourglass(DihedralElement):
     def v_to(self):
         return self._v_to
 
-    def strand_count(self):
-        if self.is_phantom(): return 0
-        
-        count = 1
-        iter = self._half_strands_head
-        while iter != self._half_strands_tail:
-            count += 1
-            iter = iter.cw_next()
-        return count
-    def multiplicity(self): #alias
-        return self.strand_count()
+    def multiplicity(self):
+        '''Returns the number of strands owned by this hourglass.'''
+        return self._multiplicity
+    def strand_count(self): # alias
+        return self.multiplicity()
     
     def is_phantom(self):
-        return self._half_strands_head == None
-    def is_boundary(self): # alias for is_phantom
+        '''Returns True if this hourglass is on the boundary (or otherwise has multiplicity 0).'''
+        return self._multiplicity == 0
+    def is_boundary(self): # alias
         return is_phantom()
 
     def get_angle(self):
