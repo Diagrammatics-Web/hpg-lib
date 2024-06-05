@@ -124,6 +124,12 @@ class HalfHourglass(DihedralElement):
     def v_to(self):
         return self._v_to
 
+    def reparent(self, v):
+        '''Sets this half hourglass's v_from to v, and its twin's v_to to v, then inserts itself into v's half hourglass list.'''
+        self._v_from = v
+        self._twin._v_to = v
+        v._insert_hourglass(self)
+
     def multiplicity(self):
         '''Returns the number of strands owned by this hourglass.'''
         return self._multiplicity

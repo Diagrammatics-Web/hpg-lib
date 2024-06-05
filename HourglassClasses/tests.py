@@ -23,6 +23,7 @@ def all_tests():
     half_strand_tests()
     half_hourglass_tests()
     vertex_tests()
+    face_tests()
 
     print("Awaiting further tests.")
 
@@ -147,10 +148,10 @@ def vertex_tests():
     v3 = Vertex(3, 1, 1, True)
     v4 = Vertex(4, 0, 1, False)
 
-    v1.create_hourglass_between(v2, 1)
-    v1.create_hourglass_between(v3, 2)
-    v1.create_hourglass_between(v4, 5)
-    v2.create_hourglass_between(v4, 0)
+    Vertex.create_hourglass_between(v1, v2, 1)
+    Vertex.create_hourglass_between(v1, v3, 2)
+    Vertex.create_hourglass_between(v1, v4, 5)
+    Vertex.create_hourglass_between(v2, v4, 0)
 
     assert v1.simple_degree() == 3, "v1 should have 3 hourglasses around it."
     assert v1.total_degree() == 8, "v1 should have 8 strands around it."
@@ -162,6 +163,26 @@ def vertex_tests():
     v1.clear_hourglasses()
     assert v1.simple_degree() == 0, "v1 should have no hourglasses around it."
 
+    v5 = Vertex(5, 0, 0, False)
+    v6 = Vertex(6, 1, 0, True)
+    extras = [Vertex(7, -1, 1, True), Vertex(8, -1, -1, True), Vertex(9, 2, 1, True), Vertex(10, 2, -1, True)]
+    mid_hh = Vertex.create_hourglass_between(v5, v6, 2)
+    Vertex.create_hourglass_between(v5, extras[0], 1)
+    Vertex.create_hourglass_between(v5, extras[1], 1)
+    hh1 = Vertex.create_hourglass_between(v6, extras[2], 1)
+    hh2 = Vertex.create_hourglass_between(v6, extras[3], 1)
+
+    v5.square_move_contract(mid_hh)
+    print("Debug v6: " + str([v.id for v in v6.get_neighbors()]))
+    assert v6.get_neighbors() == [extras[2], extras[0], extras[1], extras[3]], "v6 should be connected to 7, 8, 9, and 10."
+    v5 = v6.square_move_expand(hh1, hh2)
+    print("Debug v5: " + str([v.id for v in v5.get_neighbors()]))
+    print("Debug v6: " + str([v.id for v in v6.get_neighbors()]))
+    assert (
+        v5.get_neighbors() == [v6, extras[0], extras[1]] and
+        v6.get_neighbors() == [extras[2], v5, extras[3]]
+    ), "Graph should have returned to previous state."
+
     print("Vertex tests complete.")
 
 def trip_tests():
@@ -171,12 +192,35 @@ def trip_tests():
     print("TODO")
 
 def face_tests():
-    print("Face tests not written yet.")
+    v1 = Vertex(1, 0, 0, True)
+    v2 = Vertex(2, 0, 1, False)
+    v3 = Vertex(3, 1, 1, True)
+    v4 = Vertex(4, 1, 0, False)
+    extras = [Vertex(5, -1, -1, False), Vertex(6, 2, -1, True), Vertex(7, 2, 1, False), Vertex(8, 1, 2, False), Vertex(9, 0, 2, True), Vertex(10, -1, 1, True)]
+    Vertex.create_hourglass_between(v1, v2, 1)
+    Vertex.create_hourglass_between(v2, v3, 1)
+    Vertex.create_hourglass_between(v3, v4, 1)
+    Vertex.create_hourglass_between(v4, v1, 1)
+    face = Face(v1._half_hourglasses_head)
+    Vertex.create_hourglass_between(v1, extras[0], 2)
+    Vertex.create_hourglass_between(v2, extras[1], 2)
+    Vertex.create_hourglass_between(v3, extras[2], 1)
+    Vertex.create_hourglass_between(v3, extras[3], 1)
+    Vertex.create_hourglass_between(v4, extras[4], 1)
+    Vertex.create_hourglass_between(v4, extras[5], 1)
+
+    assert face.is_square_move_valid(), "Square move should be valid on face."
+
+    face.square_move()
+
+    assert face.is_square_move_valid(), "Square move should be valid on face even after performing square move."
+    
+    print("Face tests not yet complete.")
 
 def hourglass_plabic_graph_tests():
     print("HPG tests not written yet.")
 
-def create_test_HPG():
+def create_test_HPG(): #TODO: FIX EVENTUALLY
     '''Creates the graph seen at https://youtu.be/wsltX4aTjbc?t=2565'''
     inner_vertices = []
     boundary_vertices = []

@@ -35,8 +35,8 @@ class HourglassPlabicGraph:
             self._boundary_vertices[i] = Vertex(id, 10*math.sin((i+0.5)*2*math.pi/n), 10*math.cos((i+0.5)*2*math.pi/n), False, True, id)
 
         for i in range(0, n-1):
-            self._boundary_vertices[i].create_hourglass_between(self._boundary_vertices[i+1], 0)
-        hh = self._boundary_vertices[0].create_hourglass_between(self._boundary_vertices[n-1], 0)
+            Vertex.create_hourglass_between(self._boundary_vertices[i], self._boundary_vertices[i+1], 0)
+        hh = Vertex.create_hourglass_between(self._boundary_vertices[0], self._boundary_vertices[n-1], 0)
 
         # TODO: Create face
             
@@ -63,7 +63,7 @@ class HourglassPlabicGraph:
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
 
-        hh = v1.create_hourglass_between(v2, multiplicity)
+        hh = Vertex.create_hourglass_between(v1, v2, multiplicity)
         
         # TODO: Create faces
     

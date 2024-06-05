@@ -74,8 +74,18 @@ class Face:
         
     def square_move(self):
         ''' Performs a square move on this face. Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
-            To verify that this move will be valid, call is_square_move_valid().'''
-        raise NotImplementedError("square_move not implemented")
+            To verify that this move will be valid, call is_square_move_valid().
+            OUTPUT: A tuple of arrays; the first is of created vertices that result from this move, the second is of all removed vertices.'''
+        new_vertices = []
+        removed_vertices = []
+        ret_tuple = (new_vertices, removed_vertices)
+
+        # diagnose vertices and perform expansion or contraction as necessary
+        for hh in self:
+            if hh.v_from().simple_degree() == 4: new_vertices.append(hh.v_from().square_move_expand(hh, hh.ccw_next()))
+            else: removed_vertices.append(hh.v_from().square_move_contract(hh.cw_next()))
+        
+        return ret_tuple
 
     def benzene_move(self):
         ''' Performs a benzene move on this face. The multiplicities of its edges are swapped between 1 and 2.
