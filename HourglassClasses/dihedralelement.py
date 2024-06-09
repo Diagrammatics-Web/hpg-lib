@@ -93,7 +93,7 @@ class DihedralElement:
     def get_num_elements(self):
         '''Returns the number of elements in the linked list.'''
         count = 0
-        for element in self.iterate_clockwise(): count += 1
+        for element in self: count += 1
         return count
 
     def get_elements_as_list(self, clockwise=True):
@@ -102,7 +102,10 @@ class DihedralElement:
         if clockwise: return [element for element in self.iterate_clockwise()]
         else: [element for element in self.iterate_counterclockwise()]
 
-    def iterate_clockwise(self):
+    def __iter__(self): # by default, iteration will go clockwise
+        return _DihedralIterator(self, True)
+    
+    def iterate_clockwise(self): # for specificity, if it's important
         return _DihedralIterator(self, True)
 
     def iterate_counterclockwise(self):

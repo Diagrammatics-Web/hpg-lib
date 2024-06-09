@@ -68,13 +68,8 @@ class HalfHourglass(DihedralElement):
 
     def remove(self):
         if self._half_strands_head != None:
-            iter = self._half_strands_head
-            ''' either list is empty, we will remove iter when it is 
-             its own cw_next (see DihedralElement.remove()), or 
-             we will eventually run into another hourglass's strands'''
-            while iter.cw_next() != None and iter.hourglass() == self: 
-                iter = iter.cw_next()
-                iter.cw_prev().remove()
+            self._half_strands_head.cw_prev().link_cw_next(self._half_strands_tail.cw_next())
+            self._half_strands_head.link_cw_prev(self._half_strands_tail)
         super().remove()
 
     # Strand modification and accessor functions
@@ -125,9 +120,12 @@ class HalfHourglass(DihedralElement):
         return self._v_to
 
     def reparent(self, v):
-        '''Sets this half hourglass's v_from to v, and its twin's v_to to v, then inserts itself into v's half hourglass list.'''
+        '''Changes this half hourglass's v_from to v, along with associated bookkeeping.'''
         self._v_from = v
-        self._twin._v_to = v
+        self.twin()._v_to = v
+
+        self.remove() 
+        
         v._insert_hourglass(self)
 
     def multiplicity(self):

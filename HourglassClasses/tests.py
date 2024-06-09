@@ -167,17 +167,14 @@ def vertex_tests():
     v6 = Vertex(6, 1, 0, True)
     extras = [Vertex(7, -1, 1, True), Vertex(8, -1, -1, True), Vertex(9, 2, 1, True), Vertex(10, 2, -1, True)]
     mid_hh = Vertex.create_hourglass_between(v5, v6, 2)
-    Vertex.create_hourglass_between(v5, extras[0], 1)
-    Vertex.create_hourglass_between(v5, extras[1], 1)
-    hh1 = Vertex.create_hourglass_between(v6, extras[2], 1)
-    hh2 = Vertex.create_hourglass_between(v6, extras[3], 1)
+    hh1 = Vertex.create_hourglass_between(v5, extras[0], 1)
+    hh2 = Vertex.create_hourglass_between(v5, extras[1], 1)
+    Vertex.create_hourglass_between(v6, extras[2], 1)
+    Vertex.create_hourglass_between(v6, extras[3], 1)
 
     v5.square_move_contract(mid_hh)
-    print("Debug v6: " + str([v.id for v in v6.get_neighbors()]))
     assert v6.get_neighbors() == [extras[2], extras[0], extras[1], extras[3]], "v6 should be connected to 7, 8, 9, and 10."
     v5 = v6.square_move_expand(hh1, hh2)
-    print("Debug v5: " + str([v.id for v in v5.get_neighbors()]))
-    print("Debug v6: " + str([v.id for v in v6.get_neighbors()]))
     assert (
         v5.get_neighbors() == [v6, extras[0], extras[1]] and
         v6.get_neighbors() == [extras[2], v5, extras[3]]

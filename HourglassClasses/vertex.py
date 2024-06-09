@@ -54,17 +54,19 @@ class Vertex:
             return
 
         # reset head
-        while self._half_hourglasses_head.get_angle() > self._half_hourglasses_head.cw_prev().get_angle():
-            self._half_hourglasses_head = self._half_hourglasses_head.cw_prev()
+        while self._half_hourglasses_head.get_angle() > self._half_hourglasses_head.cw_next().get_angle():
+            self._half_hourglasses_head = self._half_hourglasses_head.cw_next()
         
         # find first edge with greater angle, then insert_cw_next
         hh_angle = hh.get_angle()
-        for iter_hh in self._half_hourglasses_head.iterate_clockwise():
+        for iter_hh in self._half_hourglasses_head.iterate_counterclockwise():
             if hh_angle < iter_hh.get_angle():
                 iter_hh.insert_cw_next(hh)
                 return
         # we've run the entire loop, so angle is greater than every other edge
-        self._half_hourglasses_head.insert_ccw_next(hh)
+        self._half_hourglasses_head.append_ccw(hh)
+
+        # print("testing vertex " + str(self.id) + ": " + str([hh.v_to().id for hh in self._half_hourglasses_head.iterate_counterclockwise()])) # TESTING
 
     def _remove_hourglass(self, hh):
         "Safely removes the provided hourglass from this vertex's hourglass list."
@@ -86,7 +88,7 @@ class Vertex:
     
     def get_hourglass_to(self, v_to):
         '''Returns the half hourglass from this vertex to v_to.'''
-        for hh in self._half_hourglasses_head.iterate_clockwise():
+        for hh in self._half_hourglasses_head:
             if hh.v_to() == v_to: return hh
         raise ValueError("Hourglass to vertex " + v_to.id() + " does not exist.")
 
@@ -117,13 +119,13 @@ class Vertex:
                 
     def get_neighbors(self):
         '''Returns all adjacent vertices in a list.'''
-        return [hh.v_to() for hh in self._half_hourglasses_head.iterate_clockwise()]
+        return [hh.v_to() for hh in self._half_hourglasses_head.iterate_counterclockwise()]
     
     def total_degree(self):
         '''Returns the number of strands around this vertex.'''
         if (self._half_hourglasses_head == None): return 0
         count = 0
-        for hh in self._half_hourglasses_head.iterate_clockwise(): count += hh.strand_count()
+        for hh in self._half_hourglasses_head: count += hh.strand_count()
         return count
 
     def simple_degree(self):
@@ -171,7 +173,7 @@ class Vertex:
         sur_v = out_hh.v_to()
 
         # store in an array to make iteration safe while reparenting
-        hourglasses = [hh for hh in out_hh.iterate_clockwise() if hh != out_hh]
+        hourglasses = [hh for hh in out_hh if hh != out_hh]
         for hh in hourglasses:
             hh.reparent(sur_v)
         sur_v._remove_hourglass(out_hh.twin())
@@ -189,7 +191,7 @@ class Vertex:
 
         hh1.reparent(new_v)
         hh2.reparent(new_v)
-        Vertex.create_hourglass_between(self, new_v)
+        Vertex.create_hourglass_between(self, new_v, 2)
 
         return new_v
 
