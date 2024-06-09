@@ -1,7 +1,7 @@
 class Face:
     '''Represents a face of an hourglass plabic graph.'''
-    def __init__(self, id, label, half_hourglass):
-         '''half_hourglass: a HalfHourglass adjacent to this face with this face on its left.'''
+    def __init__(self, id, half_hourglass, label=''):
+        ''' half_hourglass: a HalfHourglass adjacent to this face with this face on its left.'''
         self.id = id
         self.label = label
 
@@ -47,13 +47,13 @@ class Face:
         should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
         for hh in self:
             #checks
-            if hh.multiplicity() != 1: return false
-            if hh.v_to().filled != should_be_filled: return false
-            if count > 4: return false
+            if hh.multiplicity() != 1: return False
+            if hh.v_to().filled != should_be_filled: return False
+            if count > 4: return False
             # iterate
             count += 1
             should_be_filled = not should_be_filled
-        return true
+        return True
 
     def is_benzene_move_valid(self):
         ''' Verifies that this face can perform a square move. This requires the face to have an even number of
@@ -64,8 +64,8 @@ class Face:
         expected_mult = 1 if self._half_hourglasses_head.strand_count() == 1 else 2
         for hh in self:
             #checks
-            if hh.multiplicity() != expected_mult: return false
-            if hh.v_to().filled != should_be_filled: return false
+            if hh.multiplicity() != expected_mult: return False
+            if hh.v_to().filled != should_be_filled: return False
             # iterate
             count += 1
             should_be_filled = not should_be_filled

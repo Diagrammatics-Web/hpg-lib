@@ -2,6 +2,7 @@ from .dihedralelement import DihedralElement
 from .halfstrand import HalfStrand
 from .halfhourglass import HalfHourglass
 from .vertex import Vertex
+from .face import Face
 from .hourglassplabicgraph import HourglassPlabicGraph
 import math
 
@@ -48,7 +49,11 @@ def dihedral_element_tests():
         d2.ccw_next() == d3 and
         d3.cw_next() == d2  and 
         d3.ccw_next() == d1
-    ),   "List order is incorrect or list is broken."
+    ), "List order is incorrect or list is broken."
+    assert (
+        [element.id for element in d1.iterate_clockwise()] == [1, 3, 2] and
+        [element.id for element in d2.iterate_counterlockwise()] == [2, 3, 1]
+    ), "Iterator does not work."
 
     assert d1.get_cw_ith_element(4) == d3, "get_cw_ith_element is broken."
     assert d1.get_ccw_ith_element(7) == d2, "get_ccw_ith_element is broken."
@@ -163,14 +168,16 @@ def vertex_tests():
     v1.clear_hourglasses()
     assert v1.simple_degree() == 0, "v1 should have no hourglasses around it."
 
+    # SQUARE MOVE TESTING
+    
     v5 = Vertex(5, 0, 0, False)
     v6 = Vertex(6, 1, 0, True)
     extras = [Vertex(7, -1, 1, True), Vertex(8, -1, -1, True), Vertex(9, 2, 1, True), Vertex(10, 2, -1, True)]
     mid_hh = Vertex.create_hourglass_between(v5, v6, 2)
     hh1 = Vertex.create_hourglass_between(v5, extras[0], 1)
     hh2 = Vertex.create_hourglass_between(v5, extras[1], 1)
-    Vertex.create_hourglass_between(v6, extras[2], 1)
-    Vertex.create_hourglass_between(v6, extras[3], 1)
+    hh3 = Vertex.create_hourglass_between(v6, extras[2], 1)
+    hh4 = Vertex.create_hourglass_between(v6, extras[3], 1)
 
     v5.square_move_contract(mid_hh)
     assert v6.get_neighbors() == [extras[2], extras[0], extras[1], extras[3]], "v6 should be connected to 7, 8, 9, and 10."
@@ -180,6 +187,13 @@ def vertex_tests():
         v6.get_neighbors() == [extras[2], v5, extras[3]]
     ), "Graph should have returned to previous state."
 
+    v6.square_move_contract(v5._half_hourglasses_head.twin())
+    assert v5.get_neighbors() == [extras[2], extras[0], extras[1], extras[3]], "v5 should be connected to 7, 8, 9, and 10."
+    v6 = v5.square_move_expand(hh3, hh4)
+    assert (
+        v5.get_neighbors() == [v6, extras[0], extras[1]] and
+        v6.get_neighbors() == [extras[2], v5, extras[3]]
+    ), "Graph should have returned to previous state."
     print("Vertex tests complete.")
 
 def trip_tests():
@@ -198,7 +212,7 @@ def face_tests():
     Vertex.create_hourglass_between(v2, v3, 1)
     Vertex.create_hourglass_between(v3, v4, 1)
     Vertex.create_hourglass_between(v4, v1, 1)
-    face = Face(v1._half_hourglasses_head)
+    face = Face("face", v1._half_hourglasses_head)
     Vertex.create_hourglass_between(v1, extras[0], 2)
     Vertex.create_hourglass_between(v2, extras[1], 2)
     Vertex.create_hourglass_between(v3, extras[2], 1)
@@ -207,10 +221,9 @@ def face_tests():
     Vertex.create_hourglass_between(v4, extras[5], 1)
 
     assert face.is_square_move_valid(), "Square move should be valid on face."
-
     face.square_move()
-
     assert face.is_square_move_valid(), "Square move should be valid on face even after performing square move."
+    face.square_move()
     
     print("Face tests not yet complete.")
 

@@ -138,7 +138,7 @@ class HalfHourglass(DihedralElement):
         '''Returns True if this hourglass is on the boundary (or otherwise has multiplicity 0).'''
         return self._multiplicity == 0
     def is_boundary(self): # alias
-        return is_phantom()
+        return self.is_phantom()
 
     def get_angle(self):
         ''' Returns the angle between the vector from v_from to v_to and the x-axis.

@@ -35,12 +35,11 @@ class DihedralElement:
 
     def remove(self):
         ''' Removes itself from the list.
-            Once removed, this element is assumed deleted
-            and should not be used further.'''
+            This element will also become its own list to facilitate reuse.'''
         self._cw_next._ccw_next = self._ccw_next
         self._ccw_next._cw_next = self._cw_next
-        self._cw_next = None
-        self._ccw_next = None
+        self._cw_next = self
+        self._ccw_next = self
 
     # Accessor functions
     

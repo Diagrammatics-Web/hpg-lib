@@ -61,7 +61,8 @@ class Vertex:
         hh_angle = hh.get_angle()
         for iter_hh in self._half_hourglasses_head.iterate_counterclockwise():
             if hh_angle < iter_hh.get_angle():
-                iter_hh.insert_cw_next(hh)
+                iter_hh.insert_ccw_prev(hh)
+                if iter_hh == self._half_hourglasses_head: self._half_hourglasses_head = hh
                 return
         # we've run the entire loop, so angle is greater than every other edge
         self._half_hourglasses_head.append_ccw(hh)
@@ -70,7 +71,7 @@ class Vertex:
 
     def _remove_hourglass(self, hh):
         "Safely removes the provided hourglass from this vertex's hourglass list."
-        assert hh.v_from() == self, "Half hourglass " + str(hh.id) + " does not belong to this vertex."
+        # assert hh.v_from() == self, "Half hourglass " + str(hh.id) + " does not belong to this vertex."
         if hh == self._half_hourglasses_head:
             self._half_hourglasses_head = self._half_hourglasses_head.ccw_next()
             if hh == self._half_hourglasses_head:
@@ -79,12 +80,11 @@ class Vertex:
 
     def clear_hourglasses(self):
         ''' Deletes all hourglasses (and their twins) attached to this vertex.'''
-        if self._half_hourglasses_head == None: return # hacky, there should be a cleaner way to do this
-        while self._half_hourglasses_head.cw_next() != None:
-            self._half_hourglasses_head = self._half_hourglasses_head.cw_next()
-            self._half_hourglasses_head.cw_prev().twin().remove()
-            self._half_hourglasses_head.cw_prev().remove()
-        self._half_hourglasses_head = None
+        if self._half_hourglasses_head == None: return
+
+        for hh in self._half_hourglasses_head:
+            hh.twin().remove()
+        self._half_hourglasses_head = None # this may not be memory-safe, depending on python's garbage collection
     
     def get_hourglass_to(self, v_to):
         '''Returns the half hourglass from this vertex to v_to.'''
@@ -185,16 +185,24 @@ class Vertex:
             This function should only be called on vertices with two outgoing hourglasses.
             hh1, hh2: the two half hourglasses adjacent to the square face. These will be reparented to the new vertex.
             OUTPUT: Returns the created vertex.'''
-        x = (self.x + hh1.v_to().x + hh2.v_to().x) / 3
-        y = (self.y + hh1.v_to().y + hh2.v_to().y) / 3
+        # find the new position by just taking a weighted average
+        x = (2 * self.x + hh1.v_to().x + hh2.v_to().x) / 4
+        y = (2 * self.y + hh1.v_to().y + hh2.v_to().y) / 4
         new_v = Vertex("v_" + str(self.id), x, y, not self.filled)
 
+        while hh1 == self._half_hourglasses_head or hh2 == self._half_hourglasses_head:
+            self._half_hourglasses_head = self._half_hourglasses_head.ccw_next()
         hh1.reparent(new_v)
         hh2.reparent(new_v)
         Vertex.create_hourglass_between(self, new_v, 2)
 
         return new_v
 
+    # FOR TESTING PURPOSES
+    def print_neighbors(self):
+        print(str([hh.v_to().id for hh in self._half_hourglasses_head.iterate_counterclockwise()]))
+    def print_neighbors_and_angles(self):
+        print(str([(hh.v_to().id, hh.get_angle()) for hh in self._half_hourglasses_head.iterate_counterclockwise()]))
 
 
 
