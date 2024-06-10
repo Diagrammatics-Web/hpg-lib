@@ -81,9 +81,11 @@ class Face:
         ret_tuple = (new_vertices, removed_vertices)
 
         # diagnose vertices and perform expansion or contraction as necessary
-        for hh in self:
-            if hh.v_from().simple_degree() == 4: new_vertices.append(hh.v_from().square_move_expand(hh, hh.ccw_next()))
-            else: removed_vertices.append(hh.v_from().square_move_contract(hh.cw_next()))
+        hourglasses = [hh for hh in self] # cache half hourglasses for safe iteration
+        for hh in hourglasses:
+            v = hh.v_from()
+            if v.simple_degree() == 4: new_vertices.append(v.square_move_expand(hh, hh.ccw_next()))
+            else: removed_vertices.append(v.square_move_contract(hh.cw_next()))
         
         return ret_tuple
 
@@ -99,18 +101,25 @@ class Face:
     def __iter__(self):
         return _FaceIterator(self._half_hourglasses_head)
 
+    # TESTING
+    def print_vertices(self):   
+        print(str([hh.v_from().id for hh in self]))
+
 class _FaceIterator:
     ''' Internal class for iterating over the edges of a face. Iteration occurs beginning from face._half_hourglasses_head and continues counterclockwise.
         Modification of the list while iterating can cause errors with iteration.'''
     def __init__(self, head): 
         self.iter = head
-        self.start_vertex = head.v_from()
+        self.head = head
+        self.begin = False
         
     def __iter__(self):
         return self
         
     def __next__(self):
-        if self.iter.v_to() == self.start_vertex: raise StopIteration
+        if self.iter == self.head: 
+            if self.begin: raise StopIteration
+            else: self.begin = True
         old = self.iter
         self.iter = self.iter.twin()
         self.iter = self.iter.cw_next()

@@ -133,7 +133,7 @@ class Vertex:
         if (self._half_hourglasses_head == None): return 0
         return self._half_hourglasses_head.get_num_elements()
 
-    # Vertex manipulation functions
+    # Vertex manipulation functions (may be deprecated/unecessary, also untested)
 
     def is_contractible(self):
         hh1 = self._half_hourglasses_head

@@ -203,29 +203,87 @@ def trip_tests():
     print("TODO")
 
 def face_tests():
+    
+    # Square move tests
+    
     v1 = Vertex(1, 0, 0, True)
-    v2 = Vertex(2, 0, 1, False)
+    v2 = Vertex(2, 1, 0, False)
     v3 = Vertex(3, 1, 1, True)
-    v4 = Vertex(4, 1, 0, False)
-    extras = [Vertex(5, -1, -1, False), Vertex(6, 2, -1, True), Vertex(7, 2, 1, False), Vertex(8, 1, 2, False), Vertex(9, 0, 2, True), Vertex(10, -1, 1, True)]
-    Vertex.create_hourglass_between(v1, v2, 1)
+    v4 = Vertex(4, 0, 1, False)
+    extras = [Vertex(5, -1, -1, False), Vertex(6, 2, -1, True), Vertex(7, 2, 1, False), Vertex(8, 1, 2, False), Vertex(9, 0, 2, True), Vertex(10, -1, 1, True), Vertex(11, -2, -1, True), Vertex(12, -1, -2, True), Vertex(13, 2, -2, False), Vertex(14, 3, -1, False)]
+    hh = Vertex.create_hourglass_between(v1, v2, 1)
     Vertex.create_hourglass_between(v2, v3, 1)
     Vertex.create_hourglass_between(v3, v4, 1)
     Vertex.create_hourglass_between(v4, v1, 1)
-    face = Face("face", v1._half_hourglasses_head)
+    face = Face("face", hh)
     Vertex.create_hourglass_between(v1, extras[0], 2)
     Vertex.create_hourglass_between(v2, extras[1], 2)
     Vertex.create_hourglass_between(v3, extras[2], 1)
     Vertex.create_hourglass_between(v3, extras[3], 1)
     Vertex.create_hourglass_between(v4, extras[4], 1)
     Vertex.create_hourglass_between(v4, extras[5], 1)
+    Vertex.create_hourglass_between(extras[0], extras[6], 1)
+    Vertex.create_hourglass_between(extras[0], extras[7], 1)
+    Vertex.create_hourglass_between(extras[1], extras[8], 1)
+    Vertex.create_hourglass_between(extras[1], extras[9], 1)
 
-    assert face.is_square_move_valid(), "Square move should be valid on face."
-    face.square_move()
-    assert face.is_square_move_valid(), "Square move should be valid on face even after performing square move."
-    face.square_move()
+    assert [hh.v_from() for hh in face] == [v1, v2, v3, v4], "Face iteration does not work properly."
     
-    print("Face tests not yet complete.")
+    assert face.is_square_move_valid(), "Square move should be valid on face."
+    rem_add_tuple = face.square_move()
+    assert face.is_square_move_valid(), "Square move should be valid on face even after performing square move."
+    assert [v.id for v in rem_add_tuple[0]] == ['v_3', 'v_4'], "Incorrect vertices marked for addition."
+    assert rem_add_tuple[1] == [v1, v2], "Incorrect vertices marked for removal."
+    face.square_move()
+    assert face.is_square_move_valid(), "Square move should be valid on face even after performing square move twice."
+
+    v3._remove_hourglass(v)
+
+    # Benzene move tests
+
+    v1 = Vertex(1, 0, 0, True)
+    v2 = Vertex(2, 1, 0, False)
+    v3 = Vertex(3, 3, 1, True)
+    v4 = Vertex(4, 2, 2, False)
+    v5 = Vertex(5, 1, 2, True)
+    v6 = Vertex(6, -1, 1, False)
+
+    hh1 = Vertex.create_hourglass_between(v1, v2, 1)
+    hh2 = Vertex.create_hourglass_between(v2, v3, 2)
+    hh3 = Vertex.create_hourglass_between(v3, v4, 1)
+    hh4 = Vertex.create_hourglass_between(v4, v5, 2)
+    hh5 = Vertex.create_hourglass_between(v5, v6, 1)
+    hh6 = Vertex.create_hourglass_between(v6, v1, 2)
+    face = Face("face", hh1)
+
+    assert face.is_benzene_move_valid(), "Benzene move should be valid."
+    face.benzene_move()
+    assert (
+        hh1.multiplicity() == 2 and
+        hh2.multiplicity() == 1 and
+        hh3.multiplicity() == 2 and
+        hh4.multiplicity() == 1 and
+        hh5.multiplicity() == 2 and
+        hh6.multiplicity() == 1
+    ), "Hourglass multiplicities are incorrect."
+    assert face.is_benzene_move_valid(), "Benzene move should be valid even after performing a benzene move."
+    face.benzene_move()
+    assert (
+        hh1.multiplicity() == 1 and
+        hh2.multiplicity() == 2 and
+        hh3.multiplicity() == 1 and
+        hh4.multiplicity() == 2 and
+        hh5.multiplicity() == 1 and
+        hh6.multiplicity() == 2
+    ), "Hourglass multiplicities are incorrect."
+
+    hh1.thicken()
+    assert not face.is_benzene_move_valid(), "Cannot perform benzene move on hourglass with incorrect multiplicity."
+    hh1.thin()
+    Vertex.create_hourglass_between(v5, v1, 1)
+    assert not face.is_benzene_move_valid(), "Cannot perform benzene move on face with odd number of hourglasses."
+    
+    print("Face tests complete.")
 
 def hourglass_plabic_graph_tests():
     print("HPG tests not written yet.")
