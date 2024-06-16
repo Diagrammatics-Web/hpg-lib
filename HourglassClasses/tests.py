@@ -158,15 +158,30 @@ def vertex_tests():
     Vertex.create_hourglass_between(v1, v4, 5)
     Vertex.create_hourglass_between(v2, v4, 0)
 
-    assert v1.simple_degree() == 3, "v1 should have 3 hourglasses around it."
-    assert v1.total_degree() == 8, "v1 should have 8 strands around it."
-    assert v4.simple_degree() == 2, "v4 should have 2 hourglasses implicitly created around it."
-    assert v4.total_degree() == 5, "v4 should have 5 strands around it."
+    assert v1.simple_degree() == 3, "v1 should have 3 hourglasses around it. Instead has " + str(v1.simple_degree())
+    assert v1.total_degree() == 8, "v1 should have 8 strands around it. Instead has " + str(v1.total_degree())
+    assert v4.simple_degree() == 2, "v4 should have 2 hourglasses implicitly created around it. Instead has " + str(v4.simple_degree())
+    assert v4.total_degree() == 5, "v4 should have 5 strands around it. Instead has " + str(v4.total_degree())
 
     assert v4.get_hourglass_to(v2).v_to() == v2, "v4 should be able to find an hourglass to v2."
     assert v1.get_hourglass_to(v3).v_to() == v3, "v1 should be able to find an hourglass to v3."
+    
     v1.clear_hourglasses()
     assert v1.simple_degree() == 0, "v1 should have no hourglasses around it."
+    
+    Vertex.create_hourglass_between(v1, v2, 1)
+    Vertex.create_hourglass_between(v1, v3, 2)
+    Vertex.create_hourglass_between(v1, v4, 5)
+    
+    Vertex.remove_hourglass_between(v1, v2)
+    Vertex.remove_hourglass_between(v2, v4)
+
+    assert v1.simple_degree() == 2, "v1 should have 2 hourglasses around it. Instead has " + str(v1.simple_degree())
+    assert v1.total_degree() == 7, "v1 should have 7 strands around it. Instead has " + str(v1.total_degree())
+    assert v4.simple_degree() == 1, "v4 should have 1 hourglass around it. Instead has " + str(v4.simple_degree())
+    assert v4.total_degree() == 5, "v4 should have 5 strands around it. Instead has " + str(v4.total_degree())
+    assert v2.simple_degree() == 0, "v2 should have 0 hourglasses around it. Instead has " + str(v2.simple_degree())
+    assert v2.total_degree() == 0, "v2 should have 0 strands around it. Instead has " + str(v2.total_degree())
 
     # SQUARE MOVE TESTING
     
@@ -196,13 +211,11 @@ def vertex_tests():
     ), "Graph should have returned to previous state."
     print("Vertex tests complete.")
 
-def trip_tests():
-    print("Testing trips.")
-    HPG = create_test_HPG()
-    print(HPG.get_trip_perms())
-    print("TODO")
-
 def face_tests():
+
+    # Face validity tests
+
+    
     
     # Square move tests
     
@@ -234,10 +247,20 @@ def face_tests():
     assert face.is_square_move_valid(), "Square move should be valid on face even after performing square move."
     assert [v.id for v in rem_add_tuple[0]] == ['v_3', 'v_4'], "Incorrect vertices marked for addition."
     assert rem_add_tuple[1] == [v1, v2], "Incorrect vertices marked for removal."
-    face.square_move()
+    rem_add_tuple = face.square_move()
     assert face.is_square_move_valid(), "Square move should be valid on face even after performing square move twice."
 
-    v3._remove_hourglass(v)
+    v1 = rem_add_tuple[0][0]
+    v2 = rem_add_tuple[0][1]
+    
+    Vertex.create_hourglass_between(v4, v2, 1)
+    assert not face.is_square_move_valid(), "Square move should not be valid on face with 3 edges."    
+    Vertex.remove_hourglass_between(v4, v2)
+    v4.filled = True
+    assert not face.is_square_move_valid(), "Square move should not be valid on face with improper vertex fillings."
+    v4.filled = False
+    v1.get_hourglass_to(v2).thicken()
+    assert not face.is_square_move_valid(), "Square move should not be valid on face with improper hourglass multiplicities."
 
     # Benzene move tests
 
@@ -287,6 +310,12 @@ def face_tests():
 
 def hourglass_plabic_graph_tests():
     print("HPG tests not written yet.")
+
+def trip_tests():
+    print("Testing trips.")
+    HPG = create_test_HPG()
+    print(HPG.get_trip_perms())
+    print("TODO")
 
 def create_test_HPG(): #TODO: FIX EVENTUALLY
     '''Creates the graph seen at https://youtu.be/wsltX4aTjbc?t=2565'''

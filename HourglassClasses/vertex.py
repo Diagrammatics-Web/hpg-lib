@@ -69,13 +69,19 @@ class Vertex:
 
         # print("testing vertex " + str(self.id) + ": " + str([hh.v_to().id for hh in self._half_hourglasses_head.iterate_counterclockwise()])) # TESTING
 
+    @classmethod
+    def remove_hourglass_between(cls, v1, v2):
+        hh = v1.get_hourglass_to(v2)
+        v1._remove_hourglass(hh)
+        v2._remove_hourglass(hh.twin())
+    
     def _remove_hourglass(self, hh):
-        "Safely removes the provided hourglass from this vertex's hourglass list."
+        "Safely removes the provided hourglass from this vertex's hourglass list. Does not affect its twin."
         # assert hh.v_from() == self, "Half hourglass " + str(hh.id) + " does not belong to this vertex."
         if hh == self._half_hourglasses_head:
             self._half_hourglasses_head = self._half_hourglasses_head.ccw_next()
-            if hh == self._half_hourglasses_head:
-                self._half_hourglasses_head == None
+            if hh == self._half_hourglasses_head: # only remaining hourglass
+                self._half_hourglasses_head = None
         hh.remove()
 
     def clear_hourglasses(self):
@@ -83,7 +89,7 @@ class Vertex:
         if self._half_hourglasses_head == None: return
 
         for hh in self._half_hourglasses_head:
-            hh.twin().remove()
+            hh.v_to()._remove_hourglass(hh.twin())
         self._half_hourglasses_head = None # this may not be memory-safe, depending on python's garbage collection
     
     def get_hourglass_to(self, v_to):
@@ -200,24 +206,8 @@ class Vertex:
 
     # FOR TESTING PURPOSES
     def print_neighbors(self):
-        print(str([hh.v_to().id for hh in self._half_hourglasses_head.iterate_counterclockwise()]))
+        if self._half_hourglasses_head == None: print("no neighbors")
+        else: print(str([hh.v_to().id for hh in self._half_hourglasses_head.iterate_counterclockwise()]))
     def print_neighbors_and_angles(self):
-        print(str([(hh.v_to().id, hh.get_angle()) for hh in self._half_hourglasses_head.iterate_counterclockwise()]))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        if self._half_hourglasses_head == None: print("no neighbors")
+        else: print(str([(hh.v_to().id, hh.get_angle()) for hh in self._half_hourglasses_head.iterate_counterclockwise()]))

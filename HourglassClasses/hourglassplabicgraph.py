@@ -71,9 +71,7 @@ class HourglassPlabicGraph:
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
 
-        hh = v1.get_hourglass_to(v2)
-        hh.remove()
-        hh.twin().remove()
+        Vertex.remove_hourglass(v1, v2)
 
         # TODO: reform faces
     
