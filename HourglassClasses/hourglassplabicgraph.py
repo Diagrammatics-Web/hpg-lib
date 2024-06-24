@@ -141,6 +141,6 @@ class HourglassPlabicGraph:
     def _get_vertex(id):
         ''' Internal helper function that gets the vertex with the given id from either _inner_vertices or _boundary_vertices, and throws if the id is not found.'''
         v = self._inner_vertices.get(v_id)
-        if v == None: 
+        if v is None: 
             v = self._boundary_vertices.get(v_id)
-            if v == None: raise ValueError("id " + str(id) + " does not correspond to any vertex.")
+            if v is None: raise ValueError("id " + str(id) + " does not correspond to any vertex.")

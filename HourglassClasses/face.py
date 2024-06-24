@@ -1,7 +1,8 @@
 class Face:
-    '''Represents a face of an hourglass plabic graph.'''
+    ''' Represents a face of an hourglass plabic graph.
+        A face can be infinite.'''
     def __init__(self, id, half_hourglass, label=''):
-        ''' half_hourglass: a HalfHourglass adjacent to this face with this face on its left.'''
+        ''' half_hourglass: a HalfHourglass adjacent to this face with this face on its right.'''
         self.id = id
         self.label = label
 
@@ -10,39 +11,22 @@ class Face:
         self.initialize_half_hourglasses(half_hourglass)
 
     def initialize_half_hourglasses(self, hh):
-        ''' Sets this face up as the face for hh and all other half hourglasses in the same leftward loop,
+        ''' Sets this face up as the face for hh and all other half hourglasses in the same rightward loop,
             as well as the twin hourglasses in the reverse direction.
-            Assumes that this is a valid face.
-            hh: a HalfHourglass adjacent to this face with this face on its left.'''
+            hh: a HalfHourglass adjacent to this face with this face on its right.'''
         self._half_hourglasses_head = hh
         self.boundary = False
-        iter = hh
-        while True:
-            # take the sharpest left turn
-            iter.left_face = self
-            iter = iter.twin()
-            iter.right_face = self
-            iter = iter.cw_next()
-            if iter.is_boundary(): self.boundary = True
-            if iter == hh: return
+        for iter_hh in self:
+            iter_hh.right_face = self
+            iter_hh.twin().left_face = self
+            if iter_hh.is_boundary(): self.boundary = True
 
-    @staticmethod
-    def is_left_face_valid(hh):
-        '''Checks if the face to the left of hh is valid, meaning there is a closed cycle with no loose paths inside.'''
-        start_vertex = hh._v_from
-        visited = [start_vertex]
-
-        while (hh._v_to not in visited):
-            visited.append(hh._v_to)
-            hh = hh._twin
-            hh = hh.cw_next()
-
-        return hh._v_to == start_vertex and visited.len() > 2
+    def is_
 
     def is_square_move_valid(self):
         ''' Verifies that this face can perform a square move. In SL4, this requires the face to be made of 4 vertices,
             alternating filled/unfilled status, with multiplicity 1 edges in between.
-            Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.'''
+            In a square move, vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.'''
         count = 0
         should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
         for hh in self:
@@ -58,7 +42,7 @@ class Face:
     def is_benzene_move_valid(self):
         ''' Verifies that this face can perform a square move. This requires the face to have an even number of
             vertices, with alternating filled/unfilled status, and with edges of alternating 1 or 2 multiplicity in between.
-            The multiplicities of the edges are swapped.'''
+            In a benzene move, the multiplicities of the edges are swapped.'''
         count = 0
         should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
         expected_mult = 1 if self._half_hourglasses_head.strand_count() == 1 else 2
@@ -84,8 +68,8 @@ class Face:
         hourglasses = [hh for hh in self] # cache half hourglasses for safe iteration
         for hh in hourglasses:
             v = hh.v_from()
-            if v.simple_degree() == 4: new_vertices.append(v.square_move_expand(hh, hh.ccw_next()))
-            else: removed_vertices.append(v.square_move_contract(hh.cw_next()))
+            if v.simple_degree() == 4: new_vertices.append(v.square_move_expand(hh, hh.cw_next()))
+            else: removed_vertices.append(v.square_move_contract(hh.ccw_next()))
         
         return ret_tuple
 
@@ -106,7 +90,7 @@ class Face:
         print(str([hh.v_from().id for hh in self]))
 
 class _FaceIterator:
-    ''' Internal class for iterating over the edges of a face. Iteration occurs beginning from face._half_hourglasses_head and continues counterclockwise.
+    ''' Internal class for iterating over the edges of a face. Iteration occurs beginning from face._half_hourglasses_head and continues clockwise.
         Modification of the list while iterating can cause errors with iteration.'''
     def __init__(self, head): 
         self.iter = head
@@ -117,10 +101,9 @@ class _FaceIterator:
         return self
         
     def __next__(self):
-        if self.iter == self.head: 
+        if self.iter is self.head: 
             if self.begin: raise StopIteration
             else: self.begin = True
         old = self.iter
-        self.iter = self.iter.twin()
-        self.iter = self.iter.cw_next()
+        self.iter = self.iter.twin().ccw_next()
         return old

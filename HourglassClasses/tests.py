@@ -212,10 +212,6 @@ def vertex_tests():
     print("Vertex tests complete.")
 
 def face_tests():
-
-    # Face validity tests
-
-    
     
     # Square move tests
     
@@ -224,11 +220,11 @@ def face_tests():
     v3 = Vertex(3, 1, 1, True)
     v4 = Vertex(4, 0, 1, False)
     extras = [Vertex(5, -1, -1, False), Vertex(6, 2, -1, True), Vertex(7, 2, 1, False), Vertex(8, 1, 2, False), Vertex(9, 0, 2, True), Vertex(10, -1, 1, True), Vertex(11, -2, -1, True), Vertex(12, -1, -2, True), Vertex(13, 2, -2, False), Vertex(14, 3, -1, False)]
-    hh = Vertex.create_hourglass_between(v1, v2, 1)
+    hh1 = Vertex.create_hourglass_between(v1, v2, 1)
     Vertex.create_hourglass_between(v2, v3, 1)
     Vertex.create_hourglass_between(v3, v4, 1)
     Vertex.create_hourglass_between(v4, v1, 1)
-    face = Face("face", hh)
+    face = Face("face", hh1.twin())
     Vertex.create_hourglass_between(v1, extras[0], 2)
     Vertex.create_hourglass_between(v2, extras[1], 2)
     Vertex.create_hourglass_between(v3, extras[2], 1)
@@ -240,18 +236,18 @@ def face_tests():
     Vertex.create_hourglass_between(extras[1], extras[8], 1)
     Vertex.create_hourglass_between(extras[1], extras[9], 1)
 
-    assert [hh.v_from() for hh in face] == [v1, v2, v3, v4], "Face iteration does not work properly."
+    assert [hh.v_from() for hh in face] == [v2, v1, v4, v3], "Face iteration does not work properly."
     
     assert face.is_square_move_valid(), "Square move should be valid on face."
     rem_add_tuple = face.square_move()
     assert face.is_square_move_valid(), "Square move should be valid on face even after performing square move."
-    assert [v.id for v in rem_add_tuple[0]] == ['v_3', 'v_4'], "Incorrect vertices marked for addition."
-    assert rem_add_tuple[1] == [v1, v2], "Incorrect vertices marked for removal."
+    assert [v.id for v in rem_add_tuple[0]] == ['v_4', 'v_3'], "Incorrect vertices marked for addition."
+    assert rem_add_tuple[1] == [v2, v1], "Incorrect vertices marked for removal."
     rem_add_tuple = face.square_move()
     assert face.is_square_move_valid(), "Square move should be valid on face even after performing square move twice."
 
-    v1 = rem_add_tuple[0][0]
-    v2 = rem_add_tuple[0][1]
+    v2 = rem_add_tuple[0][0]
+    v1 = rem_add_tuple[0][1]
     
     Vertex.create_hourglass_between(v4, v2, 1)
     assert not face.is_square_move_valid(), "Square move should not be valid on face with 3 edges."    
@@ -277,7 +273,7 @@ def face_tests():
     hh4 = Vertex.create_hourglass_between(v4, v5, 2)
     hh5 = Vertex.create_hourglass_between(v5, v6, 1)
     hh6 = Vertex.create_hourglass_between(v6, v1, 2)
-    face = Face("face", hh1)
+    face = Face("face", hh1.twin())
 
     assert face.is_benzene_move_valid(), "Benzene move should be valid."
     face.benzene_move()

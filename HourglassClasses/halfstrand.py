@@ -9,7 +9,7 @@ class HalfStrand(DihedralElement):
         self._hourglass = hourglass
         
         # the half strand representing movement in the opposite direction, between the same vertices
-        self._twin = HalfStrand(str(id) + "_t", hourglass.twin(), self) if twin == None else twin
+        self._twin = HalfStrand(str(id) + "_t", hourglass.twin(), self) if twin is None else twin
 
     def hourglass(self):
         '''Returns the parent hourglass of this strand.'''
@@ -17,9 +17,12 @@ class HalfStrand(DihedralElement):
 
     def v_to(self):
         return self._hourglass.v_to()
-
     def v_from(self):
         return self._hourglass.v_from()
+    def left_face(self):
+        return self._hourglass.left_face()
+    def right_face(self):
+        return self._hourglass.right_face()
 
     def get_last_strand_same_hourglass(self):
         ''' Returns the last strand clockwise owned by the same parent hourglass.
@@ -33,7 +36,7 @@ class HalfStrand(DihedralElement):
         count = 1
         iter = self.cw_next()
         # Eventually, we will reach another hourglass or loop back around
-        while iter.hourglass() == self.hourglass() and iter != self:
+        while iter.hourglass() is self.hourglass() and iter != self:
             count += 1
             iter = iter.cw_next()
         return count

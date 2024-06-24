@@ -123,7 +123,7 @@ class _DihedralIterator:
         return self
         
     def __next__(self):
-        if self.iter == self.head:
+        if self.iter is self.head:
             if self.begin: raise StopIteration
             else: self.begin = True
         if self.clockwise:

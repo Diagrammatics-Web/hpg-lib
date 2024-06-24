@@ -18,7 +18,7 @@ class HalfHourglass(DihedralElement):
         # the half hourglass representing movement in the opposite direction, between the same vertices
         # twin will have swapped to/from vertices
         # only the "base" hourglass will need to set up strands
-        if twin == None:
+        if twin is None:
             self._twin = HalfHourglass(str(id) + "_t", v_to, v_from, multiplicity, '', self)
 
             # Create half strands and record head/tail
@@ -46,7 +46,7 @@ class HalfHourglass(DihedralElement):
 
     def insert_cw_next(self, element):
         super().insert_cw_next(element)
-        if element._half_strands_head == None: return
+        if element._half_strands_head is None: return
 
         # link up strands
         next_strand = element.cw_next()._get_first_strand()
@@ -57,7 +57,7 @@ class HalfHourglass(DihedralElement):
 
     def insert_ccw_next(self, element):
         super().insert_ccw_next(element)
-        if element._half_strands_head == None: return
+        if element._half_strands_head is None: return
 
         # link up strands - same procedure as for insert_cw_next
         next_strand = element.cw_next()._get_first_strand()
@@ -118,6 +118,10 @@ class HalfHourglass(DihedralElement):
         return self._v_from
     def v_to(self):
         return self._v_to
+    def left_face(self):
+        return self.left_face
+    def right_face(self):
+        return self.right_face
 
     def reparent(self, v):
         '''Changes this half hourglass's v_from to v, along with associated bookkeeping.'''

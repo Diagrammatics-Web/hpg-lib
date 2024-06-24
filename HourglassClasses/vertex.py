@@ -49,7 +49,7 @@ class Vertex:
         ''' Inserts a half hourglass into the hourglass list. 
             Maintains the list with the first angle being the one with the smallest angle ccw from the x-axis.'''
         # empty list case
-        if self._half_hourglasses_head == None: 
+        if self._half_hourglasses_head is None: 
             self._half_hourglasses_head = hh
             return
 
@@ -62,7 +62,7 @@ class Vertex:
         for iter_hh in self._half_hourglasses_head.iterate_counterclockwise():
             if hh_angle < iter_hh.get_angle():
                 iter_hh.insert_ccw_prev(hh)
-                if iter_hh == self._half_hourglasses_head: self._half_hourglasses_head = hh
+                if iter_hh is self._half_hourglasses_head: self._half_hourglasses_head = hh
                 return
         # we've run the entire loop, so angle is greater than every other edge
         self._half_hourglasses_head.append_ccw(hh)
@@ -77,16 +77,16 @@ class Vertex:
     
     def _remove_hourglass(self, hh):
         "Safely removes the provided hourglass from this vertex's hourglass list. Does not affect its twin."
-        # assert hh.v_from() == self, "Half hourglass " + str(hh.id) + " does not belong to this vertex."
-        if hh == self._half_hourglasses_head:
+        # assert hh.v_from() is self, "Half hourglass " + str(hh.id) + " does not belong to this vertex."
+        if hh is self._half_hourglasses_head:
             self._half_hourglasses_head = self._half_hourglasses_head.ccw_next()
-            if hh == self._half_hourglasses_head: # only remaining hourglass
+            if hh is self._half_hourglasses_head: # this was the only remaining hourglass
                 self._half_hourglasses_head = None
         hh.remove()
 
     def clear_hourglasses(self):
         ''' Deletes all hourglasses (and their twins) attached to this vertex.'''
-        if self._half_hourglasses_head == None: return
+        if self._half_hourglasses_head is None: return
 
         for hh in self._half_hourglasses_head:
             hh.v_to()._remove_hourglass(hh.twin())
@@ -95,7 +95,7 @@ class Vertex:
     def get_hourglass_to(self, v_to):
         '''Returns the half hourglass from this vertex to v_to.'''
         for hh in self._half_hourglasses_head:
-            if hh.v_to() == v_to: return hh
+            if hh.v_to() is v_to: return hh
         raise ValueError("Hourglass to vertex " + v_to.id() + " does not exist.")
 
     def get_trip(self, i, output='half_strands'):
@@ -129,14 +129,14 @@ class Vertex:
     
     def total_degree(self):
         '''Returns the number of strands around this vertex.'''
-        if (self._half_hourglasses_head == None): return 0
+        if (self._half_hourglasses_head is None): return 0
         count = 0
         for hh in self._half_hourglasses_head: count += hh.strand_count()
         return count
 
     def simple_degree(self):
         '''Returns the number of hourglasses around this vertex.'''
-        if (self._half_hourglasses_head == None): return 0
+        if (self._half_hourglasses_head is None): return 0
         return self._half_hourglasses_head.get_num_elements()
 
     # Vertex manipulation functions (may be deprecated/unecessary, also untested)
@@ -145,7 +145,7 @@ class Vertex:
         hh1 = self._half_hourglasses_head
         hh2 = hh1.cw_next()
         # Check if vertex is contractible
-        if (hh1 != hh2.cw_next() or hh1 == hh2): return false
+        if (hh1 != hh2.cw_next() or hh1 is hh2): return false
         if (hh1.v_to().filled and hh2.v_to().filled and not self.filled) or (not hh1.v_to().filled and not hh2.v_to().filled and self.filled):
             return false
         return true
@@ -160,7 +160,7 @@ class Vertex:
 
         hh = del_v._half_hourglasses_head
         while hh.v_from() != sur_v:
-            if hh == hh2.twin(): continue
+            if hh is hh2.twin(): continue
             
             hh_next = hh.cw_next()
             hh.reparent(sur_v)
@@ -196,7 +196,7 @@ class Vertex:
         y = (2 * self.y + hh1.v_to().y + hh2.v_to().y) / 4
         new_v = Vertex("v_" + str(self.id), x, y, not self.filled)
 
-        while hh1 == self._half_hourglasses_head or hh2 == self._half_hourglasses_head:
+        while hh1 is self._half_hourglasses_head or hh2 is self._half_hourglasses_head:
             self._half_hourglasses_head = self._half_hourglasses_head.ccw_next()
         hh1.reparent(new_v)
         hh2.reparent(new_v)
@@ -206,8 +206,8 @@ class Vertex:
 
     # FOR TESTING PURPOSES
     def print_neighbors(self):
-        if self._half_hourglasses_head == None: print("no neighbors")
+        if self._half_hourglasses_head is None: print("no neighbors")
         else: print(str([hh.v_to().id for hh in self._half_hourglasses_head.iterate_counterclockwise()]))
     def print_neighbors_and_angles(self):
-        if self._half_hourglasses_head == None: print("no neighbors")
+        if self._half_hourglasses_head is None: print("no neighbors")
         else: print(str([(hh.v_to().id, hh.get_angle()) for hh in self._half_hourglasses_head.iterate_counterclockwise()]))
