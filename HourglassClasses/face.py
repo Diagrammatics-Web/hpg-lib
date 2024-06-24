@@ -21,8 +21,6 @@ class Face:
             iter_hh.twin().left_face = self
             if iter_hh.is_boundary(): self.boundary = True
 
-    def is_
-
     def is_square_move_valid(self):
         ''' Verifies that this face can perform a square move. In SL4, this requires the face to be made of 4 vertices,
             alternating filled/unfilled status, with multiplicity 1 edges in between.
@@ -83,27 +81,9 @@ class Face:
             thicken = not thicken
 
     def __iter__(self):
-        return _FaceIterator(self._half_hourglasses_head)
+        '''Returns a HalfHourglass._TurnIterator. Iteration occurs beginning from face._half_hourglasses_head and continues clockwise.'''
+        return self._half_hourglasses_head.iterate_right_turns()
 
     # TESTING
     def print_vertices(self):   
         print(str([hh.v_from().id for hh in self]))
-
-class _FaceIterator:
-    ''' Internal class for iterating over the edges of a face. Iteration occurs beginning from face._half_hourglasses_head and continues clockwise.
-        Modification of the list while iterating can cause errors with iteration.'''
-    def __init__(self, head): 
-        self.iter = head
-        self.head = head
-        self.begin = False
-        
-    def __iter__(self):
-        return self
-        
-    def __next__(self):
-        if self.iter is self.head: 
-            if self.begin: raise StopIteration
-            else: self.begin = True
-        old = self.iter
-        self.iter = self.iter.twin().ccw_next()
-        return old

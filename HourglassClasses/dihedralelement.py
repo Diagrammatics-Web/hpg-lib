@@ -60,18 +60,16 @@ class DihedralElement:
     def twin(self):
         '''Returns an object of the same type representing movement in the opposite direction.'''
         return self._twin
-
+        
     def get_cw_ith_element(self, i):
         ''' Returns the element i elements clockwise.
-            This corresponds to the ith left from this element's twin.
-            i: how many elements to travel. Relates to trip i.'''
+            i: how many elements to travel. Assumed to be an integer >= 1.'''
         return self._cw_next if i == 1 else self._cw_next.get_cw_ith_element(i-1)
 
     def get_ccw_ith_element(self, i):
         ''' Returns the element i elements counterclockwise.
-            This corresponds to the ith right from this element's twin.
-            i: how many elements to travel. Relates to trip i.'''
-        return self._ccw_next if i == 1 else self._ccw_next.get_ccw_ith_element(i-1)
+            i: how many elements to travel. Assumed to be an integer >= 1.'''
+        return self._ccw_next if i == 1 else self._ccw_next.get_ccw_ith_element(i-1)        
 
     # Directly connects two elements. Use insert functions instead if possible.
     
@@ -126,10 +124,9 @@ class _DihedralIterator:
         if self.iter is self.head:
             if self.begin: raise StopIteration
             else: self.begin = True
-        if self.clockwise:
-            self.iter = self.iter.cw_next()
-            return self.iter.cw_prev()
-        else:
-            self.iter = self.iter.ccw_next()
-            return self.iter.ccw_prev()
+                
+        old = self.iter
+        if self.clockwise: self.iter = self.iter.cw_next()
+        else: self.iter = self.iter.ccw_next()
+        return old
         

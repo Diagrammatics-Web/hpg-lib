@@ -1,6 +1,7 @@
 import math
 from .dihedralelement import DihedralElement
 from .halfstrand import HalfStrand
+from .idgenerator import ID
 
 class HalfHourglass(DihedralElement):
     ''' Represents part of an edge from one vertex to another in an hourglass plabic graph.
@@ -28,11 +29,11 @@ class HalfHourglass(DihedralElement):
                 self._twin._half_strands_head = None
                 self._twin._half_strands_tail = None
             else:
-                self._half_strands_head = HalfStrand(str(id) + "_s" + HalfStrand.get_new_id(), self)
+                self._half_strands_head = HalfStrand(ID.get_new_id(str(id) + "_s"), self)
                 self._twin._half_strands_head = self._half_strands_head.twin()
                 for i in range(1, multiplicity): # runs multiplicity-1 times as we have already created a head strand
                     # potentially use thicken() instead of doing this manually?
-                    strand = HalfStrand(str(id) + "_s" + HalfStrand.get_new_id(), self)
+                    strand = HalfStrand(ID.get_new_id(str(id) + "_s"), self)
                     self._half_strands_head.append_cw(strand)
                     self._twin._half_strands_head.append_cw(strand.twin())
                 self._half_strands_tail = self._half_strands_head.cw_last()
@@ -50,8 +51,8 @@ class HalfHourglass(DihedralElement):
 
         # link up strands
         next_strand = element.cw_next()._get_first_strand()
-        prev_strand = next_strand.cw_prev() if next_strand != None else None
-        if next_strand != None: 
+        prev_strand = next_strand.cw_prev() if next_strand is not None else None
+        if next_strand is not None: 
             element._half_strands_tail.link_cw_next(next_strand)
             element._half_strands_head.link_cw_prev(prev_strand)
 
@@ -61,13 +62,13 @@ class HalfHourglass(DihedralElement):
 
         # link up strands - same procedure as for insert_cw_next
         next_strand = element.cw_next()._get_first_strand()
-        prev_strand = next_strand.cw_prev() if next_strand != None else None
-        if next_strand != None: 
+        prev_strand = next_strand.cw_prev() if next_strand is not None else None
+        if next_strand is not None: 
             element._half_strands_tail.link_cw_next(next_strand)
             element._half_strands_head.link_cw_prev(prev_strand)
 
     def remove(self):
-        if self._half_strands_head != None:
+        if self._half_strands_head is not None:
             self._half_strands_head.cw_prev().link_cw_next(self._half_strands_tail.cw_next())
             self._half_strands_head.link_cw_prev(self._half_strands_tail)
         super().remove()
@@ -79,7 +80,7 @@ class HalfHourglass(DihedralElement):
             Will not work on phantom edges.'''
         if (self.is_phantom()): raise RuntimeError("Cannot add a strand to a phantom/boundary edge.")
             
-        new_strand = HalfStrand(str(id) + "_" + HalfStrand.get_new_id(), self)
+        new_strand = HalfStrand(ID.get_new_id(str(id) + "_"), self)
         self._half_strands_tail.insert_cw_next(new_strand)
         self._half_strands_tail.twin().insert_cw_next(new_strand.twin())
         self._half_strands_tail = new_strand
@@ -110,9 +111,23 @@ class HalfHourglass(DihedralElement):
     def _get_first_strand(self):
         ''' Returns the first strand clockwise around v_from relative to this hourglass.
             Typically will return _half_strands_head, unless its multiplicity is 0.'''
-        return self._half_strands_head if self._half_strands_head != None or self._v_from.total_degree() == 0 else self._cw_next._get_first_strand()
+        return self._half_strands_head if self._half_strands_head is not None or self._v_from.total_degree() == 0 else self._cw_next._get_first_strand()
 
     # End strand accessor and modification functions
+
+    # Turn functions
+    
+    def left_turn(self):
+        return self.twin().cw_next()
+    def right_turn(self):
+        return self.twin().ccw_next()
+
+    def get_ith_left(self, i):
+        return self.twin().get_cw_ith_element(i)
+    def get_ith_right(self, i):
+        return self.twin().get_ccw_ith_element(i)
+
+    # Accessors
 
     def v_from(self):
         return self._v_from
@@ -138,11 +153,11 @@ class HalfHourglass(DihedralElement):
     def strand_count(self): # alias
         return self.multiplicity()
     
-    def is_phantom(self):
+    def is_boundary(self):
         '''Returns True if this hourglass is on the boundary (or otherwise has multiplicity 0).'''
         return self._multiplicity == 0
-    def is_boundary(self): # alias
-        return self.is_phantom()
+    def is_phantom(self): # alias
+        return self.is_boundary()
 
     def get_angle(self):
         ''' Returns the angle between the vector from v_from to v_to and the x-axis.
@@ -150,4 +165,33 @@ class HalfHourglass(DihedralElement):
         angle = math.atan2(self._v_to.y-self._v_from.y, self._v_to.x-self._v_from.x)
         if angle < 0:
             angle += 2 * math.pi
-        return angle        
+        return angle
+
+    def iterate_left_turns(self):
+        return _TurnIterator(self, False)
+        
+    def iterate_right_turns(self):
+        return _TurnIterator(self, True)
+
+class _TurnIterator:
+    ''' Internal class for iterating left and right turns. A left/right turn is computed by
+        taking an hourglass's twin's cw/ccw_next element.
+        Modification of the list while iterating can cause errors with iteration.'''
+    def __init__(self, head, turn_right): 
+        self.head = head
+        self.iter = head
+        self.begin = False
+        self.turn_right = turn_right
+        
+    def __iter__(self):
+        return self
+        
+    def __next__(self):
+        if self.iter is self.head:
+            if self.begin: raise StopIteration
+            else: self.begin = True
+                
+        old = self.iter
+        if self.turn_right: self.iter = self.iter.right_turn()
+        else: self.iter = self.iter.left_turn()
+        return old   

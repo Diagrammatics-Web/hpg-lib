@@ -1,14 +1,15 @@
 from sage.all import Graph
 from .vertex import Vertex
+from .idgenerator import ID
 
 class HourglassPlabicGraph:
     '''Represents an hourglass plabic graph.'''
     def __init__(self):
         # dictionaries pairing IDs to vertices
-        self._inner_vertices = {}
-        self._boundary_vertices = {}
+        self._inner_vertices = dict()
+        self._boundary_vertices = dict()
 
-        self.faces = []
+        self.faces = dict()
         
         self.layout = 'circular'
 
@@ -59,14 +60,37 @@ class HourglassPlabicGraph:
     def remove_vertex(self, v_id):
         self._get_vertex(v_id).clear_hourglasses()
         
-    def create_hourglass(self, v1_id, v2_id, multiplicity, create_face=True, verify_face=True):
+    def create_hourglass(self, v1_id, v2_id, multiplicity, create_face=True):
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
 
-        hh = Vertex.create_hourglass_between(v1, v2, multiplicity)
+        new_hh = Vertex.create_hourglass_between(v1, v2, multiplicity)
         
-        # TODO: Create faces
-    
+        if not create_face: return    
+
+        # Create faces TODO: Comment this code with explanation
+
+        face = None
+        for hh in new_hh:
+            if hh.right_face is not None:
+                face = hh.right_face
+                break
+        if face is not None:
+            face.initialize_half_hourglasses(new_hh)
+        else: 
+            face = Face(ID.get_new_id("face"), new_hh)
+            faces.add(face)
+        
+        # Repeat with this hourglass's twin, but first check that its right face is null, in case it was set in the previous step
+        # also, if the right face is null, but the found face is the same, create a new face instead
+        # check: will the found face always be the same? if so just check if null and if so create a new face and add to list
+
+        # MAKING A BIG ASSUMPTION HERE: found face will always be the same (meaning we dont need to even check for it; either
+        # it's been set, or it doesnt matter since it needs to be reset
+        
+        if new_hh.twin().right_face is not None:
+            faces.add(Face(ID.get_new_id("face"), new_hh.twin()))
+        
     def remove_hourglass(self, v1_id, v2_id, create_face=True, verify_face=True):
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)

@@ -145,7 +145,7 @@ class Vertex:
         hh1 = self._half_hourglasses_head
         hh2 = hh1.cw_next()
         # Check if vertex is contractible
-        if (hh1 != hh2.cw_next() or hh1 is hh2): return false
+        if (hh1 is not hh2.cw_next() or hh1 is hh2): return false
         if (hh1.v_to().filled and hh2.v_to().filled and not self.filled) or (not hh1.v_to().filled and not hh2.v_to().filled and self.filled):
             return false
         return true
@@ -159,7 +159,7 @@ class Vertex:
         del_v = hh2.v_to()
 
         hh = del_v._half_hourglasses_head
-        while hh.v_from() != sur_v:
+        while hh.v_from() is not sur_v:
             if hh is hh2.twin(): continue
             
             hh_next = hh.cw_next()
@@ -179,7 +179,7 @@ class Vertex:
         sur_v = out_hh.v_to()
 
         # store in an array to make iteration safe while reparenting
-        hourglasses = [hh for hh in out_hh if hh != out_hh]
+        hourglasses = [hh for hh in out_hh if hh is not out_hh]
         for hh in hourglasses:
             hh.reparent(sur_v)
         sur_v._remove_hourglass(out_hh.twin())
