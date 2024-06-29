@@ -1,17 +1,18 @@
+import math
 from sage.all import Graph
 from .vertex import Vertex
 from .idgenerator import ID
 
 class HourglassPlabicGraph:
     '''Represents an hourglass plabic graph.'''
-    def __init__(self):
-        # dictionaries pairing IDs to vertices
+    def __init__(self, n=0):
+        # dictionaries pairing IDs to vertices and faces
         self._inner_vertices = dict()
         self._boundary_vertices = dict()
-
-        self.faces = dict()
+        self._faces = dict()
         
         self.layout = 'circular'
+        if n > 0: self.create_boundary(n)
 
     # Construction functions
 
@@ -29,7 +30,7 @@ class HourglassPlabicGraph:
             sage: HPG = HourglassPlabicGraph()
             sage: HPG.create_boundary()
         """
-        assert self._inner_vertices.len() == 0 and self._boundary_vertices.len() == 0, "Cannot call create_boundary on a non-empty graph."
+        assert self.order() == 0, "Cannot call create_boundary on a non-empty graph."
 
         for i in range(0, n):
             id = str(i)
@@ -60,18 +61,16 @@ class HourglassPlabicGraph:
     def remove_vertex(self, v_id):
         self._get_vertex(v_id).clear_hourglasses()
         
-    def create_hourglass(self, v1_id, v2_id, multiplicity, create_face=True):
+    def create_hourglass(self, v1_id, v2_id, multiplicity):
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
 
         new_hh = Vertex.create_hourglass_between(v1, v2, multiplicity)
-        
-        if not create_face: return    
 
         # Create faces TODO: Comment this code with explanation
 
         face = None
-        for hh in new_hh:
+        for hh in new_hh.iterate_right_turns():
             if hh.right_face is not None:
                 face = hh.right_face
                 break
@@ -79,25 +78,44 @@ class HourglassPlabicGraph:
             face.initialize_half_hourglasses(new_hh)
         else: 
             face = Face(ID.get_new_id("face"), new_hh)
-            faces.add(face)
+            _faces[face.id] = face
         
         # Repeat with this hourglass's twin, but first check that its right face is null, in case it was set in the previous step
         # also, if the right face is null, but the found face is the same, create a new face instead
         # check: will the found face always be the same? if so just check if null and if so create a new face and add to list
 
-        # MAKING A BIG ASSUMPTION HERE: found face will always be the same (meaning we dont need to even check for it; either
-        # it's been set, or it doesnt matter since it needs to be reset
+        # MAKING AN ASSUMPTION HERE: found face will always be the same (meaning we dont need to even check for it; either
+        # it's been set in the previous step, or it doesnt matter since it needs to be reset)
         
         if new_hh.twin().right_face is not None:
-            faces.add(Face(ID.get_new_id("face"), new_hh.twin()))
+            face = Face(ID.get_new_id("face"), new_hh.twin())
+            _faces[face.id] = face
         
-    def remove_hourglass(self, v1_id, v2_id, create_face=True, verify_face=True):
+    def remove_hourglass(self, v1_id, v2_id):
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
 
-        Vertex.remove_hourglass(v1, v2)
+        face1 = None
+        hh1 = None
+        face2 = None
+        hh2 = None
+        # get a new hourglass for each face the hourglass belongs to
+        del_hh = v1.get_hourglass_to(v2)
+        for hh in del_hh.iterate_right_turns():
+            if hh is not del_hh and hh is not del_hh.twin():
+                face1 = hh.right_face
+                hh1 = hh
+        for hh in del_hh.twin().iterate_right_turns():
+            if hh is not del_hh and hh is not del_hh.twin():
+                face2 = hh.right_face
+                hh2 = hh
+        
+        del_hh = Vertex.remove_hourglass(v1, v2)
 
-        # TODO: reform faces
+        if face1 is not None:
+            face1.initialize_half_hourglasses(hh1)
+        if face2 is not None and hh2.right_face is not face1: # this should only happen if deletion results in a forest
+            face2.initialize_half_hourglasses(hh2)
     
     # Layout functions
     
@@ -168,3 +186,7 @@ class HourglassPlabicGraph:
         if v is None: 
             v = self._boundary_vertices.get(v_id)
             if v is None: raise ValueError("id " + str(id) + " does not correspond to any vertex.")
+
+    def order(self):
+        ''' The number of vertices in this graph.'''
+        return len(self._inner_vertices) + len(self._boundary_vertices)

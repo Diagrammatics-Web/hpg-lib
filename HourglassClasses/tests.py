@@ -25,8 +25,7 @@ def all_tests():
     half_hourglass_tests()
     vertex_tests()
     face_tests()
-
-    print("Awaiting further tests.")
+    hourglass_plabic_graph_tests()
 
 def dihedral_element_tests():
     print("Testing DihedralElement class.")
@@ -209,10 +208,11 @@ def vertex_tests():
         v5.get_neighbors() == [v6, extras[0], extras[1]] and
         v6.get_neighbors() == [extras[2], v5, extras[3]]
     ), "Graph should have returned to previous state."
+    
     print("Vertex tests complete.")
 
 def face_tests():
-    
+    print("Testing Face class.")
     # Square move tests
     
     v1 = Vertex(1, 0, 0, True)
@@ -305,7 +305,13 @@ def face_tests():
     print("Face tests complete.")
 
 def hourglass_plabic_graph_tests():
-    print("HPG tests not written yet.")
+    print("Testing HourglassPlabicGraph class.")
+
+    HPG = HourglassPlabicGraph(10)
+
+    assert HPG.order() == 10, "HPG should have been initialized with 10 boundary vertices."
+
+    print("HourglassPlabicGraph test not yet complete.")
 
 def trip_tests():
     print("Testing trips.")
@@ -313,58 +319,6 @@ def trip_tests():
     print(HPG.get_trip_perms())
     print("TODO")
 
-def create_test_HPG(): #TODO: FIX EVENTUALLY
+def create_test_HPG():
     '''Creates the graph seen at https://youtu.be/wsltX4aTjbc?t=2565'''
-    inner_vertices = []
-    boundary_vertices = []
-
-    boundary_vertices.append(Vertex(id=1, x=1, y=1, filled=True, boundary=True))
-    boundary_vertices.append(Vertex(id=2, x=1, y=0, filled=False, boundary=True))
-    boundary_vertices.append(Vertex(id=3, x=1, y=-1, filled=True, boundary=True))
-    boundary_vertices.append(Vertex(id=4, x=0, y=-1, filled=True, boundary=True))
-    boundary_vertices.append(Vertex(id=5, x=-1, y=-1, filled=False, boundary=True))
-    boundary_vertices.append(Vertex(id=6, x=-1, y=0, filled=True, boundary=True))
-    boundary_vertices.append(Vertex(id=7, x=-1, y=1, filled=False, boundary=True))
-
-    inner_vertices.append(Vertex(id=11, x=.5, y=.5, filled=False))
-    inner_vertices.append(Vertex(id=12, x=.5, y=0, filled=True))
-    inner_vertices.append(Vertex(id=13, x=.5, y=-.5, filled=False))
-    inner_vertices.append(Vertex(id=14, x=0, y=-.5, filled=False))
-    inner_vertices.append(Vertex(id=15, x=-.5, y=-.5, filled=True))
-    inner_vertices.append(Vertex(id=16, x=-.5, y=0, filled=False))
-    inner_vertices.append(Vertex(id=17, x=-.5, y=.5, filled=True))
-
-    boundary_vertices[0].create_hourglass_between(boundary_vertices[1], 0)
-    boundary_vertices[1].create_hourglass_between(boundary_vertices[2], 0)
-    boundary_vertices[2].create_hourglass_between(boundary_vertices[3], 0)
-    boundary_vertices[3].create_hourglass_between(boundary_vertices[4], 0)
-    boundary_vertices[4].create_hourglass_between(boundary_vertices[5], 0)
-    boundary_vertices[5].create_hourglass_between(boundary_vertices[6], 0)
-    boundary_vertices[6].create_hourglass_between(boundary_vertices[0], 0)
-    
-    boundary_vertices[0].create_hourglass_between(inner_vertices[0], 2)
-    boundary_vertices[1].create_hourglass_between(inner_vertices[1], 1)
-    boundary_vertices[2].create_hourglass_between(inner_vertices[2], 2)
-    boundary_vertices[3].create_hourglass_between(inner_vertices[3], 1)
-    boundary_vertices[4].create_hourglass_between(inner_vertices[4], 2)
-    boundary_vertices[5].create_hourglass_between(inner_vertices[5], 2)
-    boundary_vertices[6].create_hourglass_between(inner_vertices[6], 1)
-
-    inner_vertices[0].create_hourglass_between(inner_vertices[1], 1)
-    inner_vertices[1].create_hourglass_between(inner_vertices[2], 1)
-    inner_vertices[3].create_hourglass_between(inner_vertices[4], 1)
-    inner_vertices[4].create_hourglass_between(inner_vertices[5], 1)
-    inner_vertices[5].create_hourglass_between(inner_vertices[6], 1)
-    inner_vertices[6].create_hourglass_between(inner_vertices[0], 1)
-
-    inner_vertices[1].create_hourglass_between(inner_vertices[3], 1)
-    inner_vertices[3].create_hourglass_between(inner_vertices[6], 1)
-
-    HPG = HourglassPlabicGraph()
-    HPG.boundary_vertices = boundary_vertices
-    HPG.inner_vertices = inner_vertices
-
-    return HPG
-    
-
-    
+    # TODO

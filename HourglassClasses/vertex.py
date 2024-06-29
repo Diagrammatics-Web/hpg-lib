@@ -74,6 +74,8 @@ class Vertex:
         hh = v1.get_hourglass_to(v2)
         v1._remove_hourglass(hh)
         v2._remove_hourglass(hh.twin())
+
+        return hh
     
     def _remove_hourglass(self, hh):
         "Safely removes the provided hourglass from this vertex's hourglass list. Does not affect its twin."
