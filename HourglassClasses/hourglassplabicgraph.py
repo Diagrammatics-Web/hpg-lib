@@ -1,6 +1,7 @@
 import math
 from sage.all import Graph
 from .vertex import Vertex
+from .face import Face
 from .idgenerator import ID
 
 class HourglassPlabicGraph:
@@ -16,7 +17,7 @@ class HourglassPlabicGraph:
 
     # Construction functions
 
-    def create_boundary(self, n):
+    def create_boundary(self, n, r=10):
         r"""
         Creates n boundary vertices, labeled from 0 to n-1, and connects them with phantom edges.
         The vertices will be unfilled. This function can only be called on an empty graph.
@@ -24,6 +25,7 @@ class HourglassPlabicGraph:
         INPUT:
     
         - ``n`` -- integer; the number of boundary vertices to create.
+        - ``r`` -- float; the radius of the boundary.
 
         EXAMPLES:
     
@@ -34,15 +36,18 @@ class HourglassPlabicGraph:
 
         for i in range(0, n):
             id = str(i)
-            self._boundary_vertices[i] = Vertex(id, 10*math.sin((i+0.5)*2*math.pi/n), 10*math.cos((i+0.5)*2*math.pi/n), False, True, id)
+            self._boundary_vertices[id] = Vertex(id, r*math.sin((i+0.5)*2*math.pi/n), r*math.cos((i+0.5)*2*math.pi/n), False, True, id)
 
         for i in range(0, n-1):
-            Vertex.create_hourglass_between(self._boundary_vertices[i], self._boundary_vertices[i+1], 0)
-        hh = Vertex.create_hourglass_between(self._boundary_vertices[0], self._boundary_vertices[n-1], 0)
+            Vertex.create_hourglass_between(self._boundary_vertices[str(i)], self._boundary_vertices[str(i+1)], 0)
+        hh = Vertex.create_hourglass_between(self._boundary_vertices[str(n-1)], self._boundary_vertices[str(0)], 0)
 
-        # TODO: Create face
-            
-    def create_vertex(self, v_id, label, x, y, filled, boundary=False, verify_id=False):
+        inner_face = Face("face0", hh)
+        outer_face = Face("face1", hh.twin())
+        self._faces[inner_face.id] = inner_face
+        self._faces[outer_face.id] = outer_face
+                          
+    def create_vertex(self, v_id, x, y, filled, boundary=False, label='', verify_id=False):
         ''' Adds a vertex to the graph.
             v_id: The id given to the vertex. Should be unique.
             label: 
@@ -119,11 +124,11 @@ class HourglassPlabicGraph:
     
     # Layout functions
     
-    def make_circular(self, radius=10): # TODO: TEST
+    def make_circular(self, r=10): # TODO: TEST
         n = len(self.boundary_vertices.values())
         for i,v in self.boundary_vertices:
-            v.x = radius*math.sin((i+0.5)*2*math.pi/n)
-            v.y = radius*math.cos((i+0.5)*2*math.pi/n)
+            v.x = r*math.sin((i+0.5)*2*math.pi/n)
+            v.y = r*math.cos((i+0.5)*2*math.pi/n)
             
         self.tutte_layout()
         self.layout = "circular"

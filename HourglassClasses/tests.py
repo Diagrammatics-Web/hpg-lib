@@ -307,9 +307,25 @@ def face_tests():
 def hourglass_plabic_graph_tests():
     print("Testing HourglassPlabicGraph class.")
 
+    # initialization/create_boundary
+    
     HPG = HourglassPlabicGraph(10)
 
-    assert HPG.order() == 10, "HPG should have been initialized with 10 boundary vertices."
+    assert len(HPG._boundary_vertices) == 10, "HPG should have been initialized with 10 boundary vertices."
+    for v in HPG._boundary_vertices.values():
+        assert v.boundary, "Vertex " + str(v.id) + " is not marked as a boundary vertex."
+    assert len(HPG._faces) == 2, "HPG should have two faces."
+
+    # adding vertices and hourglasses
+
+    HPG = HourglassPlabicGraph(8)
+    HPG.create_vertex("v1",  5,  5, True )
+    HPG.create_vertex("v2",  5, -5, False)
+    HPG.create_vertex("v3", -5, -5, True )
+    HPG.create_vertex("v4", -5,  5, False)
+    HPG.create_hourglass(
+
+    # removing vertices and hourglasses
 
     print("HourglassPlabicGraph test not yet complete.")
 
