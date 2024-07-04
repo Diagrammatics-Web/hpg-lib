@@ -323,8 +323,29 @@ def hourglass_plabic_graph_tests():
     HPG.create_vertex("v2",  5, -5, False)
     HPG.create_vertex("v3", -5, -5, True )
     HPG.create_vertex("v4", -5,  5, False)
-    HPG.create_hourglass(
+    HPG.create_hourglass("v1", "v2", 2)
+    HPG.create_hourglass("v2", "v3", 2)
+    HPG.create_hourglass("v3", "v4", 2)
+    HPG.create_hourglass("v4", "v1", 2)
+    HPG.create_hourglass("v1", "0", 1)
+    HPG.create_hourglass("v1", "1", 1)
+    HPG.create_hourglass("v2", "2", 1)
+    HPG.create_hourglass("v2", "3", 1)
+    HPG.create_hourglass("v3", "4", 1)
+    HPG.create_hourglass("v3", "5", 1)
+    HPG.create_hourglass("v4", "6", 1)
+    HPG.create_hourglass("v4", "7", 1)
 
+    '''
+    for v in list(HPG._boundary_vertices.values()) + list(HPG._inner_vertices.values()):
+        print(v.id + ":")
+        v.print_neighbors()
+    '''
+
+    for f in HPG._faces.values():
+        print(f.id + ":")
+        f.print_vertices()
+    
     # removing vertices and hourglasses
 
     print("HourglassPlabicGraph test not yet complete.")

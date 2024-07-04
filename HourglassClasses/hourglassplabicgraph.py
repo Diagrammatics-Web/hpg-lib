@@ -67,34 +67,42 @@ class HourglassPlabicGraph:
         self._get_vertex(v_id).clear_hourglasses()
         
     def create_hourglass(self, v1_id, v2_id, multiplicity):
+        print("Creating hourglass between", v1_id, "and", v2_id) # TESTING
+        
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
 
         new_hh = Vertex.create_hourglass_between(v1, v2, multiplicity)
 
-        # Create faces TODO: Comment this code with explanation
+        # Create faces
 
         face = None
+        # First, find an already existing reference to this hourglass's right face
         for hh in new_hh.iterate_right_turns():
             if hh.right_face is not None:
                 face = hh.right_face
                 break
         if face is not None:
+            print("Found existing face", face.id + ". Reinitializing.") # TESTING
+            print("Old vertices: ") # TESTING
+            face.print_vertices() # TESTING
             face.initialize_half_hourglasses(new_hh)
+            print("New vertices: ") # TESTING
+            face.print_vertices() # TESTING
+        # If none exists, create a new one
         else: 
             face = Face(ID.get_new_id("face"), new_hh)
-            _faces[face.id] = face
-        
-        # Repeat with this hourglass's twin, but first check that its right face is null, in case it was set in the previous step
-        # also, if the right face is null, but the found face is the same, create a new face instead
-        # check: will the found face always be the same? if so just check if null and if so create a new face and add to list
+            self._faces[face.id] = face
+            print("Creating new face. Vertices:") # TESTING
+            face.print_vertices() # TESTING
 
-        # MAKING AN ASSUMPTION HERE: found face will always be the same (meaning we dont need to even check for it; either
-        # it's been set in the previous step, or it doesnt matter since it needs to be reset)
-        
-        if new_hh.twin().right_face is not None:
+        # Either the twin's face will be the same as this, or we will need to create a new face since the old face
+        # will be the same as the one reused for the hourglass and will no longer be valid
+        if new_hh.twin().right_face is None:
             face = Face(ID.get_new_id("face"), new_hh.twin())
-            _faces[face.id] = face
+            self._faces[face.id] = face
+            print("Creating new face for twin as well. Vertices:") # TESTING
+            face.print_vertices() # TESTING
         
     def remove_hourglass(self, v1_id, v2_id):
         v1 = self._get_vertex(v1_id)
@@ -185,12 +193,13 @@ class HourglassPlabicGraph:
         r = max(v.total_degree() for v in self.inner_vertices)
         return [self.get_trip_perm(i) for i in range(1, r)]
 
-    def _get_vertex(id):
+    def _get_vertex(self, v_id):
         ''' Internal helper function that gets the vertex with the given id from either _inner_vertices or _boundary_vertices, and throws if the id is not found.'''
         v = self._inner_vertices.get(v_id)
         if v is None: 
             v = self._boundary_vertices.get(v_id)
-            if v is None: raise ValueError("id " + str(id) + " does not correspond to any vertex.")
+            if v is None: raise ValueError("id " + str(v_id) + " does not correspond to any vertex.")
+        return v
 
     def order(self):
         ''' The number of vertices in this graph.'''
