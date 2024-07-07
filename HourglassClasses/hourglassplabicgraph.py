@@ -60,11 +60,13 @@ class HourglassPlabicGraph:
         if verify_id and ((not boundary and v_id in self._inner_vertices) or (boundary and v_id in self._boundary_vertices)): raise ValueError("v_id already in use.")
 
         vertex = Vertex(v_id, x, y, filled, boundary, label)
-        if boundary: self._inner_vertices[v_id] = vertex
-        else: self._boundary_vertices[v_id] = vertex
+        if boundary: self._boundary_vertices[v_id] = vertex
+        else: self._inner_vertices[v_id] = vertex
 
     def remove_vertex(self, v_id):
         self._get_vertex(v_id).clear_hourglasses()
+        if v_id in self._inner_vertices: del self._inner_vertices[v_id]
+        else: del self._boundary_vertices[v_id]
         
     def create_hourglass(self, v1_id, v2_id, multiplicity):
         print("Creating hourglass between", v1_id, "and", v2_id) # TESTING
@@ -78,31 +80,26 @@ class HourglassPlabicGraph:
 
         face = None
         # First, find an already existing reference to this hourglass's right face
+        # There is a chance we are connecting two faces, so we should find the second one
+        # and remove it from our list
         for hh in new_hh.iterate_right_turns():
             if hh.right_face is not None:
-                face = hh.right_face
-                break
+                if face is None: face = hh.right_face
+                elif face is not hh.right_face:
+                    del self._faces[hh.right_face.id]
+                    break
         if face is not None:
-            print("Found existing face", face.id + ". Reinitializing.") # TESTING
-            print("Old vertices: ") # TESTING
-            face.print_vertices() # TESTING
             face.initialize_half_hourglasses(new_hh)
-            print("New vertices: ") # TESTING
-            face.print_vertices() # TESTING
         # If none exists, create a new one
         else: 
             face = Face(ID.get_new_id("face"), new_hh)
             self._faces[face.id] = face
-            print("Creating new face. Vertices:") # TESTING
-            face.print_vertices() # TESTING
 
         # Either the twin's face will be the same as this, or we will need to create a new face since the old face
         # will be the same as the one reused for the hourglass and will no longer be valid
         if new_hh.twin().right_face is None:
             face = Face(ID.get_new_id("face"), new_hh.twin())
             self._faces[face.id] = face
-            print("Creating new face for twin as well. Vertices:") # TESTING
-            face.print_vertices() # TESTING
         
     def remove_hourglass(self, v1_id, v2_id):
         v1 = self._get_vertex(v1_id)
