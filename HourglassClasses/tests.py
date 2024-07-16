@@ -340,13 +340,24 @@ def hourglass_plabic_graph_tests():
     for v in list(HPG._boundary_vertices.values()) + list(HPG._inner_vertices.values()):
         print(v.id + ":")
         v.print_neighbors()
-    '''
 
     for f in HPG._faces.values():
         print(f.id + ":")
         f.print_vertices()
+    '''
     
     # removing vertices and hourglasses
+
+    HPG.remove_hourglass("v1", "v4")
+    HPG.remove_hourglass("v2", "v3")
+    HPG.remove_hourglass("v1", "v2")
+    HPG.remove_hourglass("v1", "1")
+    HPG.remove_hourglass("7", "0")
+    HPG.remove_hourglass("3", "4")
+    
+    for f in HPG._faces.values():
+        print(f.id + ":")
+        f.print_vertices()
 
     print("HourglassPlabicGraph test not yet complete.")
 

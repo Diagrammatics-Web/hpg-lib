@@ -68,9 +68,7 @@ class HourglassPlabicGraph:
         if v_id in self._inner_vertices: del self._inner_vertices[v_id]
         else: del self._boundary_vertices[v_id]
         
-    def create_hourglass(self, v1_id, v2_id, multiplicity):
-        print("Creating hourglass between", v1_id, "and", v2_id) # TESTING
-        
+    def create_hourglass(self, v1_id, v2_id, multiplicity):        
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
 
@@ -104,28 +102,34 @@ class HourglassPlabicGraph:
     def remove_hourglass(self, v1_id, v2_id):
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
+        del_hh = v1.get_hourglass_to(v2)
 
         face1 = None
         hh1 = None
         face2 = None
         hh2 = None
         # get a new hourglass for each face the hourglass belongs to
-        del_hh = v1.get_hourglass_to(v2)
         for hh in del_hh.iterate_right_turns():
-            if hh is not del_hh and hh is not del_hh.twin():
+            if hh is not del_hh and hh is not del_hh.twin() and hh.right_face is not None:
                 face1 = hh.right_face
                 hh1 = hh
+                break
         for hh in del_hh.twin().iterate_right_turns():
-            if hh is not del_hh and hh is not del_hh.twin():
+            if hh is not del_hh and hh is not del_hh.twin() and hh.right_face is not None:
                 face2 = hh.right_face
                 hh2 = hh
+                break
         
-        del_hh = Vertex.remove_hourglass(v1, v2)
+        del_hh = Vertex.remove_hourglass_between(v1, v2)
 
         if face1 is not None:
             face1.initialize_half_hourglasses(hh1)
-        if face2 is not None and hh2.right_face is not face1: # this should only happen if deletion results in a forest
-            face2.initialize_half_hourglasses(hh2)
+        if face2 is not None:
+            if face2 is not face1:
+                del self._faces[face2.id]
+            else: # this should only happen if deletion results in seperate subgraphs
+                face2 = Face(ID.get_new_id("face"), hh2)
+                self._faces[face2.id] = face2
     
     # Layout functions
     
