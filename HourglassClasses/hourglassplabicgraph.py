@@ -63,10 +63,16 @@ class HourglassPlabicGraph:
         if boundary: self._boundary_vertices[v_id] = vertex
         else: self._inner_vertices[v_id] = vertex
 
-    def remove_vertex(self, v_id):
-        self._get_vertex(v_id).clear_hourglasses()
+    def remove_vertex_by_id(self, v_id):
+        del_vertex = self._get_vertex(v_id)
+        remove_vertex(del_vertex)
+
+    def remove_vertex(self, del_vertex):
+        for hh in del_vertex:
+            self.remove_hourglass(hh, del_vertex, hh.v_to())
+        
         if v_id in self._inner_vertices: del self._inner_vertices[v_id]
-        else: del self._boundary_vertices[v_id]
+        else: del self._boundary_vertices[v_id]        
         
     def create_hourglass(self, v1_id, v2_id, multiplicity):        
         v1 = self._get_vertex(v1_id)
@@ -99,11 +105,16 @@ class HourglassPlabicGraph:
             face = Face(ID.get_new_id("face"), new_hh.twin())
             self._faces[face.id] = face
         
-    def remove_hourglass(self, v1_id, v2_id):
+    def remove_hourglass_by_id(self, v1_id, v2_id):
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
-        del_hh = v1.get_hourglass_to(v2)
+        self.remove_hourglass(v1, v2)
 
+    def remove_hourglass(self, v1, v2):
+        del_hh = v1.get_hourglass_to(v2)
+        self._remove_hourglass_internal(del_hh, v1, v2)
+
+    def _remove_hourglass_internal(self, del_hh, v1, v2):        
         face1 = None
         hh1 = None
         face2 = None
@@ -130,6 +141,10 @@ class HourglassPlabicGraph:
             else: # this should only happen if deletion results in seperate subgraphs
                 face2 = Face(ID.get_new_id("face"), hh2)
                 self._faces[face2.id] = face2
+        # case: this is the last hourglass in the face
+        if face1 is None and face2 is None:
+            del self._faces[del_hh.right_face.id]
+            
     
     # Layout functions
     

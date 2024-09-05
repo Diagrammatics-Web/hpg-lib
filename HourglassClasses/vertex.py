@@ -59,7 +59,7 @@ class Vertex:
         
         # find first edge with greater angle, then insert_cw_next
         hh_angle = hh.get_angle()
-        for iter_hh in self._half_hourglasses_head.iterate_counterclockwise():
+        for iter_hh in self:
             if hh_angle < iter_hh.get_angle():
                 iter_hh.insert_ccw_prev(hh)
                 if iter_hh is self._half_hourglasses_head: self._half_hourglasses_head = hh
@@ -67,7 +67,7 @@ class Vertex:
         # we've run the entire loop, so angle is greater than every other edge
         self._half_hourglasses_head.append_ccw(hh)
 
-        # print("testing vertex " + str(self.id) + ": " + str([hh.v_to().id for hh in self._half_hourglasses_head.iterate_counterclockwise()])) # TESTING
+        # print("testing vertex " + str(self.id) + ": " + str([hh.v_to().id for hh in self])) # TESTING
 
     @classmethod
     def remove_hourglass_between(cls, v1, v2):
@@ -127,7 +127,7 @@ class Vertex:
                 
     def get_neighbors(self):
         '''Returns all adjacent vertices in a list.'''
-        return [hh.v_to() for hh in self._half_hourglasses_head.iterate_counterclockwise()]
+        return [hh.v_to() for hh in self]
     
     def total_degree(self):
         '''Returns the number of strands around this vertex.'''
@@ -209,7 +209,10 @@ class Vertex:
     # FOR TESTING PURPOSES
     def print_neighbors(self):
         if self._half_hourglasses_head is None: print("no neighbors")
-        else: print(str([hh.v_to().id for hh in self._half_hourglasses_head.iterate_counterclockwise()]))
+        else: print(str([hh.v_to().id for hh in self]))
     def print_neighbors_and_angles(self):
         if self._half_hourglasses_head is None: print("no neighbors")
-        else: print(str([(hh.v_to().id, hh.get_angle()) for hh in self._half_hourglasses_head.iterate_counterclockwise()]))
+        else: print(str([(hh.v_to().id, hh.get_angle()) for hh in self]))
+
+    def __iter__(self):
+        return self._half_hourglasses_head.iterate_counterclockwise()

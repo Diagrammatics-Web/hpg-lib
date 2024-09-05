@@ -318,6 +318,53 @@ def hourglass_plabic_graph_tests():
 
     # adding vertices and hourglasses
 
+    HPG = create_test_HPG()
+
+    '''
+    for v in list(HPG._boundary_vertices.values()) + list(HPG._inner_vertices.values()):
+        print(v.id + ":")
+        v.print_neighbors()
+
+    for f in HPG._faces.values():
+        print(f.id + ":")
+        f.print_vertices()
+    '''
+    
+    # removing vertices and hourglasses
+
+    HPG.remove_vertex_by_id()
+    
+    HPG = create_test_HPG()
+
+    HPG.remove_hourglass_by_id("v1", "v4")
+    HPG.remove_hourglass_by_id("v2", "v3")
+    HPG.remove_hourglass_by_id("v1", "v2")
+    HPG.remove_hourglass_by_id("7", "v4")
+    HPG.remove_hourglass_by_id("v2", "2")
+    
+    for f in HPG._faces.values():
+        print(f.id + ":")
+        f.print_vertices()
+
+    print("HourglassPlabicGraph test not yet complete.")
+
+def trip_tests():
+    print("Testing trips.")
+    HPG = create_test_HPG()
+    print(HPG.get_trip_perms())
+    print("TODO")
+
+def create_test_HPG():
+    '''
+    Creates the following graph with the labeled IDs:
+       7 -- 0
+     / |    | \
+    6--v4--v1--1
+    |  |    |  |
+    5--v3--v2--2
+     \ |    | /
+       4 -- 3
+    '''
     HPG = HourglassPlabicGraph(8)
     HPG.create_vertex("v1",  5,  5, True )
     HPG.create_vertex("v2",  5, -5, False)
@@ -335,38 +382,4 @@ def hourglass_plabic_graph_tests():
     HPG.create_hourglass("v3", "5", 1)
     HPG.create_hourglass("v4", "6", 1)
     HPG.create_hourglass("v4", "7", 1)
-
-    '''
-    for v in list(HPG._boundary_vertices.values()) + list(HPG._inner_vertices.values()):
-        print(v.id + ":")
-        v.print_neighbors()
-
-    for f in HPG._faces.values():
-        print(f.id + ":")
-        f.print_vertices()
-    '''
-    
-    # removing vertices and hourglasses
-
-    HPG.remove_hourglass("v1", "v4")
-    HPG.remove_hourglass("v2", "v3")
-    HPG.remove_hourglass("v1", "v2")
-    HPG.remove_hourglass("v1", "1")
-    HPG.remove_hourglass("7", "0")
-    HPG.remove_hourglass("3", "4")
-    
-    for f in HPG._faces.values():
-        print(f.id + ":")
-        f.print_vertices()
-
-    print("HourglassPlabicGraph test not yet complete.")
-
-def trip_tests():
-    print("Testing trips.")
-    HPG = create_test_HPG()
-    print(HPG.get_trip_perms())
-    print("TODO")
-
-def create_test_HPG():
-    '''Creates the graph seen at https://youtu.be/wsltX4aTjbc?t=2565'''
-    # TODO
+    return HPG
