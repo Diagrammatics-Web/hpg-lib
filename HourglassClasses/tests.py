@@ -320,19 +320,27 @@ def hourglass_plabic_graph_tests():
 
     HPG = create_test_HPG()
 
+    print("Checking for proper face initialization.")
     '''
     for v in list(HPG._boundary_vertices.values()) + list(HPG._inner_vertices.values()):
         print(v.id + ":")
         v.print_neighbors()
-
+    '''
     for f in HPG._faces.values():
         print(f.id + ":")
         f.print_vertices()
-    '''
     
     # removing vertices and hourglasses
 
-    HPG.remove_vertex_by_id()
+    HPG.remove_vertex_by_id("v1")
+    HPG.remove_vertex_by_id("5")
+    HPG.remove_vertex_by_id("v2")
+
+    print("Testing vertex removal.")
+    for f in HPG._faces.values():
+        print(f.id + ":")
+        f.print_vertices()
+    print()
     
     HPG = create_test_HPG()
 
@@ -341,7 +349,8 @@ def hourglass_plabic_graph_tests():
     HPG.remove_hourglass_by_id("v1", "v2")
     HPG.remove_hourglass_by_id("7", "v4")
     HPG.remove_hourglass_by_id("v2", "2")
-    
+
+    print("Testing hourglass removal.")
     for f in HPG._faces.values():
         print(f.id + ":")
         f.print_vertices()
@@ -357,13 +366,13 @@ def trip_tests():
 def create_test_HPG():
     '''
     Creates the following graph with the labeled IDs:
-       7 -- 0
-     / |    | \
-    6--v4--v1--1
-    |  |    |  |
-    5--v3--v2--2
-     \ |    | /
-       4 -- 3
+           7 -- 0
+         / |    | \
+        6--v4--v1--1
+        |  |    |  |
+        5--v3--v2--2
+         \ |    | /
+           4 -- 3
     '''
     HPG = HourglassPlabicGraph(8)
     HPG.create_vertex("v1",  5,  5, True )

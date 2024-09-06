@@ -65,14 +65,17 @@ class HourglassPlabicGraph:
 
     def remove_vertex_by_id(self, v_id):
         del_vertex = self._get_vertex(v_id)
-        remove_vertex(del_vertex)
+        self.remove_vertex(del_vertex)
 
     def remove_vertex(self, del_vertex):
-        for hh in del_vertex:
-            self.remove_hourglass(hh, del_vertex, hh.v_to())
+        # Store hourglasses in a list to avoid issues with removing
+        # elements while iterating over dihedral element
+        del_hourglasses = del_vertex.get_hourglasses_as_list()
+        for hh in del_hourglasses:
+            self._remove_hourglass_internal(hh, del_vertex, hh.v_to())
         
-        if v_id in self._inner_vertices: del self._inner_vertices[v_id]
-        else: del self._boundary_vertices[v_id]        
+        if del_vertex.id in self._inner_vertices: del self._inner_vertices[del_vertex.id]
+        else: del self._boundary_vertices[del_vertex.id]        
         
     def create_hourglass(self, v1_id, v2_id, multiplicity):        
         v1 = self._get_vertex(v1_id)
@@ -114,7 +117,7 @@ class HourglassPlabicGraph:
         del_hh = v1.get_hourglass_to(v2)
         self._remove_hourglass_internal(del_hh, v1, v2)
 
-    def _remove_hourglass_internal(self, del_hh, v1, v2):        
+    def _remove_hourglass_internal(self, del_hh, v1, v2):
         face1 = None
         hh1 = None
         face2 = None
@@ -131,14 +134,16 @@ class HourglassPlabicGraph:
                 hh2 = hh
                 break
         
-        del_hh = Vertex.remove_hourglass_between(v1, v2)
+        Vertex.remove_hourglass_between(v1, v2)
 
         if face1 is not None:
             face1.initialize_half_hourglasses(hh1)
         if face2 is not None:
             if face2 is not face1:
                 del self._faces[face2.id]
-            else: # this should only happen if deletion results in seperate subgraphs
+            # This should only happen if deletion results in seperate subgraphs
+            # This check avoids creating a new face for an isolated vertex
+            elif not (del_hh.right_turn() is del_hh.twin() or del_hh.twin().right_turn() is del_hh):
                 face2 = Face(ID.get_new_id("face"), hh2)
                 self._faces[face2.id] = face2
         # case: this is the last hourglass in the face

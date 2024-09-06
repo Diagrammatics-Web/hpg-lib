@@ -90,13 +90,13 @@ class Vertex:
         ''' Deletes all hourglasses (and their twins) attached to this vertex.'''
         if self._half_hourglasses_head is None: return
 
-        for hh in self._half_hourglasses_head:
+        for hh in self:
             hh.v_to()._remove_hourglass(hh.twin())
         self._half_hourglasses_head = None # this may not be memory-safe, depending on python's garbage collection
     
     def get_hourglass_to(self, v_to):
         '''Returns the half hourglass from this vertex to v_to.'''
-        for hh in self._half_hourglasses_head:
+        for hh in self:
             if hh.v_to() is v_to: return hh
         raise ValueError("Hourglass to vertex " + v_to.id() + " does not exist.")
 
@@ -124,6 +124,10 @@ class Vertex:
         visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)
 
         return visited
+
+    def get_hourglasses_as_list(self):
+        '''Returns all hourglasses in a list.'''
+        return self._half_hourglasses_head.get_elements_as_list()
                 
     def get_neighbors(self):
         '''Returns all adjacent vertices in a list.'''
@@ -133,7 +137,7 @@ class Vertex:
         '''Returns the number of strands around this vertex.'''
         if (self._half_hourglasses_head is None): return 0
         count = 0
-        for hh in self._half_hourglasses_head: count += hh.strand_count()
+        for hh in self: count += hh.strand_count()
         return count
 
     def simple_degree(self):
@@ -215,4 +219,5 @@ class Vertex:
         else: print(str([(hh.v_to().id, hh.get_angle()) for hh in self]))
 
     def __iter__(self):
+        ''' Iterates over this vertex's hourglasses counterclockwise (in degree order).'''
         return self._half_hourglasses_head.iterate_counterclockwise()

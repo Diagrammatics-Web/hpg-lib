@@ -6,3 +6,7 @@ class ID:
         n_id = prefix + str(cls._id)
         cls._id += 1
         return n_id
+
+    @classmethod
+    def reset_id(cls):
+        cls._id = 0
