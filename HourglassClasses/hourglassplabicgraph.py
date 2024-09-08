@@ -42,8 +42,8 @@ class HourglassPlabicGraph:
             Vertex.create_hourglass_between(self._boundary_vertices[str(i)], self._boundary_vertices[str(i+1)], 0)
         hh = Vertex.create_hourglass_between(self._boundary_vertices[str(n-1)], self._boundary_vertices[str(0)], 0)
 
-        inner_face = Face("face0", hh)
-        outer_face = Face("face1", hh.twin())
+        inner_face = Face(ID.get_new_id("face"), hh)
+        outer_face = Face(ID.get_new_id("face"), hh.twin())
         self._faces[inner_face.id] = inner_face
         self._faces[outer_face.id] = outer_face
                           
@@ -174,7 +174,6 @@ class HourglassPlabicGraph:
             self._inner_vertices[v.id] = v
         for v in tup[1]:
             del self._inner_vertices[v.id]
-            
 
     def benzene_move(self, face_id):
         self._get_face(face_id).benzene_move()
@@ -258,3 +257,8 @@ class HourglassPlabicGraph:
     def order(self):
         ''' The number of vertices in this graph.'''
         return len(self._inner_vertices) + len(self._boundary_vertices)
+
+    def print_faces(self):
+        for f in self._faces.values():
+            print(f.id + ":")
+            f.print_vertices()

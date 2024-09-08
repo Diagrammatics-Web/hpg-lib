@@ -320,27 +320,27 @@ def hourglass_plabic_graph_tests():
 
     HPG = create_test_HPG()
 
-    print("Checking for proper face initialization.")
     '''
+    print("Checking for proper face initialization.")
     for v in list(HPG._boundary_vertices.values()) + list(HPG._inner_vertices.values()):
         print(v.id + ":")
         v.print_neighbors()
+    HPG.print_faces()
     '''
-    for f in HPG._faces.values():
-        print(f.id + ":")
-        f.print_vertices()
     
     # removing vertices and hourglasses
 
     HPG.remove_vertex_by_id("v1")
     HPG.remove_vertex_by_id("5")
     HPG.remove_vertex_by_id("v2")
+    print("After removing v2:")
+    HPG.print_faces()
 
+    '''
     print("Testing vertex removal.")
-    for f in HPG._faces.values():
-        print(f.id + ":")
-        f.print_vertices()
+    HPG.print_faces()
     print()
+    '''
     
     HPG = create_test_HPG()
 
@@ -350,18 +350,27 @@ def hourglass_plabic_graph_tests():
     HPG.remove_hourglass_by_id("7", "v4")
     HPG.remove_hourglass_by_id("v2", "2")
 
+    '''
     print("Testing hourglass removal.")
-    for f in HPG._faces.values():
-        print(f.id + ":")
-        f.print_vertices()
+    HPG.print_faces()
+    '''
 
-    print("HourglassPlabicGraph test not yet complete.")
+    print("HourglassPlabicGraph test complete.")
+
+def move_tests():
+    print("Testing moves.")
+
+    HPG = create_test_HPG()
+
+    HPG.print_faces()
+    
+    print("Move tests not yet complete.")
 
 def trip_tests():
     print("Testing trips.")
     HPG = create_test_HPG()
     print(HPG.get_trip_perms())
-    print("TODO")
+    print("Trip tests not yet complete.")
 
 def create_test_HPG():
     '''
