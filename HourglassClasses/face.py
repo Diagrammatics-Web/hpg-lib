@@ -57,7 +57,7 @@ class Face:
     def square_move(self):
         ''' Performs a square move on this face. Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
             To verify that this move will be valid, call is_square_move_valid().
-            OUTPUT: A tuple of arrays; the first is of created vertices that result from this move, the second is of all removed vertices.'''
+            OUTPUT: A tuple of arrays. the first is of created vertices that result from this move; the second is of all removed vertices.'''
         new_vertices = []
         removed_vertices = []
         ret_tuple = (new_vertices, removed_vertices)

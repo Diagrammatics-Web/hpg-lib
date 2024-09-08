@@ -34,7 +34,7 @@ class Vertex:
     # Hourglass construction and manipulation functions
 
     @classmethod
-    def create_hourglass_between(cls, v1, v2, multiplicity):
+    def create_hourglass_between(cls, v1, v2, multiplicity=1):
         ''' Creates a half hourglass to and from v1 and v2, inserting it into each vertex's hourglass list.
             v1, v2: The vertices to create the hourglass between.
             multiplicity: the number of strands on the edge.
@@ -200,7 +200,7 @@ class Vertex:
         # find the new position by just taking a weighted average
         x = (2 * self.x + hh1.v_to().x + hh2.v_to().x) / 4
         y = (2 * self.y + hh1.v_to().y + hh2.v_to().y) / 4
-        new_v = Vertex("v_" + str(self.id), x, y, not self.filled)
+        new_v = Vertex(ID.get_new_id("vertex_"), x, y, not self.filled)
 
         while hh1 is self._half_hourglasses_head or hh2 is self._half_hourglasses_head:
             self._half_hourglasses_head = self._half_hourglasses_head.ccw_next()

@@ -77,7 +77,7 @@ class HourglassPlabicGraph:
         if del_vertex.id in self._inner_vertices: del self._inner_vertices[del_vertex.id]
         else: del self._boundary_vertices[del_vertex.id]        
         
-    def create_hourglass(self, v1_id, v2_id, multiplicity):        
+    def create_hourglass(self, v1_id, v2_id, multiplicity=1):        
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
 
@@ -150,6 +150,34 @@ class HourglassPlabicGraph:
         if face1 is None and face2 is None:
             del self._faces[del_hh.right_face.id]
             
+    # Moves
+
+    def is_square_move_valid(self, face_id):
+        return self._get_face(face_id).is_square_move_valid()
+
+    def is_benzene_move_valid(self, face_id):
+        return self._get_face(face_id).is_benzene_move_valid()
+
+    def square_move(self, face_id):
+        face = self._get_face(face_id)
+        # A square move does not add or remove any faces, but faces adjacent faces
+        # should have their hourglass heads set to hourglasses that are guaranteed
+        # to persist.
+        # Note that hh will have face as its right face.
+        for hh in face:
+            hh.left_face._half_hourglasses_head = hh
+        
+        tup = face.square_move()
+        # Returned tuple is (new_vertices, removed_vertices)
+        # NOTE: By assumption, all vertices involved in a square move are inner vertices
+        for v in tup[0]:
+            self._inner_vertices[v.id] = v
+        for v in tup[1]:
+            del self._inner_vertices[v.id]
+            
+
+    def benzene_move(self, face_id):
+        self._get_face(face_id).benzene_move()
     
     # Layout functions
     
@@ -221,6 +249,11 @@ class HourglassPlabicGraph:
             v = self._boundary_vertices.get(v_id)
             if v is None: raise ValueError("id " + str(v_id) + " does not correspond to any vertex.")
         return v
+
+    def _get_face(self, f_id):
+        face = self._faces.get(f_id)
+        if face is None: raise ValueError("id " + str(f_id) + " does not correspond to any face.")
+        return face
 
     def order(self):
         ''' The number of vertices in this graph.'''
