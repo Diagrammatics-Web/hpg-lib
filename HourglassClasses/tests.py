@@ -4,6 +4,7 @@ from .halfhourglass import HalfHourglass
 from .vertex import Vertex
 from .face import Face
 from .hourglassplabicgraph import HourglassPlabicGraph
+from .idgenerator import ID
 import math
 
 # Mock classes for testing lower level classes
@@ -20,12 +21,14 @@ class _TestVertex:
 # Begin tests
 
 def all_tests():
-    # dihedral_element_tests()
+    dihedral_element_tests()
     half_strand_tests()
     half_hourglass_tests()
     vertex_tests()
     face_tests()
     hourglass_plabic_graph_tests()
+    move_tests()
+    trip_tests()
 
 def dihedral_element_tests():
     print("Testing DihedralElement class.")
@@ -51,7 +54,7 @@ def dihedral_element_tests():
     ), "List order is incorrect or list is broken."
     assert (
         [element.id for element in d1.iterate_clockwise()] == [1, 3, 2] and
-        [element.id for element in d2.iterate_counterlockwise()] == [2, 3, 1]
+        [element.id for element in d2.iterate_counterclockwise()] == [2, 3, 1]
     ), "Iterator does not work."
 
     assert d1.get_cw_ith_element(4) == d3, "get_cw_ith_element is broken."
@@ -214,6 +217,7 @@ def vertex_tests():
 def face_tests():
     print("Testing Face class.")
     # Square move tests
+    ID.reset_id()
     
     v1 = Vertex(1, 0, 0, True)
     v2 = Vertex(2, 1, 0, False)
@@ -241,8 +245,8 @@ def face_tests():
     assert face.is_square_move_valid(), "Square move should be valid on face."
     rem_add_tuple = face.square_move()
     assert face.is_square_move_valid(), "Square move should be valid on face even after performing square move."
-    assert [v.id for v in rem_add_tuple[0]] == ['v_4', 'v_3'], "Incorrect vertices marked for addition."
-    assert rem_add_tuple[1] == [v2, v1], "Incorrect vertices marked for removal."
+    assert [v.id for v in rem_add_tuple[0]] == ['v16', 'v19'], "Incorrect vertices marked for addition. Marked vertices: " + str([v.id for v in rem_add_tuple[0]]) + ". Should be: ['v16', 'v19']"
+    assert rem_add_tuple[1] == [v2, v1], "Incorrect vertices marked for removal. Marked vertices: " + str([v.id for v in rem_add_tuple[0]]) + ". Should be: [v2, v1]"
     rem_add_tuple = face.square_move()
     assert face.is_square_move_valid(), "Square move should be valid on face even after performing square move twice."
 
@@ -333,8 +337,6 @@ def hourglass_plabic_graph_tests():
     HPG.remove_vertex_by_id("v1")
     HPG.remove_vertex_by_id("5")
     HPG.remove_vertex_by_id("v2")
-    print("After removing v2:")
-    HPG.print_faces()
 
     '''
     print("Testing vertex removal.")
@@ -359,10 +361,25 @@ def hourglass_plabic_graph_tests():
 
 def move_tests():
     print("Testing moves.")
+    ID.reset_id()
 
     HPG = create_test_HPG()
-
+    print("Faces before:")
     HPG.print_faces()
+    print()
+    # ID of inner face: face3
+
+    '''
+    assert HPG.is_square_move_valid("face3"), "Square move should be valid on face3."
+    HPG.square_move("face3")
+    print("Faces after square move:")
+    HPG.print_faces()
+    print()
+    assert HPG.is_square_move_valid("face3"), "Square move should be valid on face3 after performing square move."
+    HPG.square_move("face3")
+    print("Faces after second square move:")
+    HPG.print_faces()
+    '''
     
     print("Move tests not yet complete.")
 

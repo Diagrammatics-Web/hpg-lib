@@ -1,4 +1,5 @@
 from .halfhourglass import HalfHourglass
+from .idgenerator import ID
 
 class Vertex:
     '''Represents a vertex in an hourglass plabic graph.
@@ -200,7 +201,7 @@ class Vertex:
         # find the new position by just taking a weighted average
         x = (2 * self.x + hh1.v_to().x + hh2.v_to().x) / 4
         y = (2 * self.y + hh1.v_to().y + hh2.v_to().y) / 4
-        new_v = Vertex(ID.get_new_id("vertex_"), x, y, not self.filled)
+        new_v = Vertex(ID.get_new_id("v"), x, y, not self.filled)
 
         while hh1 is self._half_hourglasses_head or hh2 is self._half_hourglasses_head:
             self._half_hourglasses_head = self._half_hourglasses_head.ccw_next()

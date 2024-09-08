@@ -165,7 +165,7 @@ class HourglassPlabicGraph:
         # to persist.
         # Note that hh will have face as its right face.
         for hh in face:
-            hh.left_face._half_hourglasses_head = hh
+            hh.left_face._half_hourglasses_head = hh.twin()
         
         tup = face.square_move()
         # Returned tuple is (new_vertices, removed_vertices)
@@ -193,7 +193,7 @@ class HourglassPlabicGraph:
         '''from https://cs.brown.edu/people/rtamassi/gdhandbook/chapters/force-directed.pdf.'''
         for i in range(max_iter):
             err = 0
-            for v in self.inner_vertices():
+            for v in self._inner_vertices:
                 neighbours = v.get_neighbors()
                 x_new = sum(w.x for w in neighbours)/len(neighbours)
                 y_new = sum(w.y for w in neighbours)/len(neighbours)
@@ -238,7 +238,7 @@ class HourglassPlabicGraph:
     def get_trip_perms(self):
         '''Returns a list [t_1, ..., t_{r-1}] where t_i is the ith trip permutation
            and r is the maximum degree of an internal vertex.'''
-        r = max(v.total_degree() for v in self.inner_vertices)
+        r = max(v.total_degree() for v in self._inner_vertices)
         return [self.get_trip_perm(i) for i in range(1, r)]
 
     def _get_vertex(self, v_id):
