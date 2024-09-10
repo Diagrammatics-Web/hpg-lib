@@ -114,8 +114,7 @@ class HourglassPlabicGraph:
         self.remove_hourglass(v1, v2)
 
     def remove_hourglass(self, v1, v2):
-        del_hh = v1.get_hourglass_to(v2)
-        self._remove_hourglass_internal(del_hh, v1, v2)
+        self._remove_hourglass_internal(self._get_hourglass(v1, v2), v1, v2)
 
     def _remove_hourglass_internal(self, del_hh, v1, v2):
         face1 = None
@@ -158,8 +157,7 @@ class HourglassPlabicGraph:
         self.thicken_hourglass_by_id(v1_id, v2_id)
 
     def thicken_hourglass(self, v1, v2):
-        hh = v1.get_hourglass_to(v2)
-        hh.thicken()
+        self._get_hourglass(v1, v2).thicken()
     def add_strand(self, v1, v2): # alias
         self.thicken_hourglass(v1, v2)
         
@@ -171,11 +169,9 @@ class HourglassPlabicGraph:
         self.thin_hourglass_by_id(v1_id, v2_id)
 
     def thin_hourglass(self, v1, v2):
-        hh = v1.get_hourglass_to(v2)
-        hh.thin()
+        self._get_hourglass(v1, v2).thin()
     def remove_strand(self, v1, v2): # alias
         self.thin_hourglass(v1, v2)
-    
     
     # Moves
 
@@ -268,6 +264,11 @@ class HourglassPlabicGraph:
         r = max(v.total_degree() for v in self._inner_vertices.values())
         return [self.get_trip_perm(i) for i in range(1, r)]
 
+    def _get_face(self, f_id):
+        face = self._faces.get(f_id)
+        if face is None: raise ValueError("id " + str(f_id) + " does not correspond to any face.")
+        return face
+        
     def _get_vertex(self, v_id):
         ''' Internal helper function that gets the vertex with the given id from either _inner_vertices or _boundary_vertices, and throws if the id is not found.'''
         v = self._inner_vertices.get(v_id)
@@ -276,10 +277,10 @@ class HourglassPlabicGraph:
             if v is None: raise ValueError("id " + str(v_id) + " does not correspond to any vertex.")
         return v
 
-    def _get_face(self, f_id):
-        face = self._faces.get(f_id)
-        if face is None: raise ValueError("id " + str(f_id) + " does not correspond to any face.")
-        return face
+    def _get_hourglass_by_id(self, v1_id, v2_id):
+        return self._get_hourglass(self._get_vertex(v1_id), self._get_vertex(v2_id))
+    def _get_hourglass(self, v1, v2):
+        return v1.get_hourglass_to(v2)
 
     def order(self):
         ''' The number of vertices in this graph.'''

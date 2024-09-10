@@ -360,29 +360,41 @@ def move_tests():
     ID.reset_id()
 
     HPG = create_test_HPG()
+    '''
     print("Faces before:")
     HPG.print_faces()
     print()
+    '''
     # ID of inner face: face3
 
     # Square move test
-    '''
     assert HPG.is_square_move_valid("face3"), "Square move should be valid on face3."
     HPG.square_move("face3")
+    '''
     print("Faces after square move:")
     HPG.print_faces()
     print()
+    '''
     assert HPG.is_square_move_valid("face3"), "Square move should be valid on face3 after performing square move."
     HPG.square_move("face3")
+    assert HPG.is_square_move_valid("face3"), "Square move should be valid on face3 after performing second square move."
+    '''
     print("Faces after second square move:")
     HPG.print_faces()
     '''
 
     # Benzene move test
-    assert HPG.is_square_move_valid("face3")
+    assert not HPG.is_benzene_move_valid("face3"), "Benzene move should not be valid on face3."
+    HPG.thicken_hourglass_by_id("v4", "v1")
+    HPG.thicken_hourglass_by_id("v3", "v2")
+    assert HPG.is_benzene_move_valid("face3"), "Benzene move should be valid on face3 after thickening some edges."
+    HPG.benzene_move("face3")
+    assert HPG._get_hourglass_by_id("v1", "v2").multiplicity() == 2, "Hourglass between v1 and v2 should have multiplicity 2. Instead has multiplicity " + str(HPG._get_hourglass_by_id("v1", "v2").multiplicity())
+    assert HPG._get_hourglass_by_id("v2", "v3").multiplicity() == 1, "Hourglass between v2 and v3 should have multiplicity 2. Instead has multiplicity " + str(HPG._get_hourglass_by_id("v2", "v3").multiplicity())
+    assert HPG._get_hourglass_by_id("v3", "v4").multiplicity() == 2, "Hourglass between v3 and v4 should have multiplicity 2. Instead has multiplicity " + str(HPG._get_hourglass_by_id("v3", "v4").multiplicity())
+    assert HPG._get_hourglass_by_id("v4", "v1").multiplicity() == 1, "Hourglass between v4 and v1 should have multiplicity 2. Instead has multiplicity " + str(HPG._get_hourglass_by_id("v4", "v1").multiplicity())
     
-    
-    print("Move tests not yet complete.")
+    print("Move tests complete.")
 
 def trip_tests():
     print("Testing trips.")
