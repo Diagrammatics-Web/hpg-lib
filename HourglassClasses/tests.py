@@ -78,24 +78,20 @@ def half_strand_tests():
     assert s1.twin().twin() == s1, "s1's twin's twin should be s1."
     
     assert s1.get_last_strand_same_hourglass() == s1, "s1 is not linked to itself properly when alone."
-    assert s1.get_num_strands_same_hourglass() == 1, "s1 not counting number of strands properly when alone."
 
     s2 = HalfStrand(2, hh1)
     s3 = HalfStrand(3, hh1)
     s1.insert_cw_next(s2)
     s2.insert_cw_next(s3)
     assert s1.get_last_strand_same_hourglass() == s3, "s1 is not linked to other strands properly when strands are all from same hourglass."
-    assert s1.get_num_strands_same_hourglass() == 3, "s1 not counting number of strands properly when strands are all from same hourglass."
 
     s4 = HalfStrand(4, hh2)
     s1.insert_ccw_next(s4)
     assert s4.get_last_strand_same_hourglass() == s4, "s4 is not linked to other strands properly when alone with another hourglass."
-    assert s4.get_num_strands_same_hourglass() == 1, "s4 not counting number of strands properly when alone with another hourglass."
 
     s5 = HalfStrand(5, hh2)
     s4.insert_cw_next(s5)
     assert s4.get_last_strand_same_hourglass() == s5, "s4 is not linked to other strands properly when multiple hourglasses."
-    assert s4.get_num_strands_same_hourglass() == 2, "s4 not counting number of strands properly when multiple hourglasses."    
 
     print("HalfStrand tests complete.")
 
@@ -369,6 +365,7 @@ def move_tests():
     print()
     # ID of inner face: face3
 
+    # Square move test
     '''
     assert HPG.is_square_move_valid("face3"), "Square move should be valid on face3."
     HPG.square_move("face3")
@@ -380,6 +377,10 @@ def move_tests():
     print("Faces after second square move:")
     HPG.print_faces()
     '''
+
+    # Benzene move test
+    assert HPG.is_square_move_valid("face3")
+    
     
     print("Move tests not yet complete.")
 

@@ -119,7 +119,7 @@ class Vertex:
 
         vertex = strand.v_to()
         while not vertex.boundary:
-            strand = strand.twin
+            strand = strand.twin()
             strand = strand.get_ccw_ith_element(i) if vertex.filled else strand.get_cw_ith_element(i)
             vertex = strand.v_to()
         visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)

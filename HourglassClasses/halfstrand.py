@@ -31,12 +31,5 @@ class HalfStrand(DihedralElement):
             if strand.hourglass() is not self.hourglass() or strand == self: return strand.cw_prev()
 
     def get_num_strands_same_hourglass(self):
-        '''Returns the number of strands owned by the same parent hourglass.
-         Assumes you are beginning from the most counterclockwise strand for this hourglass.'''
-        count = 1
-        iter = self.cw_next()
-        # Eventually, we will reach another hourglass or loop back around
-        while iter.hourglass() is self.hourglass() and iter is not self:
-            count += 1
-            iter = iter.cw_next()
-        return count
+        '''Returns the number of strands owned by the same parent hourglass.'''
+        return self.hourglass().strand_count()
