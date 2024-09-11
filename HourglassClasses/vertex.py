@@ -108,23 +108,12 @@ class Vertex:
                     Otherwise, returns the ids of the HalfStrands.'''
         assert self.boundary, "Vertex " + self.id + " should be on the boundary."
         assert self.total_degree() == 1, "multiplicity of vertex " + self.id + " should be 1."
-
-        visited = []
         
         # find the hourglass to the graph interior
         hh = self._half_hourglasses_head
         while hh.is_boundary(): hh = hh.cw_next()
         strand = hh._half_strands_head
-        visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)
-
-        vertex = strand.v_to()
-        while not vertex.boundary:
-            strand = strand.twin()
-            strand = strand.get_ccw_ith_element(i) if vertex.filled else strand.get_cw_ith_element(i)
-            vertex = strand.v_to()
-        visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)
-
-        return visited
+        return strand.get_trip(i, output)
 
     def get_hourglasses_as_list(self):
         '''Returns all hourglasses in a list.'''

@@ -69,7 +69,19 @@ class DihedralElement:
     def get_ccw_ith_element(self, i):
         ''' Returns the element i elements counterclockwise.
             i: how many elements to travel. Assumed to be an integer >= 1.'''
-        return self._ccw_next if i == 1 else self._ccw_next.get_ccw_ith_element(i-1)        
+        return self._ccw_next if i == 1 else self._ccw_next.get_ccw_ith_element(i-1)
+
+    # Turn functions
+    
+    def left_turn(self):
+        return self.twin().cw_next()
+    def right_turn(self):
+        return self.twin().ccw_next()
+
+    def get_ith_left(self, i):
+        return self.twin().get_cw_ith_element(i)
+    def get_ith_right(self, i):
+        return self.twin().get_ccw_ith_element(i)
 
     # Directly connects two elements. Use insert functions instead if possible.
     

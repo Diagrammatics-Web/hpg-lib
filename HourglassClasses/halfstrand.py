@@ -33,3 +33,21 @@ class HalfStrand(DihedralElement):
     def get_num_strands_same_hourglass(self):
         '''Returns the number of strands owned by the same parent hourglass.'''
         return self.hourglass().strand_count()
+
+    def get_trip(self, i, output='half_strands'):
+        ''' Traverses the graph to compute trip i and returns an array of all visited half strands or half hourglasses.
+            i: computes trip_i by taking the ith left at unfilled/ith right at filled
+            output: if output = 'half_strands', returns an array of HalfStrands. If output = 'half_hourglasses', returns HalfHourglasses.
+                    Otherwise, returns the ids of the HalfStrands.'''
+
+        visited = []
+        visited.append(self)
+
+        strand = self
+        vertex = strand.v_to()
+        while not vertex.boundary:
+            strand = strand.get_ith_right(i) if vertex.filled else strand.get_ith_left(i)
+            vertex = strand.v_to()
+            visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)
+
+        return visited

@@ -242,8 +242,8 @@ class HourglassPlabicGraph:
 
             Returns the list of HalfHourglasses/HalfStrands the trip visits in order.'''
 
-        assert vertex.is_boundary(), "vertex should be on the boundary."
-        assert vertex.total_degree() == 1, "multiplicity of vertex should be 1."
+        assert vertex.is_boundary(), "Vertex should be on the boundary."
+        assert vertex.total_degree() == 1, "Total degree of vertex should be 1. Instead is " + str(vertex.total_degree())
         
         return vertex.get_trip(i, output)
 
@@ -263,6 +263,8 @@ class HourglassPlabicGraph:
            and r is the maximum degree of an internal vertex.'''
         r = max(v.total_degree() for v in self._inner_vertices.values())
         return [self.get_trip_perm(i) for i in range(1, r)]
+
+    # Internal accessors
 
     def _get_face(self, f_id):
         face = self._faces.get(f_id)

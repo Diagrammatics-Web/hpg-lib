@@ -113,20 +113,6 @@ class HalfHourglass(DihedralElement):
             Typically will return _half_strands_head, unless its multiplicity is 0.'''
         return self._half_strands_head if self._half_strands_head is not None or self._v_from.total_degree() == 0 else self._cw_next._get_first_strand()
 
-    # End strand accessor and modification functions
-
-    # Turn functions
-    
-    def left_turn(self):
-        return self.twin().cw_next()
-    def right_turn(self):
-        return self.twin().ccw_next()
-
-    def get_ith_left(self, i):
-        return self.twin().get_cw_ith_element(i)
-    def get_ith_right(self, i):
-        return self.twin().get_ccw_ith_element(i)
-
     # Accessors
 
     def v_from(self):
