@@ -38,7 +38,7 @@ class HalfStrand(DihedralElement):
         return self.get_ith_right(i) if self.v_to().filled else self.get_ith_left(i)
 
     def invert_ith_trip_turn(self, i):
-        return return self.get_cw_ith_element(i).twin() if self.v_from().filled else self.get_ccw_ith_element(i).twin()
+        return self.get_cw_ith_element(i).twin() if self.v_from().filled else self.get_ccw_ith_element(i).twin()
 
     def get_trip(self, i, output='half_strands'):
         ''' Traverses the graph to compute trip i and returns an array of all visited half strands or half hourglasses.

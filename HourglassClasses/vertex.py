@@ -106,8 +106,8 @@ class Vertex:
             i: computes trip_i by taking the ith left at unfilled/ith right at filled
             output: if output = 'half_strands', returns an array of HalfStrands. If output = 'half_hourglasses', returns HalfHourglasses.
                     Otherwise, returns the ids of the HalfStrands.'''
-        assert self.boundary, "Vertex " + self.id + " should be on the boundary."
-        assert self.total_degree() == 1, "multiplicity of vertex " + self.id + " should be 1."
+        assert self.boundary, "Vertex " + str(self.id) + " should be on the boundary."
+        assert self.total_degree() == 1, "multiplicity of vertex " + str(self.id) + " should be 1. Instead is " + str(self.total_degree())
         
         # find the hourglass to the graph interior
         hh = self._half_hourglasses_head

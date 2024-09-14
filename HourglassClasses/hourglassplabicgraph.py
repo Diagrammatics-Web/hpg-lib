@@ -253,15 +253,15 @@ class HourglassPlabicGraph:
             Boundary vertices are assumed to be numbered 1, 2, ..., n CW starting slightly east of due north.'''
         perm = []
         for vertex in self._boundary_vertices.values():
-            trip = vertex.get_trip(i)
+            trip = vertex.get_trip(i, 'half_strands')
             final_vertex = trip[-1].v_to()
-            perm.append(self._boundary_vertices.index(w)+1)
+            perm.append(final_vertex.id)
         return perm
 
     def get_trip_perms(self):
         '''Returns a list [t_1, ..., t_{r-1}] where t_i is the ith trip permutation
            and r is the maximum degree of an internal vertex.'''
-        r = max(v.total_degree() for v in self._inner_vertices.values())
+        r = max(v.total_degree() for v in self._inner_vertices.values()) # This is quite inefficient, could be a cached value provided by user?
         return [self.get_trip_perm(i) for i in range(1, r)]
 
     # Internal accessors
