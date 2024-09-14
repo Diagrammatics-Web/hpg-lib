@@ -34,20 +34,36 @@ class HalfStrand(DihedralElement):
         '''Returns the number of strands owned by the same parent hourglass.'''
         return self.hourglass().strand_count()
 
+    def get_ith_trip_turn(self, i):
+        return self.get_ith_right(i) if self.v_to().filled else self.get_ith_left(i)
+
+    def invert_ith_trip_turn(self, i):
+        return return self.get_cw_ith_element(i).twin() if self.v_from().filled else self.get_ccw_ith_element(i).twin()
+
     def get_trip(self, i, output='half_strands'):
         ''' Traverses the graph to compute trip i and returns an array of all visited half strands or half hourglasses.
+            Can be called on any strand, even non-boundary strands; will find the entire trip regardless.
             i: computes trip_i by taking the ith left at unfilled/ith right at filled
             output: if output = 'half_strands', returns an array of HalfStrands. If output = 'half_hourglasses', returns HalfHourglasses.
                     Otherwise, returns the ids of the HalfStrands.'''
 
-        visited = []
-        visited.append(self)
+        visited = [self]
 
         strand = self
-        vertex = strand.v_to()
-        while not vertex.boundary:
-            strand = strand.get_ith_right(i) if vertex.filled else strand.get_ith_left(i)
-            vertex = strand.v_to()
+        while not strand.v_to().boundary:
+            strand = strand.get_ith_trip_turn(i)
             visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)
+
+        # We may need to find the other direction of the trip
+        if not self.v_from().boundary:
+            strand = self.invert_ith_trip_turn(i)
+            prepend_visited = [strand]
+            
+            while not strand.v_from().boundary:
+                strand = strand.invert_ith_trip_turn(i)
+                prepend_visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)
+            
+            prepend_visited.reverse()
+            visited = prepend_visited + visited
 
         return visited
