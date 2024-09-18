@@ -75,12 +75,15 @@ class HourglassPlabicGraph:
             self._remove_hourglass_internal(hh, del_vertex, hh.v_to())
         
         if del_vertex.id in self._inner_vertices: del self._inner_vertices[del_vertex.id]
-        else: del self._boundary_vertices[del_vertex.id]        
-        
-    def create_hourglass(self, v1_id, v2_id, multiplicity=1):        
+        else: del self._boundary_vertices[del_vertex.id]
+
+    def create_hourglass_by_id(self, v1_id, v2_id, multiplicity=1):
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
 
+        self.create_hourglass(v1, v2, multiplicity)
+
+    def create_hourglass(self, v1, v2, multiplicity=1):
         new_hh = Vertex.create_hourglass_between(v1, v2, multiplicity)
 
         # Create faces
@@ -225,14 +228,6 @@ class HourglassPlabicGraph:
             if err < error:
                 break
 
-    def to_graph(self, hourglass_labels=False): # TODO: VERIFY/TEST
-        '''Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.'''
-        vertices = inner_vertices.values() + boundary_vertices.values()
-        edges = [(h.v_from.id, h.v_to.id, h.label if hourglass_labels else h.strand_count) for h in self.hourglasses.values()]
-        pos = {v:(v.x,v.y) for v in vertices}
-        g = Graph([vertices,edges],format='vertices_and_edges', pos=pos)
-        return g
-
     # Trip functions
 
     def get_trip(self, vertex, i, output='half_strands'):
@@ -292,3 +287,75 @@ class HourglassPlabicGraph:
         for f in self._faces.values():
             print(f.id + ":")
             f.print_vertices()
+
+    # Serialization
+
+    def to_graph(self, hourglass_labels=False): # TODO: VERIFY/TEST
+        '''Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.'''
+        vertices = inner_vertices.values() + boundary_vertices.values()
+        edges = [(h.v_from.id, h.v_to.id, h.label if hourglass_labels else h.strand_count) for h in self.hourglasses.values()]
+        pos = {v:(v.x,v.y) for v in vertices}
+        g = Graph([vertices,edges],format='vertices_and_edges', pos=pos)
+        return g
+
+    @classmethod
+    def from_dict(cls, data):
+        '''Constructs a new hourglass plabic graph from a dictionary representing
+        a JSON encoding of the graph.'''
+        HPG = cls()
+
+        if 'layout' in data: HPG.layout = data['layout']
+
+        # prepare internal data for graph
+        for v_data in data['vertices']:
+            label = v_data['label'] if 'label' in v_data else ''
+            HPG.create_vertex(v_data['id'], v_data['x'], v_data['y'], v_data['filled'], v_data['boundary'], label)
+
+        for e in data['edges']:
+            label = e['label'] if 'label' in e else ''
+            HPG.create_hourglass(e['sourceId'], e['targetId'], e['multiplicity']) # Use label?
+            
+         # add boundary edges
+        sorted_boundary_vertices = list(HPG._boundary_vertices.values())
+        if HPG.layout == 'circular':
+            sorted_boundary_vertices.sort(key = lambda v: math.atan2(-v.x, -v.y)) # cw orientation
+        elif HPG.layout == 'linear':
+            sorted_boundary_vertices.sort(key = lambda v: v.x) # left to right
+        else:
+            raise NotImplementedError("Layout must be circular or linear.")
+        for i in range(0, len(sorted_boundary_vertices)):
+            v_from = sorted_boundary_vertices[i]
+            v_to   = sorted_boundary_vertices[(i+1)%len(sorted_boundary_vertices)]
+            HPG.create_hourglass(v_from, v_to, 0)
+
+        return HPG
+
+    def to_dict(self):
+        '''Encode this HourglassPlabicGraph as a dictionary representing
+           a JSON encoding of the graph.'''
+        vertices = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
+        edges = set()
+        for v in vertices:
+            for hh in v:
+                # do not record boundary edges
+                if not (hh.is_boundary() or hh.twin() in edges):
+                    edges.add(hh)
+        
+        d = {
+            'edges': [{
+                "multiplicity": e.multiplicity(),
+                "sourceId": e.v_from().id,
+                "targetId": e.v_to().id,
+                "label": e.label,
+                } for e in edges],
+            'vertices': [{
+                "id": v.id,
+                "x": float(v.x),
+                "y": float(v.y),
+                "filled": v.filled,
+                "boundary": v.boundary,
+                "label": v.label,
+                } for v in vertices],
+            'layout': self.layout,
+        }
+        return d

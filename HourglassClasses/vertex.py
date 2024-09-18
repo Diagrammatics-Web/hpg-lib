@@ -21,8 +21,6 @@ class Vertex:
         self.y = y
         self.filled = filled
         self.boundary = boundary
-        self.first = False
-        self.last = False
         self.label = label
         ''' Some half hourglass around this vertex. When the graph is properly embedded,
             the vertex will attempt to maintain this as the the one making the smallest
