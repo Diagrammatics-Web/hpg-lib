@@ -20,7 +20,7 @@ class HourglassPlabicGraph:
     def create_boundary(self, n, r=10):
         r"""
         Creates n boundary vertices, labeled from 0 to n-1, and connects them with phantom edges.
-        The vertices will be unfilled. This function can only be called on an empty graph.
+        The vertices will be filled. This function can only be called on an empty graph.
 
         INPUT:
     
@@ -36,7 +36,7 @@ class HourglassPlabicGraph:
 
         for i in range(0, n):
             id = str(i)
-            self._boundary_vertices[id] = Vertex(id, r*math.sin((i+0.5)*2*math.pi/n), r*math.cos((i+0.5)*2*math.pi/n), False, True, id)
+            self._boundary_vertices[id] = Vertex(id, r*math.sin((i+0.5)*2*math.pi/n), r*math.cos((i+0.5)*2*math.pi/n), True, True, id)
 
         for i in range(0, n-1):
             Vertex.create_hourglass_between(self._boundary_vertices[str(i)], self._boundary_vertices[str(i+1)], 0)
@@ -313,7 +313,7 @@ class HourglassPlabicGraph:
 
         for e in data['edges']:
             label = e['label'] if 'label' in e else ''
-            HPG.create_hourglass(e['sourceId'], e['targetId'], e['multiplicity']) # Use label?
+            HPG.create_hourglass_by_id(e['sourceId'], e['targetId'], e['multiplicity']) # Use label?
             
          # add boundary edges
         sorted_boundary_vertices = list(HPG._boundary_vertices.values())

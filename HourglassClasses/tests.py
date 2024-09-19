@@ -5,6 +5,9 @@ from .vertex import Vertex
 from .face import Face
 from .hourglassplabicgraph import HourglassPlabicGraph
 from .idgenerator import ID
+
+import examples as Examples
+
 import math
 import json
 
@@ -408,13 +411,13 @@ def trip_tests():
 
 def serialization_tests():
     print("Testing serialization.")
-    HPG = create_test_HPG()
+    HPG = HourglassPlabicGraph.from_dict(Examples.example_ASM)
     HPGdict = HPG.to_dict()
     HPGstr = json.dumps(HPGdict, indent=4)
     print(HPGstr)
     HPG2 = HourglassPlabicGraph.from_dict(HPGdict)
     HPG2.print_faces()
-    print("Serialization tests not yet complete")
+    print("Serialization tests not yet complete.")
 
 def create_test_HPG():
     '''
@@ -426,23 +429,26 @@ def create_test_HPG():
         5--v3--v2--2
          \ |    | /
            4 -- 3
-    Note that v1 and v3 will be filled, and v2 and v4 will not.
     '''
     HPG = HourglassPlabicGraph(8)
-    HPG.create_vertex("v1",  5,  5, True )
-    HPG.create_vertex("v2",  5, -5, False)
-    HPG.create_vertex("v3", -5, -5, True )
-    HPG.create_vertex("v4", -5,  5, False)
-    HPG.create_hourglass_by_id("v1", "v2")
-    HPG.create_hourglass_by_id("v2", "v3")
-    HPG.create_hourglass_by_id("v3", "v4")
-    HPG.create_hourglass_by_id("v4", "v1")
-    HPG.create_hourglass_by_id("v1", "0")
-    HPG.create_hourglass_by_id("v1", "1")
-    HPG.create_hourglass_by_id("v2", "2")
-    HPG.create_hourglass_by_id("v2", "3")
-    HPG.create_hourglass_by_id("v3", "4")
-    HPG.create_hourglass_by_id("v3", "5")
-    HPG.create_hourglass_by_id("v4", "6")
-    HPG.create_hourglass_by_id("v4", "7")
+    HPG.create_vertex("8",  5,  5, False )
+    HPG.create_vertex("9",  5, -5, False)
+    HPG.create_vertex("10", -5, -5, False )
+    HPG.create_vertex("11", -5,  5, False)
+    HPG.create_vertex("12", 2,  2, True)
+    HPG.create_vertex("13", -2,  -2, True)
+    HPG.create_hourglass_by_id("8", "12", 2)
+    HPG.create_hourglass_by_id("10", "13", 2)
+    HPG.create_hourglass_by_id("9", "12")
+    HPG.create_hourglass_by_id("9", "13")
+    HPG.create_hourglass_by_id("11", "12")
+    HPG.create_hourglass_by_id("11", "13")
+    HPG.create_hourglass_by_id("8", "0")
+    HPG.create_hourglass_by_id("8", "1")
+    HPG.create_hourglass_by_id("9", "2")
+    HPG.create_hourglass_by_id("9", "3")
+    HPG.create_hourglass_by_id("10", "4")
+    HPG.create_hourglass_by_id("10", "5")
+    HPG.create_hourglass_by_id("11", "6")
+    HPG.create_hourglass_by_id("11", "7")
     return HPG
