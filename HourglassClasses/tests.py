@@ -424,9 +424,14 @@ def create_test_HPG():
     Creates the following graph with the labeled IDs:
            7 -- 0
          / |    | \
-        6--v4--v1--1
-        |  |    |  |
-        5--v3--v2--2
+        /  |    |  \
+       6---11---8---1
+       |   | \  ()  |
+       |   |    12  |
+       |   13   |   |
+       |   () \ |   |        
+       5---10---9---2
+        \  |    |  /
          \ |    | /
            4 -- 3
     '''
