@@ -334,9 +334,9 @@ def hourglass_plabic_graph_tests():
     
     # removing vertices and hourglasses
 
-    HPG.remove_vertex_by_id("v1")
+    HPG.remove_vertex_by_id("8")
     HPG.remove_vertex_by_id("5")
-    HPG.remove_vertex_by_id("v2")
+    HPG.remove_vertex_by_id("12")
 
     '''
     print("Testing vertex removal.")
@@ -346,11 +346,9 @@ def hourglass_plabic_graph_tests():
     
     HPG = create_test_HPG()
 
-    HPG.remove_hourglass_by_id("v1", "v4")
-    HPG.remove_hourglass_by_id("v2", "v3")
-    HPG.remove_hourglass_by_id("v1", "v2")
-    HPG.remove_hourglass_by_id("7", "v4")
-    HPG.remove_hourglass_by_id("v2", "2")
+    HPG.remove_hourglass_by_id("13", "10")
+    HPG.remove_hourglass_by_id("12", "9")
+    HPG.remove_hourglass_by_id("8", "1")
 
     '''
     print("Testing hourglass removal.")
@@ -411,7 +409,7 @@ def trip_tests():
 
 def serialization_tests():
     print("Testing serialization.")
-    HPG = HourglassPlabicGraph.from_dict(Examples.example_ASM)
+    HPG = create_test_HPG()
     HPGdict = HPG.to_dict()
     HPGstr = json.dumps(HPGdict, indent=4)
     print(HPGstr)
@@ -422,18 +420,22 @@ def serialization_tests():
 def create_test_HPG():
     '''
     Creates the following graph with the labeled IDs:
-           7 -- 0
+           7----0
          / |    | \
         /  |    |  \
-       6---11---8---1
+       6---11   8---1
        |   | \  ()  |
+       |   |  \ ()  |
        |   |    12  |
        |   13   |   |
-       |   () \ |   |        
-       5---10---9---2
+       |   ()\  |   |  
+       |   () \ |   |
+       5---10   9---2
         \  |    |  /
          \ |    | /
-           4 -- 3
+           4----3
+    Note that the boundary, 12, and 13 are filled,
+    while 8, 9, 10, and 11 are unfilled.
     '''
     HPG = HourglassPlabicGraph(8)
     HPG.create_vertex("8",  5,  5, False )

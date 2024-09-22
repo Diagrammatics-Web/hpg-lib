@@ -203,6 +203,26 @@ class HourglassPlabicGraph:
 
     def benzene_move(self, face_id):
         self._get_face(face_id).benzene_move()
+
+    # Checks
+
+    def is_fully_reduced(self, r=4):
+        '''
+        The conditions for being fully reduced:
+        - r-valent
+        - Trips should have no self-intersections
+        - No trip_i should have an essential double crossing with another trip_i
+        - No trip_i should have an essential double crossing with trip_i+1
+        An essential double crossing occurs when two paths intersect twice in the same direction.
+        Ignore starting/ending vertices and consecutive intersections.
+        '''
+        # Check r-valence
+        for v in self._inner_vertices.values():
+            if v.total_degree() != r: return false
+
+        trips = [[self.get_trip(v, i) for v in self._boundary_vertices.values()] for i in range(0, r)]
+
+        print(trips)
     
     # Layout functions
     
