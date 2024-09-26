@@ -355,6 +355,10 @@ def hourglass_plabic_graph_tests():
     HPG.print_faces()
     '''
 
+    HPG = create_test_HPG()
+
+    #assert HPG.is_fully_reduced(), "HPG should be fully reduced."
+
     print("HourglassPlabicGraph test complete.")
 
 def move_tests():
