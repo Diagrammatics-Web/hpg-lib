@@ -221,41 +221,80 @@ class HourglassPlabicGraph:
         while travelling in the same direction.
         Ignore starting/ending vertices and consecutive intersections.
         '''
+
+        # Verify r-valence
         if (not self.is_r_valent(r)): return false
 
         trips = [[self.get_trip(v, i, 'half_hourglasses') for v in self._boundary_vertices.values()] for i in range(0, r)]
 
         print(trips)
 
-        def do_trips_double_cross(trip1, trip2):
-            # exclude starting and ending vertices
-            for i in range(1, len(trip1) - 2):
-                for j in range(1, len(trip2) - 2):
-                    # identify shared edges
-                    if trip1[i] is not trip2[j]: continue
-                    # continue on shared path
-                    x = i + 1
-                    y = j + 1
-                    while x < len(trip1)-1 and y < len(trip2)-2 and trip1[x] is trip2[y]:
-                        x += 1
-                        y += 1
-                    # after divergence, verify that the paths do not cross again
-                    for k in range(x, len(trip1) - 1):
-                        for l in range(y, len(trip2) - 1):
-                            if trip1[k] is trip2[l]: return false
+        # returns true if trip does not intersect with itself
+        # except for starting and ending vertices.
+        def validate_no_self_intersections(trip):
+            vertices = set()
+            for hh in trip:
+                if hh.v_to() in vertices: return false
+                vertices.add(hh.v_to())
             return true
 
+        # Verify no self-intersections
+        for trip_is in trips: 
+            for trip in trip_is: 
+                if not validate_no_self_intersections(trip): 
+                    return false
+
+        # Internal helper functions for double crossing checks
+        
+        # Returns a tuple of (boolean, integer).
+        # If the resulting crossing is valid - that is, the 
+        # orientations of the hourglasses going in and out 
+        # of the crossing genuinely intersect - the boolean
+        # will be true; otherwise, false. The integer is the 
+        # number of shared vertices along the trips.
+        def validate_crossing(trip1, ind1, trip2, ind2):
+            
+
+        # Finds the first crossing between trip1 and trip2
+        # starting at the hourglasses indicated by ind1 and ind2.
+        # If a crossing is found, returns the indices of the
+        # outgoing hourglasses for each trip in a tuple.
+        # If no crossing is found, returns None.
+        def find_crossing_from(trip1, ind1, trip2, ind2):
+            for i1 in range(ind1, len(trip1) - 2):
+                for i2 in range(ind2, len(trip2) - 2):
+                    # this should only happen if the starting hourglass
+                    # is the same; i.e., on trip_i and trip_i+1.
+                    if trip1[i1] is trip2[i2]: break
+                        
+                    # we only care if we see an intersection
+                    if trip1[i1].v_to() is not trip2[i2].v_to(): continue
+                    
+                    validation = validate_crossing(trip1, i1, trip2, i2)
+                    # because there are no self intersections, if we've already
+                    # encountered a potential self intersection on trip1's hourglass,
+                    # but it fails, we won't encounter another one.
+                    if not validation[0]: break
+                    return (i1 + validation[1], i2 + validation[1])
+            return None
+
+        def do_trips_double_cross(trip1, trip2):
+            # exclude starting and ending hourglasses
+            next_inds = find_crossing_from(trip1, 0, trip2, 0)
+            if next_inds is None: return false
+            final_inds = find_crossing_from(trip1, next_inds[0], trip2, next_inds[1])
+            return (final_inds is not None)
+
+        # validate no double crossings
         for i in range(0, len(trips)):
             trip_is = trips[i]
             for a in range(0, len(trip_is)):
                 trip1 = trip_is[a]
                 for b in range(a+1, len(trip_is)):
                     trip2 = trip_is[b]
-
                     if (do_trips_double_cross(trip1, trip2)): return false
                 if (do_trips_double_cross(trip1, trips[(i+1)%len(trips)])): return false
 
-        # No double crossings encountered
         return true
     
     # Layout functions
