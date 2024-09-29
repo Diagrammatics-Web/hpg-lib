@@ -229,7 +229,7 @@ class HourglassPlabicGraph:
 
         print(trips)
 
-        # returns true if trip does not intersect with itself
+        # Returns true if trip does not intersect with itself
         # except for starting and ending vertices.
         def validate_no_self_intersections(trip):
             vertices = set()
@@ -246,14 +246,74 @@ class HourglassPlabicGraph:
 
         # Internal helper functions for double crossing checks
         
-        # Returns a tuple of (boolean, integer).
+        # Returns an integer.
         # If the resulting crossing is valid - that is, the 
         # orientations of the hourglasses going in and out 
-        # of the crossing genuinely intersect - the boolean
-        # will be true; otherwise, false. The integer is the 
-        # number of shared vertices along the trips.
+        # of the crossing genuinely intersect - returns the 
+        # number of shared vertices along the trips. Otherwise,
+        # returns -1.
         def validate_crossing(trip1, ind1, trip2, ind2):
-            
+            # Keep track of ingoing hourglasses
+            in_ind1 = ind1
+            in_ind2 = ind2
+            out_ind1 = ind1
+            out_ind2 = ind2
+            count = 0
+
+            # Trace the shared trip intil it diverges
+            while (out_ind1 < len(trip1) - 1 and out_ind2 < len(trip2) - 1
+                   and trip1[out_ind1].v_to() is trip2[out_ind2].v_to()):
+                out_ind1 += 1
+                out_ind2 += 1
+                count += 1
+
+            # If the crossing never diverges, ignore it - this should
+            # only occur at the boundary.
+            if trip1[out_ind1].v_to() is trip2[out_ind2].v_to(): return -1
+
+            inhh1 = trip1[in_ind1].twin()
+            inhh2 = trip2[in_ind2].twin()
+            outhh1 = trip1[out_ind1]
+            outhh2 = trip2[out_ind2]
+
+            # Validate crossing orientation
+            # Case 1: Crossing is immediate
+            # Verify that the order of hourglasses around the vertex
+            # alternates between trip1 and trip2.
+            if (count == 1):
+                for hh in inhh1.iterate_clockwise():
+                    if hh is outhh1: return -1
+                    else if hh is inhh2 or outhh2: break
+                for hh in inhh1.iterate_counterclockwise():
+                    if hh is outhh1: return -1
+                    else if hh is inhh2 or outhh2: return count
+                # this should never be reached in a well-formed graph
+                raise Exception("Issue with crossing validation. Hourglasses do not belong to same vertex.")
+                
+            # Case 2: Some shared edges along crossing
+            # verify that that either the trip2 hourglasses
+            # or the shared hourglasses are first in clockwise
+            # order from the trip1 hourglasses
+            else:
+                inhh_shared = trip1[in_ind1+1]
+                outhh_shared = trip1[out_ind1-1].twin()
+
+                encounter_first = None
+                encounter_second = None
+                for hh in inhh1.iterate_clockwise():
+                    if hh is inhh_shared:
+                        encounter_first = outhh_shared
+                        encounter_second = outhh2
+                        break
+                    else if hh is inhh2:
+                        encounter_first = outhh2
+                        encounter_second = outhh_shared
+                        break
+                for hh in outhh1.iterate_clockwise():
+                    if hh is encounter_first: return count
+                    else if hh is encounter_second: return -1
+                # this should never be reached in a well-formed graph
+                raise Exception("Issue with crossing validation. Hourglasses do not belong to same vertex.")
 
         # Finds the first crossing between trip1 and trip2
         # starting at the hourglasses indicated by ind1 and ind2.
@@ -263,29 +323,29 @@ class HourglassPlabicGraph:
         def find_crossing_from(trip1, ind1, trip2, ind2):
             for i1 in range(ind1, len(trip1) - 2):
                 for i2 in range(ind2, len(trip2) - 2):
-                    # this should only happen if the starting hourglass
+                    # This should only happen if the starting hourglass
                     # is the same; i.e., on trip_i and trip_i+1.
                     if trip1[i1] is trip2[i2]: break
                         
-                    # we only care if we see an intersection
+                    # We only care if we see an intersection
                     if trip1[i1].v_to() is not trip2[i2].v_to(): continue
                     
                     validation = validate_crossing(trip1, i1, trip2, i2)
-                    # because there are no self intersections, if we've already
+                    # Because there are no self intersections, if we've already
                     # encountered a potential self intersection on trip1's hourglass,
-                    # but it fails, we won't encounter another one.
-                    if not validation[0]: break
-                    return (i1 + validation[1], i2 + validation[1])
+                    # but it fails, we won't encounter another one for that hourglass.
+                    if validation == -1: break
+                    return (i1 + validation, i2 + validation)
             return None
 
         def do_trips_double_cross(trip1, trip2):
-            # exclude starting and ending hourglasses
+            # Exclude starting and ending hourglasses
             next_inds = find_crossing_from(trip1, 0, trip2, 0)
             if next_inds is None: return false
             final_inds = find_crossing_from(trip1, next_inds[0], trip2, next_inds[1])
             return (final_inds is not None)
 
-        # validate no double crossings
+        # Validate no double crossings
         for i in range(0, len(trips)):
             trip_is = trips[i]
             for a in range(0, len(trip_is)):
