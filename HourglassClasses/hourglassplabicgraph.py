@@ -208,7 +208,10 @@ class HourglassPlabicGraph:
 
     def is_r_valent(self, r=4):
         for v in self._inner_vertices.values():
-            if v.total_degree() != r: return false
+            if v.total_degree() != r: 
+                print("vertex " + str(v.id) + " does not have degree 4.")
+                return False
+        return True
 
     def is_fully_reduced(self, r=4):
         '''
@@ -223,26 +226,29 @@ class HourglassPlabicGraph:
         '''
 
         # Verify r-valence
-        if (not self.is_r_valent(r)): return false
+        if (not self.is_r_valent(r)): 
+            print("Graph is not r-valent.")
+            return False
 
-        trips = [[self.get_trip(v, i, 'half_hourglasses') for v in self._boundary_vertices.values()] for i in range(0, r)]
-
-        print(trips)
+        trips = [[self.get_trip(v, i, 'half_hourglasses') for v in self._boundary_vertices.values()] for i in range(1, r)]
 
         # Returns true if trip does not intersect with itself
         # except for starting and ending vertices.
         def validate_no_self_intersections(trip):
             vertices = set()
             for hh in trip:
-                if hh.v_to() in vertices: return false
+                if hh.v_to() in vertices: return False
                 vertices.add(hh.v_to())
-            return true
+            return True
 
         # Verify no self-intersections
-        for trip_is in trips: 
+        count = 0 # TESTING
+        for trip_is in trips:
+            count += 1 # TESTING
             for trip in trip_is: 
-                if not validate_no_self_intersections(trip): 
-                    return false
+                if not validate_no_self_intersections(trip):
+                    print("trip" + str(count) + " from vertex " + str(trip[0].v_from().id)) # TESTING
+                    return False
 
         # Internal helper functions for double crossing checks
         
@@ -283,10 +289,10 @@ class HourglassPlabicGraph:
             if (count == 1):
                 for hh in inhh1.iterate_clockwise():
                     if hh is outhh1: return -1
-                    else if hh is inhh2 or outhh2: break
+                    elif hh is inhh2 or outhh2: break
                 for hh in inhh1.iterate_counterclockwise():
                     if hh is outhh1: return -1
-                    else if hh is inhh2 or outhh2: return count
+                    elif hh is inhh2 or outhh2: return count
                 # this should never be reached in a well-formed graph
                 raise Exception("Issue with crossing validation. Hourglasses do not belong to same vertex.")
                 
@@ -305,13 +311,13 @@ class HourglassPlabicGraph:
                         encounter_first = outhh_shared
                         encounter_second = outhh2
                         break
-                    else if hh is inhh2:
+                    elif hh is inhh2:
                         encounter_first = outhh2
                         encounter_second = outhh_shared
                         break
                 for hh in outhh1.iterate_clockwise():
                     if hh is encounter_first: return count
-                    else if hh is encounter_second: return -1
+                    elif hh is encounter_second: return -1
                 # this should never be reached in a well-formed graph
                 raise Exception("Issue with crossing validation. Hourglasses do not belong to same vertex.")
 
@@ -321,8 +327,8 @@ class HourglassPlabicGraph:
         # outgoing hourglasses for each trip in a tuple.
         # If no crossing is found, returns None.
         def find_crossing_from(trip1, ind1, trip2, ind2):
-            for i1 in range(ind1, len(trip1) - 2):
-                for i2 in range(ind2, len(trip2) - 2):
+            for i1 in range(ind1, len(trip1) - 1):
+                for i2 in range(ind2, len(trip2) - 1):
                     # This should only happen if the starting hourglass
                     # is the same; i.e., on trip_i and trip_i+1.
                     if trip1[i1] is trip2[i2]: break
@@ -341,7 +347,7 @@ class HourglassPlabicGraph:
         def do_trips_double_cross(trip1, trip2):
             # Exclude starting and ending hourglasses
             next_inds = find_crossing_from(trip1, 0, trip2, 0)
-            if next_inds is None: return false
+            if next_inds is None: return True
             final_inds = find_crossing_from(trip1, next_inds[0], trip2, next_inds[1])
             return (final_inds is not None)
 
@@ -352,10 +358,16 @@ class HourglassPlabicGraph:
                 trip1 = trip_is[a]
                 for b in range(a+1, len(trip_is)):
                     trip2 = trip_is[b]
-                    if (do_trips_double_cross(trip1, trip2)): return false
-                if (do_trips_double_cross(trip1, trips[(i+1)%len(trips)])): return false
+                    if (do_trips_double_cross(trip1, trip2)):
+                        print("trip" + str(i+1) + "s from vertices " + str(trip1[0].v_from().id) # TESTING
+                              + " and " + str(trip2[0].v_from().id) + " double cross.") # TESTING
+                        return False
+                if (do_trips_double_cross(trip1, trips[(i+1)%len(trips)])):
+                    print("trips " + str(i+1) + " and " + str(i+2) + " from vertex " # TESTING
+                          + str(trip1[0].v_from().id) + " double cross.") # TESTING
+                    return False
 
-        return true
+        return True
     
     # Layout functions
     
@@ -390,7 +402,7 @@ class HourglassPlabicGraph:
 
             Returns the list of HalfHourglasses/HalfStrands the trip visits in order.'''
 
-        assert vertex.is_boundary(), "Vertex should be on the boundary."
+        assert vertex.boundary, "Vertex should be on the boundary."
         assert vertex.total_degree() == 1, "Total degree of vertex should be 1. Instead is " + str(vertex.total_degree())
         
         return vertex.get_trip(i, output)

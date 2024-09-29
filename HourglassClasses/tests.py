@@ -11,7 +11,7 @@ import examples as Examples
 import math
 import json
 
-# Mock classes for testing lower level classes
+# Proxy classes for testing lower level classes
 
 class _TestHalfHourglass:
     def twin(self):
@@ -22,8 +22,6 @@ class _TestVertex:
         self.x = x
         self.y = y
 
-# Begin tests
-
 def all_tests():
     dihedral_element_tests()
     half_strand_tests()
@@ -33,6 +31,8 @@ def all_tests():
     hourglass_plabic_graph_tests()
     move_tests()
     trip_tests()
+    serialization_tests()
+    reduced_tests()
 
 def dihedral_element_tests():
     print("Testing DihedralElement class.")
@@ -355,10 +355,6 @@ def hourglass_plabic_graph_tests():
     HPG.print_faces()
     '''
 
-    HPG = create_test_HPG()
-
-    #assert HPG.is_fully_reduced(), "HPG should be fully reduced."
-
     print("HourglassPlabicGraph test complete.")
 
 def move_tests():
@@ -424,6 +420,14 @@ def serialization_tests():
     HPG2 = HourglassPlabicGraph.from_dict(HPGdict)
     HPG2.print_faces()
     print("Serialization tests not yet complete.")
+
+def reduced_tests():
+    print("Testing is_fully_reduced.")
+    HPG = HourglassPlabicGraph.from_dict(Examples.example_ASM)
+
+    assert HPG.is_fully_reduced(4), "HPG should be fully reduced."
+
+    print("is_fully_reduced tests complete.")
 
 def create_test_HPG():
     ''' 
