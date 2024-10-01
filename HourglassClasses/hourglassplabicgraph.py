@@ -209,7 +209,7 @@ class HourglassPlabicGraph:
     def is_r_valent(self, r=4):
         for v in self._inner_vertices.values():
             if v.total_degree() != r: 
-                print("vertex " + str(v.id) + " does not have degree 4.")
+                print("vertex " + str(v.id) + " does not have degree 4. Instead, degree is " + str(v.total_degree()))
                 return False
         return True
 
@@ -227,7 +227,7 @@ class HourglassPlabicGraph:
 
         # Verify r-valence
         if (not self.is_r_valent(r)): 
-            print("Graph is not r-valent.")
+            print("Graph is not r-valent.") # TESTING
             return False
 
         trips = [[self.get_trip(v, i, 'half_hourglasses') for v in self._boundary_vertices.values()] for i in range(1, r)]
@@ -347,7 +347,7 @@ class HourglassPlabicGraph:
         def do_trips_double_cross(trip1, trip2):
             # Exclude starting and ending hourglasses
             next_inds = find_crossing_from(trip1, 0, trip2, 0)
-            if next_inds is None: return True
+            if next_inds is None: return False
             final_inds = find_crossing_from(trip1, next_inds[0], trip2, next_inds[1])
             return (final_inds is not None)
 
@@ -362,7 +362,7 @@ class HourglassPlabicGraph:
                         print("trip" + str(i+1) + "s from vertices " + str(trip1[0].v_from().id) # TESTING
                               + " and " + str(trip2[0].v_from().id) + " double cross.") # TESTING
                         return False
-                if (do_trips_double_cross(trip1, trips[(i+1)%len(trips)])):
+                if (do_trips_double_cross(trip1, trips[(i+1)%len(trips)][a])):
                     print("trips " + str(i+1) + " and " + str(i+2) + " from vertex " # TESTING
                           + str(trip1[0].v_from().id) + " double cross.") # TESTING
                     return False

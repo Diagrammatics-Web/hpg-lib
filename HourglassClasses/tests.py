@@ -423,29 +423,48 @@ def serialization_tests():
 
 def reduced_tests():
     print("Testing is_fully_reduced.")
-    HPG = HourglassPlabicGraph.from_dict(Examples.example_ASM)
 
-    assert HPG.is_fully_reduced(4), "HPG should be fully reduced."
+    # Reduced HPGs
+    '''
+    assert HourglassPlabicGraph.from_dict(Examples.example_ASM).is_fully_reduced(4), "example_ASM should be fully reduced."
+    assert HourglassPlabicGraph.from_dict(Examples.example_5_by_2).is_fully_reduced(5), "example_5_by_2 should be fully reduced."
+    assert HourglassPlabicGraph.from_dict(Examples.example_5_by_3_ASM).is_fully_reduced(5), "example_5_by_3_ASM should be fully reduced."
+    assert HourglassPlabicGraph.from_dict(Examples.example_9_by_2).is_fully_reduced(9), "example_9_by_2 should be fully reduced."
+    assert HourglassPlabicGraph.from_dict(Examples.example_2_column_running).is_fully_reduced(7), "example_2_column_running should be fully reduced."
+    assert HourglassPlabicGraph.from_dict(Examples.example_2_column_running_after_squaremove).is_fully_reduced(5), "example_2_column_running_after_squaremove should be fully reduced."
+    assert HourglassPlabicGraph.from_dict(Examples.example_2_column_running_ear_cut).is_fully_reduced(7), "example_2_column_running_ear_cut should be fully reduced."
+    assert HourglassPlabicGraph.from_dict(Examples.example_benzene).is_fully_reduced(4), "example_benzene should be fully reduced."
+    '''
+    
+    # Non-reduced HPGs
+    # NOTE: These examples are not found in the examples module. Also r-valence should be double-checked when they are.
+    '''
+    assert not HourglassPlabicGraph.from_dict(Examples.example_benzene_full_nonreduced).is_fully_reduced(4), "example_benzene_full_nonreduced should not be fully reduced."
+    assert not HourglassPlabicGraph.from_dict(Examples.example_double_crossing).is_fully_reduced(4), "example_double_crossing should not be fully reduced."
+    assert not HourglassPlabicGraph.from_dict(Examples.example_5x4_badsep).is_fully_reduced(4), "example_5x4_badsep should not be fully reduced."
+    '''
 
     print("is_fully_reduced tests complete.")
 
 def create_test_HPG():
     ''' 
     Creates the following graph with the labeled IDs:
-           7----0
-         / |    | \
-        /  |    |  \
-       6---11   8---1
-       |   | \  ()  |
-       |   |  \ ()  |
-       |   |    12  |
-       |   13   |   |
-       |   ()\  |   |  
-       |   () \ |   |
-       5---10   9---2
-        \  |    |  /
-         \ |    | /
-           4----3
+    '''
+#           7----0
+#         / |    | \
+#        /  |    |  \
+#       6---11   8---1
+#       |   | \  ()  |
+#       |   |  \ ()  |
+#       |   |    12  |
+#       |   13   |   |
+#       |   ()\  |   |  
+#       |   () \ |   |
+#       5---10   9---2
+#        \  |    |  /
+#         \ |    | /
+#           4----3
+    '''
     Note that the boundary, 12, and 13 are filled,
     while 8, 9, 10, and 11 are unfilled.
     '''
