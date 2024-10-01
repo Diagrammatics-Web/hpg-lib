@@ -43,6 +43,9 @@ class HalfHourglass(DihedralElement):
         self.left_face = None
         self.right_face = None
 
+    def __repr__(self):
+        return "HalfHourglass between " + str(self.v_from().id) + " to " + str(self.v_to().id) + " with multiplicity " + str(self.multiplicity())
+
     # Insert/remove overrides. These must be overridden as strands must be linked up as well.
 
     def insert_cw_next(self, element):

@@ -47,12 +47,14 @@ class HalfStrand(DihedralElement):
             output: if output = 'half_strands', returns an array of HalfStrands. If output = 'half_hourglasses', returns HalfHourglasses.
                     Otherwise, returns the ids of the HalfStrands.'''
 
-        visited = [self]
+        trip_value = (lambda strand : strand) if output == 'half_strands' else (lambda strand : strand.hourglass()) if output == 'half_hourglasses' else (lambda strand : strand.id)
+
+        visited = [trip_value(self)]
 
         strand = self
         while not strand.v_to().boundary:
             strand = strand.get_ith_trip_turn(i)
-            visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)
+            visited.append(trip_value(strand))
 
         # We may need to find the other direction of the trip
         if not self.v_from().boundary:
@@ -61,7 +63,7 @@ class HalfStrand(DihedralElement):
             
             while not strand.v_from().boundary:
                 strand = strand.invert_ith_trip_turn(i)
-                prepend_visited.append(strand if output == 'half_strands' else strand.hourglass() if output == 'half_hourglasses' else strand.id)
+                prepend_visited.append(trip_value(strand))
             
             prepend_visited.reverse()
             visited = prepend_visited + visited

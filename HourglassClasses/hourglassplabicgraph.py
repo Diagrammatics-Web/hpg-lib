@@ -209,7 +209,7 @@ class HourglassPlabicGraph:
     def is_r_valent(self, r=4):
         for v in self._inner_vertices.values():
             if v.total_degree() != r: 
-                print("vertex " + str(v.id) + " does not have degree 4. Instead, degree is " + str(v.total_degree()))
+                print("vertex " + str(v.id) + " does not have degree " + str(r) + ". Instead, degree is " + str(v.total_degree()))
                 return False
         return True
 
@@ -242,12 +242,9 @@ class HourglassPlabicGraph:
             return True
 
         # Verify no self-intersections
-        count = 0 # TESTING
         for trip_is in trips:
-            count += 1 # TESTING
             for trip in trip_is: 
                 if not validate_no_self_intersections(trip):
-                    print("trip" + str(count) + " from vertex " + str(trip[0].v_from().id)) # TESTING
                     return False
 
         # Internal helper functions for double crossing checks
