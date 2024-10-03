@@ -465,7 +465,7 @@ class HourglassPlabicGraph:
     def plot(self):
         vertex_refs = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
         vertex_colors = {"gray":[v.id for v in vertex_refs if v.filled],  "white":[v.id for v in vertex_refs if not v.filled]}
-        return self.to_graph().plot(vertex_colors=vertex_colors)
+        return self.to_graph().plot(vertex_colors=vertex_colors, edge_labels=True)
 
     @classmethod
     def from_dict(cls, data):

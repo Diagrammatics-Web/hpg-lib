@@ -437,7 +437,7 @@ def reduced_tests():
     # Non-reduced HPGs
     assert not HourglassPlabicGraph.from_dict(Examples.example_benzene_full_nonreduced).is_fully_reduced(4), "example_benzene_full_nonreduced should not be fully reduced."
     assert not HourglassPlabicGraph.from_dict(Examples.example_double_crossing).is_fully_reduced(4), "example_double_crossing should not be fully reduced."
-    assert not HourglassPlabicGraph.from_dict(Examples.example_5x4_badsep).is_fully_reduced(4), "example_5x4_badsep should not be fully reduced."
+    assert not HourglassPlabicGraph.from_dict(Examples.example_5x4_badsep).is_fully_reduced(5), "example_5x4_badsep should not be fully reduced."
 
     # Test unknown examples
     # NOTE: r-valence should be double-checked.
