@@ -232,10 +232,9 @@ class HourglassPlabicGraph:
 
         trips = [[self.get_trip(v, i, 'half_hourglasses') for v in self._boundary_vertices.values()] for i in range(1, r)]
 
-        # Returns true if trip does not intersect with itself
-        # except for starting and ending vertices.
+        # Returns true if trip does not intersect with itself.
         def validate_no_self_intersections(trip):
-            vertices = set()
+            vertices = { trip[0].v_from() }
             for hh in trip:
                 if hh.v_to() in vertices: 
                     return False
@@ -268,15 +267,14 @@ class HourglassPlabicGraph:
             count = 0
 
             # Trace the shared trip intil it diverges
-            while (out_ind1 < len(trip1) - 1 and out_ind2 < len(trip2) - 1
+            while (out_ind1 < len(trip1) and out_ind2 < len(trip2)
                    and trip1[out_ind1].v_to() is trip2[out_ind2].v_to()):
                 out_ind1 += 1
                 out_ind2 += 1
                 count += 1
 
-            # If the crossing never diverges, ignore it - this should
-            # only occur at the boundary.
-            if trip1[out_ind1].v_to() is trip2[out_ind2].v_to(): return -1
+            # If the crossing begins or ends at the boundary, we can assume it is valid.
+            if in_ind1 == 0 or out_ind1 == len(trip1): return count
 
             inhh1 = trip1[in_ind1].twin()
             inhh2 = trip2[in_ind2].twin()
@@ -329,24 +327,19 @@ class HourglassPlabicGraph:
         # If no crossing is found, returns None.
         def find_crossing_from(trip1, ind1, trip2, ind2):
             for i1 in range(ind1, len(trip1) - 1):
-                for i2 in range(ind2, len(trip2) - 1):
-                    # This should only happen if the starting hourglass
-                    # is the same; i.e., on trip_i and trip_i+1.
-                    if trip1[i1] is trip2[i2]: break
-                        
+                for i2 in range(ind2, len(trip2) - 1):                        
                     # We only care if we see an intersection
                     if trip1[i1].v_to() is not trip2[i2].v_to(): continue
                     
-                    validation = validate_crossing(trip1, i1, trip2, i2)
-                    # Because there are no self intersections, if we've already
-                    # encountered a potential self intersection on trip1's hourglass,
-                    # but it fails, we won't encounter another one for that hourglass.
-                    if validation == -1: break
-                    return (i1 + validation, i2 + validation)
+                    count = validate_crossing(trip1, i1, trip2, i2)
+                    # Because there are no self intersections, if we encounter
+                    # a potential self intersection on trip1's hourglass but it
+                    # fails, we won't encounter another one for that hourglass.
+                    if count == -1: break
+                    return (i1 + count, i2 + count)
             return None
 
         def do_trips_double_cross(trip1, trip2):
-            # Exclude starting and ending hourglasses
             next_inds = find_crossing_from(trip1, 0, trip2, 0)
             if next_inds is None: return False
             final_inds = find_crossing_from(trip1, next_inds[0], trip2, next_inds[1])
@@ -355,18 +348,15 @@ class HourglassPlabicGraph:
         # Validate no double crossings
         for i in range(0, len(trips)):
             trip_is = trips[i]
+            all_compare_trips = trips[i] + (trips[i+1] if i < len(trips)-1 else [])
             for a in range(0, len(trip_is)):
                 trip1 = trip_is[a]
-                for b in range(a+1, len(trip_is)):
-                    trip2 = trip_is[b]
+                for b in range(a+1, len(all_compare_trips)):
+                    trip2 = all_compare_trips[b]
                     if (do_trips_double_cross(trip1, trip2)):
-                        print("trip" + str(i+1) + "s from vertices " + str(trip1[0].v_from().id) # TESTING
-                              + " and " + str(trip2[0].v_from().id) + " double cross.") # TESTING
+                        print("trip" + str(i+1) + " from vertex " + str(trip1[0].v_from().id) # TESTING
+                              + " and trip" + (str(i+1) if b < len(trip_is) else str(i+2)) + " from vertex " + str(trip2[0].v_from().id) + " double cross.") # TESTING
                         return False
-                if (do_trips_double_cross(trip1, trips[(i+1)%len(trips)][a])):
-                    print("trips " + str(i+1) + " and " + str(i+2) + " from vertex " # TESTING
-                          + str(trip1[0].v_from().id) + " double cross.") # TESTING
-                    return False
 
         return True
     
