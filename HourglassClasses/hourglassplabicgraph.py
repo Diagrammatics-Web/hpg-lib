@@ -237,14 +237,18 @@ class HourglassPlabicGraph:
         def validate_no_self_intersections(trip):
             vertices = set()
             for hh in trip:
-                if hh.v_to() in vertices: return False
+                if hh.v_to() in vertices: 
+                    return False
                 vertices.add(hh.v_to())
             return True
 
         # Verify no self-intersections
+        count = 0 # TESTING
         for trip_is in trips:
+            count += 1 # TESTING
             for trip in trip_is: 
                 if not validate_no_self_intersections(trip):
+                    print("trip" + str(count) + " from vertex " + str(trip[0].v_from().id) + " self-intersects.") # TESTING
                     return False
 
         # Internal helper functions for double crossing checks

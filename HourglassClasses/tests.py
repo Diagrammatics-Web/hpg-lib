@@ -425,10 +425,8 @@ def reduced_tests():
     print("Testing is_fully_reduced.")
 
     # Reduced HPGs
-    '''
     assert HourglassPlabicGraph.from_dict(Examples.example_ASM).is_fully_reduced(4), "example_ASM should be fully reduced."
     assert HourglassPlabicGraph.from_dict(Examples.example_5_by_2).is_fully_reduced(5), "example_5_by_2 should be fully reduced."
-    '''
     assert HourglassPlabicGraph.from_dict(Examples.example_5_by_3_ASM).is_fully_reduced(5), "example_5_by_3_ASM should be fully reduced."
     assert HourglassPlabicGraph.from_dict(Examples.example_9_by_2).is_fully_reduced(9), "example_9_by_2 should be fully reduced."
     assert HourglassPlabicGraph.from_dict(Examples.example_2_column_running).is_fully_reduced(7), "example_2_column_running should be fully reduced."
@@ -437,15 +435,12 @@ def reduced_tests():
     assert HourglassPlabicGraph.from_dict(Examples.example_benzene).is_fully_reduced(4), "example_benzene should be fully reduced."
     
     # Non-reduced HPGs
-    # NOTE: These examples are not found in the examples module. Also r-valence should be double-checked when they are.
-    '''
     assert not HourglassPlabicGraph.from_dict(Examples.example_benzene_full_nonreduced).is_fully_reduced(4), "example_benzene_full_nonreduced should not be fully reduced."
     assert not HourglassPlabicGraph.from_dict(Examples.example_double_crossing).is_fully_reduced(4), "example_double_crossing should not be fully reduced."
     assert not HourglassPlabicGraph.from_dict(Examples.example_5x4_badsep).is_fully_reduced(4), "example_5x4_badsep should not be fully reduced."
-    '''
 
     # Test unknown examples
-    # NOTE: These examples may not be found in the examples module. Also r-valence should be double-checked when they are.
+    # NOTE: r-valence should be double-checked.
     '''
     print("example_6_by_3 is ", ("" if HourglassPlabicGraph.from_dict(Examples.example_6_by_3).is_fully_reduced(6) else "not"), " fully reduced.")
     print("example_6_by_3_bad is ", ("" if HourglassPlabicGraph.from_dict(Examples.example_6_by_3_bad).is_fully_reduced(6) else "not"), " fully reduced.")
