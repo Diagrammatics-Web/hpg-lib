@@ -448,10 +448,17 @@ class HourglassPlabicGraph:
 
     def to_graph(self, hourglass_labels=False): # TODO: VERIFY/TEST
         '''Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.'''
-        vertices = inner_vertices.values() + boundary_vertices.values()
-        edges = [(h.v_from.id, h.v_to.id, h.label if hourglass_labels else h.strand_count) for h in self.hourglasses.values()]
-        pos = {v:(v.x,v.y) for v in vertices}
-        g = Graph([vertices,edges],format='vertices_and_edges', pos=pos)
+        vertex_refs = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
+        edge_refs = set()
+        for v in vertex_refs:
+            for hh in v:
+                if not hh.twin() in edge_refs:
+                    edge_refs.add(hh)
+
+        vertices = [v.id for v in vertex_refs]
+        edges = [(h.v_from().id, h.v_to().id, h.label if hourglass_labels else h.strand_count()) for h in edge_refs]
+        pos = {v.id:(v.x,v.y) for v in vertex_refs}
+        g = Graph([vertices, edges], format='vertices_and_edges', pos=pos)
         return g
 
     @classmethod
