@@ -444,7 +444,7 @@ class HourglassPlabicGraph:
             print(f.id + ":")
             f.print_vertices()
 
-    # Serialization
+    # Serialization/Data Conversion
 
     def to_graph(self, hourglass_labels=False): # TODO: VERIFY/TEST
         '''Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.'''
@@ -460,6 +460,12 @@ class HourglassPlabicGraph:
         pos = {v.id:(v.x,v.y) for v in vertex_refs}
         g = Graph([vertices, edges], format='vertices_and_edges', pos=pos)
         return g
+
+    # Update with **kwds argument?
+    def plot(self):
+        vertex_refs = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
+        vertex_colors = {"gray":[v.id for v in vertex_refs if v.filled],  "white":[v.id for v in vertex_refs if not v.filled]}
+        return self.to_graph().plot(vertex_colors=vertex_colors)
 
     @classmethod
     def from_dict(cls, data):
