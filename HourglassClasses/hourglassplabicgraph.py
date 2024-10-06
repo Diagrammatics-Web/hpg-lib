@@ -59,7 +59,7 @@ class HourglassPlabicGraph:
             '''
         if verify_id and ((not boundary and v_id in self._inner_vertices) or (boundary and v_id in self._boundary_vertices)): raise ValueError("v_id already in use.")
 
-        vertex = Vertex(v_id, x, y, filled, boundary, label)
+        vertex = Vertex(v_id, x, y, filled, boundary, v_id if label == '' else label)
         if boundary: self._boundary_vertices[v_id] = vertex
         else: self._inner_vertices[v_id] = vertex
 
@@ -206,14 +206,14 @@ class HourglassPlabicGraph:
 
     # Checks
 
-    def is_r_valent(self, r=4):
+    def is_r_valent(self, r=4, verbose=False):
         for v in self._inner_vertices.values():
             if v.total_degree() != r: 
-                print("vertex " + str(v.id) + " does not have degree " + str(r) + ". Instead, degree is " + str(v.total_degree()))
+                if verbose: print("Graph is not r-valent. Vertex " + str(v.id) + " does not have degree " + str(r) + ". Instead, degree is " + str(v.total_degree()) + ".")
                 return False
         return True
 
-    def is_fully_reduced(self, r=4):
+    def is_fully_reduced(self, r=4, verbose=False):
         '''
         The conditions for being fully reduced:
         - r-valent
@@ -226,9 +226,7 @@ class HourglassPlabicGraph:
         '''
 
         # Verify r-valence
-        if (not self.is_r_valent(r)): 
-            print("Graph is not r-valent.") # TESTING
-            return False
+        if (not self.is_r_valent(r, verbose)): return False
 
         trips = [[self.get_trip(v, i, 'half_hourglasses') for v in self._boundary_vertices.values()] for i in range(1, r)]
 
@@ -242,12 +240,10 @@ class HourglassPlabicGraph:
             return True
 
         # Verify no self-intersections
-        count = 0 # TESTING
-        for trip_is in trips:
-            count += 1 # TESTING
-            for trip in trip_is: 
+        for i in range(0, len(trips)):
+            for trip in trips[i]: 
                 if not validate_no_self_intersections(trip):
-                    print("trip" + str(count) + " from vertex " + str(trip[0].v_from().id) + " self-intersects.") # TESTING
+                    if verbose: print("trip" + str(i) + " from vertex " + str(trip[0].v_from().id) + " self-intersects.")
                     return False
 
         # Internal helper functions for double crossing checks
@@ -354,8 +350,9 @@ class HourglassPlabicGraph:
                 for b in range(a+1, len(all_compare_trips)):
                     trip2 = all_compare_trips[b]
                     if (do_trips_double_cross(trip1, trip2)):
-                        print("trip" + str(i+1) + " from vertex " + str(trip1[0].v_from().id) # TESTING
-                              + " and trip" + (str(i+1) if b < len(trip_is) else str(i+2)) + " from vertex " + str(trip2[0].v_from().id) + " double cross.") # TESTING
+                        if verbose: print("trip" + str(i+1) + " from vertex " + str(trip1[0].v_from().id)
+                                          + " and trip" + (str(i+1) if b < len(trip_is) else str(i+2)) 
+                                          + " from vertex " + str(trip2[0].v_from().id) + " double cross.")
                         return False
 
         return True
