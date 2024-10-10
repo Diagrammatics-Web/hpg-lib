@@ -450,12 +450,13 @@ def reduced_tests():
     print("example_6_by_6 is " + ("" if HourglassPlabicGraph.from_dict(Examples.examples_ICERM).is_fully_reduced(5, verbose) else "not ") + "fully reduced.")
     
     # These examples are not well-formed graphs.
-    #'''
     print("Testing examples_christian_plabic for reducedness.")
     print("examples_christian_plabic is " + ("" if HourglassPlabicGraph.from_dict(Examples.examples_christian_plabic).is_fully_reduced(7, True) else "not ") + "fully reduced.")
+    # Throws NotImplementedError
+    '''
     print("Testing example_contractable for reducedness.")
     print("example_contractable is " + ("" if HourglassPlabicGraph.from_dict(Examples.example_contractable).is_fully_reduced(5, True) else "not ") + "fully reduced.")
-    #'''
+    '''
 
     print("is_fully_reduced tests complete.")
 

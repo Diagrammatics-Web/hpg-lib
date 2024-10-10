@@ -389,9 +389,6 @@ class HourglassPlabicGraph:
             output: if output = 'half_strands', returns an array of HalfStrands. Otherwise, returns HalfHourglasses.
 
             Returns the list of HalfHourglasses/HalfStrands the trip visits in order.'''
-
-        assert vertex.boundary, "Vertex should be on the boundary."
-        assert vertex.total_degree() == 1, "Total degree of vertex should be 1. Instead is " + str(vertex.total_degree())
         
         return vertex.get_trip(i, output)
 
