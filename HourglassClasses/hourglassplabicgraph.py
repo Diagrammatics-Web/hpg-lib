@@ -201,6 +201,8 @@ class HourglassPlabicGraph:
         for v in tup[1]:
             del self._inner_vertices[v.id]
 
+    move_square = square_move # alias
+
     def benzene_move(self, face_id):
         self._get_face(face_id).benzene_move()
 
