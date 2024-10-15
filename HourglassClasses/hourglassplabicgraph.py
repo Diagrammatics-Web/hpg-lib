@@ -187,7 +187,7 @@ class HourglassPlabicGraph:
     def square_move(self, face_id, r=4):
         face = self._get_face(face_id)
         
-        tup = face.square_move(4)
+        tup = face.square_move(r)
         # Returned tuple is (new_vertices, removed_vertices)
         # NOTE: By assumption, all vertices involved in a square move are inner vertices
         for v in tup[0]:
