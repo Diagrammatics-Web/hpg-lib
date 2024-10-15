@@ -1,5 +1,5 @@
 import math
-from sage.all import Graph
+from sage.graphs.graph import Graph
 from .vertex import Vertex
 from .face import Face
 from .idgenerator import ID
@@ -178,28 +178,28 @@ class HourglassPlabicGraph:
     
     # Moves
 
-    def is_square_move_valid(self, face_id):
-        return self._get_face(face_id).is_square_move_valid()
+    def is_square_move_valid(self, face_id, r=4):
+        return self._get_face(face_id).is_square_move_valid(r)
 
     def is_benzene_move_valid(self, face_id):
         return self._get_face(face_id).is_benzene_move_valid()
 
-    def square_move(self, face_id):
+    def square_move(self, face_id, r=4):
         face = self._get_face(face_id)
-        # A square move does not add or remove any faces, but faces adjacent faces
-        # should have their hourglass heads set to hourglasses that are guaranteed
-        # to persist.
-        # Note that hh will have face as its right face.
-        for hh in face:
-            hh.left_face._half_hourglasses_head = hh.twin()
         
-        tup = face.square_move()
+        tup = face.square_move(4)
         # Returned tuple is (new_vertices, removed_vertices)
         # NOTE: By assumption, all vertices involved in a square move are inner vertices
         for v in tup[0]:
             self._inner_vertices[v.id] = v
         for v in tup[1]:
             del self._inner_vertices[v.id]
+        # A square move does not add or remove any faces, but adjacent faces
+        # should have their hourglass heads set to hourglasses that are guaranteed
+        # to persist -- i.e. those of this face.
+        # Note that hh will have face as its right face.
+        for hh in face:
+            hh.left_face.initialize_half_hourglasses(hh.twin())
 
     def benzene_move(self, face_id):
         self._get_face(face_id).benzene_move()

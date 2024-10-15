@@ -21,7 +21,56 @@ class Face:
             iter_hh.twin().left_face = self
             if iter_hh.is_boundary(): self.boundary = True
 
-    def is_square_move_valid(self):
+    # Moves
+        
+    # Square move
+    
+    def is_square_move_valid(self, r=4):
+        ''' Verifies that this face can perform a square move. The face should have 4 vertices,
+            alternating filled/unfilled status. The sum of the multiplicities of connecting hourglasses should equal r.
+            In a square move, vertices with one outgoing edge are contracted, while vertices with two outgoing edges 
+            are split into two vertices connected by an hourglass of sufficient multiplicity.'''
+        count = 0
+        multiplicity_sum = 0
+        should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
+        for hh in self:
+            #checks
+            if hh.v_to().filled != should_be_filled: return False
+            if count > 4: return False
+            multiplicity_sum += hh.multiplicity()
+            # iterate
+            count += 1
+            should_be_filled = not should_be_filled
+        return (multiplicity_sum == r)
+        
+    def square_move(self, r=4):
+        ''' Performs a square move on this face. Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
+            To verify that this move will be valid, call is_square_move_valid().
+            OUTPUT: A tuple of arrays. the first is of created vertices that result from this move; the second is of all removed vertices.'''
+        new_vertices = []
+        removed_vertices = []
+        ret_tuple = (new_vertices, removed_vertices)
+
+        # diagnose vertices and perform expansion or contraction as necessary
+        hourglasses = [hh for hh in self] # cache half hourglasses for safe iteration
+        for hh in hourglasses:
+            v = hh.v_from()
+            if v.simple_degree() > 3: new_vertices.append(v.square_move_expand(hh, hh.cw_next()))
+            else: removed_vertices.append(v.square_move_contract(hh.ccw_next()))
+
+        # "Swap" multiplicities of hourglasses
+        # TODO: Actually swap these hourglasses rather than using thicken/thin
+        target_multiplicities = [hh.right_turn().right_turn().multiplicity() for hh in hourglasses]
+        for i in range(0, len(hourglasses)):
+            hh = hourglasses[i]
+            while hh.multiplicity() > target_multiplicities[i]: hh.thin()
+            while hh.multiplicity() < target_multiplicities[i]: hh.thicken()
+        
+        return ret_tuple
+
+    # SL4 Square move (should operate identically to square_move(r=4))
+
+    def is_square_move4_valid(self):
         ''' Verifies that this face can perform a square move. In SL4, this requires the face to be made of 4 vertices,
             alternating filled/unfilled status, with multiplicity 1 edges in between.
             In a square move, vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.'''
@@ -36,6 +85,25 @@ class Face:
             count += 1
             should_be_filled = not should_be_filled
         return True
+        
+    def square_move4(self):
+        ''' Performs a square move on this face. Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
+            To verify that this move will be valid, call is_square_move_valid().
+            OUTPUT: A tuple of arrays. the first is of created vertices that result from this move; the second is of all removed vertices.'''
+        new_vertices = []
+        removed_vertices = []
+        ret_tuple = (new_vertices, removed_vertices)
+
+        # diagnose vertices and perform expansion or contraction as necessary
+        hourglasses = [hh for hh in self] # cache half hourglasses for safe iteration
+        for hh in hourglasses:
+            v = hh.v_from()
+            if v.simple_degree() == 4: new_vertices.append(v.square_move_expand(hh, hh.cw_next()))
+            else: removed_vertices.append(v.square_move_contract(hh.ccw_next()))
+        
+        return ret_tuple
+
+    # Benzene move
 
     def is_benzene_move_valid(self):
         ''' Verifies that this face can perform a square move. This requires the face to have an even number of
@@ -53,23 +121,6 @@ class Face:
             should_be_filled = not should_be_filled
             expected_mult = 3 - expected_mult # maps 2 -> 1 and 1 -> 2
         return count % 2 == 0
-        
-    def square_move(self):
-        ''' Performs a square move on this face. Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
-            To verify that this move will be valid, call is_square_move_valid().
-            OUTPUT: A tuple of arrays. the first is of created vertices that result from this move; the second is of all removed vertices.'''
-        new_vertices = []
-        removed_vertices = []
-        ret_tuple = (new_vertices, removed_vertices)
-
-        # diagnose vertices and perform expansion or contraction as necessary
-        hourglasses = [hh for hh in self] # cache half hourglasses for safe iteration
-        for hh in hourglasses:
-            v = hh.v_from()
-            if v.simple_degree() == 4: new_vertices.append(v.square_move_expand(hh, hh.cw_next()))
-            else: removed_vertices.append(v.square_move_contract(hh.ccw_next()))
-        
-        return ret_tuple
 
     def benzene_move(self):
         ''' Performs a benzene move on this face. The multiplicities of its edges are swapped between 1 and 2.

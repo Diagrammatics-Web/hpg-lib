@@ -30,6 +30,10 @@ class Vertex:
     def __repr__(self):
         return "HourglassPlabicGraph Vertex object: id=%s, label=%s"%(str(self.id), str(self.label))
 
+    def reset_head(self):
+        while self._half_hourglasses_head.get_angle() > self._half_hourglasses_head.cw_next().get_angle():
+            self._half_hourglasses_head = self._half_hourglasses_head.cw_next()
+
     # Hourglass construction and manipulation functions
 
     @classmethod
@@ -53,9 +57,7 @@ class Vertex:
             self._half_hourglasses_head = hh
             return
 
-        # reset head
-        while self._half_hourglasses_head.get_angle() > self._half_hourglasses_head.cw_next().get_angle():
-            self._half_hourglasses_head = self._half_hourglasses_head.cw_next()
+        self.reset_head()
         
         # find first edge with greater angle, then insert_cw_next
         hh_angle = hh.get_angle()
@@ -163,7 +165,7 @@ class Vertex:
 
         sur_v.remove_hourglass(hh1.twin())
 
-    # Square move functions -- usable in SL4
+    # Square move functions
 
     def square_move_contract(self, out_hh):
         ''' Contracts the vertex into the vertex it is connected to outside the face.
@@ -174,7 +176,7 @@ class Vertex:
         sur_v = out_hh.v_to()
 
         # store in an array to make iteration safe while reparenting
-        hourglasses = [hh for hh in out_hh if hh is not out_hh]
+        hourglasses = [hh for hh in self if hh is not out_hh]
         for hh in hourglasses:
             hh.reparent(sur_v)
         sur_v._remove_hourglass(out_hh.twin())
@@ -183,19 +185,22 @@ class Vertex:
 
     def square_move_expand(self, hh1, hh2):
         ''' Expands the vertex by creating another vertex of opposite fill and using it to take its place in the square face.
-            This function should only be called on vertices with two outgoing hourglasses.
-            hh1, hh2: the two half hourglasses adjacent to the square face. These will be reparented to the new vertex.
+            This function should only be called on vertices with two or more outgoing hourglasses.
+            hh1, hh2: the two half hourglasses that are part of the square face. These will be reparented to the new vertex.
             OUTPUT: Returns the created vertex.'''
         # find the new position by just taking a weighted average
         x = (2 * self.x + hh1.v_to().x + hh2.v_to().x) / 4
         y = (2 * self.y + hh1.v_to().y + hh2.v_to().y) / 4
         new_v = Vertex(ID.get_new_id("v"), x, y, not self.filled)
 
-        while hh1 is self._half_hourglasses_head or hh2 is self._half_hourglasses_head:
+        # store in an array to make iteration safe while reparenting
+        while self._half_hourglasses_head is hh1 or self._half_hourglasses_head is hh2:
             self._half_hourglasses_head = self._half_hourglasses_head.ccw_next()
         hh1.reparent(new_v)
         hh2.reparent(new_v)
-        Vertex.create_hourglass_between(self, new_v, 2)
+
+        multiplicity = hh1.multiplicity() + hh2.multiplicity()
+        Vertex.create_hourglass_between(self, new_v, multiplicity)
 
         return new_v
 

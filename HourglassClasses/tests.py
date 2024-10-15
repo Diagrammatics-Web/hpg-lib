@@ -10,6 +10,7 @@ import examples as Examples
 
 import math
 import json
+from sage.graphs.graph import Graph
 
 # Proxy classes for testing lower level classes
 
@@ -323,12 +324,13 @@ def hourglass_plabic_graph_tests():
     # adding vertices and hourglasses
 
     HPG = create_test_HPG()
+    #HPG = HourglassPlabicGraph.from_dict(Examples.example_ASM)
 
     '''
     print("Checking for proper face initialization.")
     for v in list(HPG._boundary_vertices.values()) + list(HPG._inner_vertices.values()):
-        print(v.id + ":")
-        v.print_neighbors()
+        print(str(v.id) + ": " + str([hh.left_face.id for hh in v]))
+        #v.print_neighbors()
     HPG.print_faces()
     '''
     
@@ -338,11 +340,11 @@ def hourglass_plabic_graph_tests():
     HPG.remove_vertex_by_id("5")
     HPG.remove_vertex_by_id("12")
 
-    '''
+    #'''
     print("Testing vertex removal.")
     HPG.print_faces()
     print()
-    '''
+    #'''
     
     HPG = create_test_HPG()
 
@@ -350,54 +352,69 @@ def hourglass_plabic_graph_tests():
     HPG.remove_hourglass_by_id("12", "9")
     HPG.remove_hourglass_by_id("8", "1")
 
-    '''
+    #'''
     print("Testing hourglass removal.")
     HPG.print_faces()
-    '''
+    #'''
 
     print("HourglassPlabicGraph test complete.")
 
 def move_tests():
     print("Testing moves.")
     ID.reset_id()
+    plots = []
 
-    HPG = create_test_HPG()
+    HPG = HourglassPlabicGraph.from_dict(Examples.example_ASM)
+    face_id = "face2"
+    plots.append(("HPG before square move:", HPG.plot()))
+    assert HPG.is_square_move_valid(face_id), "Square move should be valid on " + str(face_id) + "."
+
     '''
-    print("Faces before:")
+    print("Checking for proper face initialization.")
+    for v in list(HPG._boundary_vertices.values()) + list(HPG._inner_vertices.values()):
+        print(str(v.id) + ": " + str([hh.left_face.id for hh in v]))
     HPG.print_faces()
-    print()
     '''
-
-    # ID of inner face: face12
 
     # Square move test
-    assert HPG.is_square_move_valid("face12"), "Square move should be valid on face12."
-    HPG.square_move("face12")
-    '''
-    print("Faces after square move:")
-    HPG.print_faces()
-    print()
-    '''
-    assert HPG.is_square_move_valid("face12"), "Square move should be valid on face12 after performing square move."
-    HPG.square_move("face12")
-    assert HPG.is_square_move_valid("face12"), "Square move should be valid on face12 after performing second square move."
-    '''
-    print("Faces after second square move:")
-    HPG.print_faces()
-    '''
+    HPG.square_move(face_id)
+    plots.append(("HPG after first square move:", HPG.plot()))
+    assert HPG.is_square_move_valid(face_id), "Square move should be valid on " + str(face_id) + " after performing square move."
+    
+    HPG.square_move(face_id)
+    plots.append(("HPG after second square move:", HPG.plot()))
+    assert HPG.is_square_move_valid(face_id), "Square move should be valid on " + str(face_id) + " after performing second square move."
 
     # Benzene move test
-    assert not HPG.is_benzene_move_valid("face12"), "Benzene move should not be valid on face12."
-    HPG.thicken_hourglass_by_id("9", "v37")
-    HPG.thicken_hourglass_by_id("11", "v34")
-    assert HPG.is_benzene_move_valid("face12"), "Benzene move should be valid on face12 after thickening some edges."
-    HPG.benzene_move("face12")
-    assert HPG._get_hourglass_by_id("9", "v34").multiplicity() == 2, "Hourglass between 9 and v34 should have multiplicity 2. Instead has multiplicity " + str(HPG._get_hourglass_by_id("9", "v34").multiplicity())
-    assert HPG._get_hourglass_by_id("v34", "11").multiplicity() == 1, "Hourglass between v34 and 11 should have multiplicity 1. Instead has multiplicity " + str(HPG._get_hourglass_by_id("v34", "11").multiplicity())
-    assert HPG._get_hourglass_by_id("11", "v37").multiplicity() == 2, "Hourglass between 11 and v37 should have multiplicity 2. Instead has multiplicity " + str(HPG._get_hourglass_by_id("11", "v37").multiplicity())
-    assert HPG._get_hourglass_by_id("v37", "9").multiplicity() == 1, "Hourglass between v37 and 9 should have multiplicity 1. Instead has multiplicity " + str(HPG._get_hourglass_by_id("v37", "9").multiplicity())
+    assert not HPG.is_benzene_move_valid(face_id), "Benzene move should not be valid on " + str(face_id) + "."
+    HPG.thicken_hourglass_by_id(9, "v36")
+    HPG.thicken_hourglass_by_id(11, "v33")
+    plots.append(("HPG after thickening:", HPG.plot()))
+    assert HPG.is_benzene_move_valid(face_id), "Benzene move should be valid on " + str(face_id) + " after thickening some edges."
+    HPG.benzene_move(face_id)
+    plots.append(("HPG after benzene move:", HPG.plot()))
+    assert HPG._get_hourglass_by_id(9, "v33").multiplicity() == 2, "Hourglass between 9 and v33 should have multiplicity 2. Instead has multiplicity " + str(HPG._get_hourglass_by_id("9", "v33").multiplicity())
+    assert HPG._get_hourglass_by_id("v33", 11).multiplicity() == 1, "Hourglass between v33 and 11 should have multiplicity 1. Instead has multiplicity " + str(HPG._get_hourglass_by_id("v33", "11").multiplicity())
+    assert HPG._get_hourglass_by_id(11, "v36").multiplicity() == 2, "Hourglass between 11 and v36 should have multiplicity 2. Instead has multiplicity " + str(HPG._get_hourglass_by_id("11", "v36").multiplicity())
+    assert HPG._get_hourglass_by_id("v36", 9).multiplicity() == 1, "Hourglass between v36 and 9 should have multiplicity 1. Instead has multiplicity " + str(HPG._get_hourglass_by_id("v36", "9").multiplicity())
+
+    # Square move test in SL7
+    ID.reset_id()
+    HPG = HourglassPlabicGraph.from_dict(Examples.example_2_column_running)
+    face_id = "face9"
+    plots.append(("HPG before square move in SL7:", HPG.plot()))
+    assert HPG.is_square_move_valid(face_id, 7), "Square move should be valid on " + str(face_id) + "."
+    
+    HPG.square_move(face_id, 7)
+    plots.append(("HPG after first square move in SL7:", HPG.plot()))
+    assert HPG.is_square_move_valid(face_id, 7), "Square move should be valid on " + str(face_id) + " after performing square move."
+    
+    HPG.square_move(face_id, 7)
+    plots.append(("HPG after second square move in SL7:", HPG.plot()))
+    assert HPG.is_square_move_valid(face_id, 7), "Square move should be valid on " + str(face_id) + " after performing second square move."
     
     print("Move tests complete.")
+    return plots
 
 def trip_tests():
     print("Testing trips.")
@@ -443,20 +460,21 @@ def reduced_tests():
     assert not HourglassPlabicGraph.from_dict(Examples.example_6_by_3_bad).is_fully_reduced(6, verbose), "example_6_by_3_bad should not be fully reduced."
     assert not HourglassPlabicGraph.from_dict(Examples.example_christian_is_working_with).is_fully_reduced(3, verbose), "example_christian_is_working_with should not be fully reduced."
 
-    # Test unknown examples
-    print("Testing example_6_by_6 for reducedness.")
-    print("example_6_by_6 is " + ("" if HourglassPlabicGraph.from_dict(Examples.example_6_by_6).is_fully_reduced(6, verbose) else "not ") + "fully reduced.")
-    print("Testing examples_ICERM for reducedness.")
-    print("example_6_by_6 is " + ("" if HourglassPlabicGraph.from_dict(Examples.examples_ICERM).is_fully_reduced(5, verbose) else "not ") + "fully reduced.")
-    
-    # These examples are not well-formed graphs.
-    print("Testing examples_christian_plabic for reducedness.")
-    print("examples_christian_plabic is " + ("" if HourglassPlabicGraph.from_dict(Examples.examples_christian_plabic).is_fully_reduced(7, True) else "not ") + "fully reduced.")
-    # Throws NotImplementedError
-    '''
-    print("Testing example_contractable for reducedness.")
-    print("example_contractable is " + ("" if HourglassPlabicGraph.from_dict(Examples.example_contractable).is_fully_reduced(5, True) else "not ") + "fully reduced.")
-    '''
+    if verbose:
+        # Test unknown examples
+        print("Testing example_6_by_6 for reducedness.")
+        print("example_6_by_6 is " + ("" if HourglassPlabicGraph.from_dict(Examples.example_6_by_6).is_fully_reduced(6, verbose) else "not ") + "fully reduced.")
+        print("Testing examples_ICERM for reducedness.")
+        print("examples_ICERM is " + ("" if HourglassPlabicGraph.from_dict(Examples.examples_ICERM).is_fully_reduced(5, verbose) else "not ") + "fully reduced.")
+        
+        # These examples are not well-formed graphs.
+        print("Testing examples_christian_plabic for reducedness.")
+        print("examples_christian_plabic is " + ("" if HourglassPlabicGraph.from_dict(Examples.examples_christian_plabic).is_fully_reduced(7, verbose) else "not ") + "fully reduced.")
+        # Throws NotImplementedError
+        '''
+        print("Testing example_contractable for reducedness.")
+        print("example_contractable is " + ("" if HourglassPlabicGraph.from_dict(Examples.example_contractable).is_fully_reduced(5, True) else "not ") + "fully reduced.")
+        '''
 
     print("is_fully_reduced tests complete.")
 
