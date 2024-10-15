@@ -30,7 +30,7 @@ class Vertex:
     def __repr__(self):
         return "HourglassPlabicGraph Vertex object: id=%s, label=%s"%(str(self.id), str(self.label))
 
-    def reset_head(self):
+    def _reset_head(self):
         while self._half_hourglasses_head.get_angle() > self._half_hourglasses_head.cw_next().get_angle():
             self._half_hourglasses_head = self._half_hourglasses_head.cw_next()
 
@@ -57,7 +57,7 @@ class Vertex:
             self._half_hourglasses_head = hh
             return
 
-        self.reset_head()
+        self._reset_head()
         
         # find first edge with greater angle, then insert_cw_next
         hh_angle = hh.get_angle()

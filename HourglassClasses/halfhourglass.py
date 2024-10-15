@@ -40,8 +40,8 @@ class HalfHourglass(DihedralElement):
                 self._twin._half_strands_tail = self._half_strands_tail.twin()
         else: self._twin = twin
         
-        self.left_face = None
-        self.right_face = None
+        self._left_face = None
+        self._right_face = None
 
     def __repr__(self):
         return "HalfHourglass between " + str(self.v_from().id) + " to " + str(self.v_to().id) + " with multiplicity " + str(self.multiplicity())
@@ -123,9 +123,9 @@ class HalfHourglass(DihedralElement):
     def v_to(self):
         return self._v_to
     def left_face(self):
-        return self.left_face
+        return self._left_face
     def right_face(self):
-        return self.right_face
+        return self._right_face
 
     def reparent(self, v):
         '''Changes this half hourglass's v_from to v, along with associated bookkeeping.'''

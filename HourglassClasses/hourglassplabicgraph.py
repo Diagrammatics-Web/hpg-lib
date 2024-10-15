@@ -93,10 +93,10 @@ class HourglassPlabicGraph:
         # There is a chance we are connecting two faces, so we should find the second one
         # and remove it from our list
         for hh in new_hh.iterate_right_turns():
-            if hh.right_face is not None:
-                if face is None: face = hh.right_face
-                elif face is not hh.right_face:
-                    del self._faces[hh.right_face.id]
+            if hh.right_face() is not None:
+                if face is None: face = hh.right_face()
+                elif face is not hh.right_face():
+                    del self._faces[hh.right_face().id]
                     break
         if face is not None:
             face.initialize_half_hourglasses(new_hh)
@@ -107,7 +107,7 @@ class HourglassPlabicGraph:
 
         # Either the twin's face will be the same as this, or we will need to create a new face since the old face
         # will be the same as the one reused for the hourglass and will no longer be valid
-        if new_hh.twin().right_face is None:
+        if new_hh.twin().right_face() is None:
             face = Face(ID.get_new_id("face"), new_hh.twin())
             self._faces[face.id] = face
         
@@ -126,13 +126,13 @@ class HourglassPlabicGraph:
         hh2 = None
         # get a new hourglass for each face the hourglass belongs to
         for hh in del_hh.iterate_right_turns():
-            if hh is not del_hh and hh is not del_hh.twin() and hh.right_face is not None:
-                face1 = hh.right_face
+            if hh is not del_hh and hh is not del_hh.twin() and hh.right_face() is not None:
+                face1 = hh.right_face()
                 hh1 = hh
                 break
         for hh in del_hh.twin().iterate_right_turns():
-            if hh is not del_hh and hh is not del_hh.twin() and hh.right_face is not None:
-                face2 = hh.right_face
+            if hh is not del_hh and hh is not del_hh.twin() and hh.right_face() is not None:
+                face2 = hh.right_face()
                 hh2 = hh
                 break
         
@@ -150,7 +150,7 @@ class HourglassPlabicGraph:
                 self._faces[face2.id] = face2
         # case: this is the last hourglass of the face
         if face1 is None and face2 is None:
-            del self._faces[del_hh.right_face.id]
+            del self._faces[del_hh.right_face().id]
 
     def thicken_hourglass_by_id(self, v1_id, v2_id):
         v1 = self._get_vertex(v1_id)
@@ -181,9 +181,6 @@ class HourglassPlabicGraph:
     def is_square_move_valid(self, face_id, r=4):
         return self._get_face(face_id).is_square_move_valid(r)
 
-    def is_benzene_move_valid(self, face_id):
-        return self._get_face(face_id).is_benzene_move_valid()
-
     def square_move(self, face_id, r=4):
         face = self._get_face(face_id)
         
@@ -199,7 +196,10 @@ class HourglassPlabicGraph:
         # to persist -- i.e. those of this face.
         # Note that hh will have face as its right face.
         for hh in face:
-            hh.left_face.initialize_half_hourglasses(hh.twin())
+            hh.left_face().initialize_half_hourglasses(hh.twin())
+
+    def is_benzene_move_valid(self, face_id):
+        return self._get_face(face_id).is_benzene_move_valid()
 
     def benzene_move(self, face_id):
         self._get_face(face_id).benzene_move()
@@ -433,6 +433,7 @@ class HourglassPlabicGraph:
         ''' The number of vertices in this graph.'''
         return len(self._inner_vertices) + len(self._boundary_vertices)
 
+    # TESTING
     def print_faces(self):
         for f in self._faces.values():
             print(f.id + ":")

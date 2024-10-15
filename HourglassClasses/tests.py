@@ -329,7 +329,7 @@ def hourglass_plabic_graph_tests():
     '''
     print("Checking for proper face initialization.")
     for v in list(HPG._boundary_vertices.values()) + list(HPG._inner_vertices.values()):
-        print(str(v.id) + ": " + str([hh.left_face.id for hh in v]))
+        print(str(v.id) + ": " + str([hh.left_face().id for hh in v]))
         #v.print_neighbors()
     HPG.print_faces()
     '''
@@ -372,7 +372,7 @@ def move_tests():
     '''
     print("Checking for proper face initialization.")
     for v in list(HPG._boundary_vertices.values()) + list(HPG._inner_vertices.values()):
-        print(str(v.id) + ": " + str([hh.left_face.id for hh in v]))
+        print(str(v.id) + ": " + str([hh.left_face().id for hh in v]))
     HPG.print_faces()
     '''
 

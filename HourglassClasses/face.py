@@ -17,8 +17,8 @@ class Face:
         self._half_hourglasses_head = hh
         self.boundary = False
         for iter_hh in self:
-            iter_hh.right_face = self
-            iter_hh.twin().left_face = self
+            iter_hh._right_face = self
+            iter_hh.twin()._left_face = self
             if iter_hh.is_boundary(): self.boundary = True
 
     # Moves
