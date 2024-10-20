@@ -50,14 +50,22 @@ class HalfStrand(DihedralElement):
         trip_value = (lambda strand : strand) if output == 'half_strands' else (lambda strand : strand.hourglass()) if output == 'half_hourglasses' else (lambda strand : strand.id)
 
         visited = [trip_value(self)]
-
+        # Keep track of visited strands to avoid looping. This is only possible if not starting on the boundary, as trip traversal is invertible.
+        visited_set = {self}
+        # Only check for membership in visited_set if we don't start on the boundary.
+        is_valid = (lambda strand : not strand.v_to().boundary) if self.v_from().boundary else (lambda strand : not strand.v_to().boundary and strand not in visited_set)
+        # Only add strand to visited_set if we don't start on the boundary. Note that the second lambda returns a tuple of (None, None) while still executing both functions.
+        add_data = (lambda strand : visited.append(trip_value(strand))) if self.v_from().boundary else  (lambda strand: (visited.append(trip_value(strand)), visited_set.add(strand)))
+        
         strand = self
-        while not strand.v_to().boundary:
+        while is_valid(strand):
             strand = strand.get_ith_trip_turn(i)
-            visited.append(trip_value(strand))
+            add_data(strand)
 
-        # We may need to find the other direction of the trip
-        if not self.v_from().boundary:
+        # We may need to find the other direction of the trip if we didn't start on the boundary
+        # and if we didn't loop already. If so, we no longer need to worry about looping; otherwise
+        # we would have already visited these strands.
+        if not self.v_from().boundary and self.invert_ith_trip_turn(i) not in visited_set:
             strand = self.invert_ith_trip_turn(i)
             prepend_visited = [strand]
             
