@@ -50,7 +50,8 @@ class HalfStrand(DihedralElement):
         trip_value = (lambda strand : strand) if output == 'half_strands' else (lambda strand : strand.hourglass()) if output == 'half_hourglasses' else (lambda strand : strand.id)
 
         visited = [trip_value(self)]
-        # Keep track of visited strands to avoid looping. This is only possible if not starting on the boundary, as trip traversal is invertible.
+        # Keep track of visited strands to avoid isolated trips. This is only possible if not starting on the boundary, as trip traversal is invertible.
+        # An isolated trip occurs when a trip starting at an interior strand never reaches the boundary.
         visited_set = {self}
         # Only check for membership in visited_set if we don't start on the boundary.
         is_valid = (lambda strand : not strand.v_to().boundary) if self.v_from().boundary else (lambda strand : not strand.v_to().boundary and strand not in visited_set)

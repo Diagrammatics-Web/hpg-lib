@@ -162,10 +162,15 @@ class HalfHourglass(DihedralElement):
     def iterate_right_turns(self):
         return _TurnIterator(self, True)
 
+    def iterate_strands(self):
+        return _StrandIterator(self)
+
 class _TurnIterator:
-    ''' Internal class for iterating left and right turns. A left/right turn is computed by
-        taking an hourglass's twin's cw/ccw_next element.
-        Modification of the list while iterating can cause errors with iteration.'''
+    '''
+    Internal class for iterating left and right turns. A left/right turn is computed by
+    taking an hourglass's twin's cw/ccw_next element.
+    Modification of the list while iterating can cause errors with iteration.
+    '''
     def __init__(self, head, turn_right): 
         self.head = head
         self.iter = head
@@ -181,6 +186,30 @@ class _TurnIterator:
             else: self.begin = True
                 
         old = self.iter
-        if self.turn_right: self.iter = self.iter.right_turn()
-        else: self.iter = self.iter.left_turn()
-        return old   
+        self.iter = self.iter.right_turn() if self.turn_right else self.iter.left_turn()
+        return old
+
+class _StrandIterator:
+    '''Internal class for iterating over the strands owned by this hourglass.'''
+    def __init__(self, hh):
+        self.hh = hh
+        self.iter = hh._half_strands_head
+        self.end_strand = hh._half_strands_tail.cw_next() if hh._half_strands_head is not None else None
+        # We only care about looping around if the head and tail are linked
+        self.begin = self.iter is not self.end_strand
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        # Iteration immediately ends if hh has no strands
+        if self.iter is None: raise StopIteration
+        if self.iter is self.end_strand:
+            if self.begin: raise StopIteration
+            else: self.begin = True
+
+        old = self.iter
+        self.iter = self.iter.cw_next()
+        return old
+            
+            

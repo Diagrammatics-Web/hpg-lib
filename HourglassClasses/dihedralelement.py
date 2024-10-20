@@ -138,7 +138,6 @@ class _DihedralIterator:
             else: self.begin = True
                 
         old = self.iter
-        if self.clockwise: self.iter = self.iter.cw_next()
-        else: self.iter = self.iter.ccw_next()
+        self.iter = self.iter.cw_next() if self.clockwise else self.iter.ccw_next()
         return old
         

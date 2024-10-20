@@ -217,12 +217,11 @@ class HourglassPlabicGraph:
         '''
         The conditions for being fully reduced:
         - r-valent
-        - Trips should have no self-intersections
-        - No trip_i should have an essential double crossing with another trip_i
-        - No trip_i should have an essential double crossing with trip_i+1 starting from the same vertex
+        - All trips should have no self-intersections, including nontrivial isolated trips
+        - For boundary trips, no trip_i should have an essential double crossing with another trip_i or a trip_i+1
         An essential double crossing occurs when two paths intersect (cross rather than reflect) twice 
-        while travelling in the same direction.
-        Ignore starting/ending vertices and consecutive intersections.
+        while traveling in the same direction.
+        Ignore consecutive intersections.
         '''
 
         # Verify r-valence
@@ -428,6 +427,12 @@ class HourglassPlabicGraph:
         return self._get_hourglass(self._get_vertex(v1_id), self._get_vertex(v2_id))
     def _get_hourglass(self, v1, v2):
         return v1.get_hourglass_to(v2)
+
+    def _get_interior_hourglasses(self):
+        hourglasses = {}
+        for vertex in self._inner_vertices.values():
+            for hh in vertex:
+                pass # TODO
 
     def order(self):
         ''' The number of vertices in this graph.'''

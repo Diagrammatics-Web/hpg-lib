@@ -115,6 +115,7 @@ def half_hourglass_tests():
     hh.thicken()
     hh.thicken()
     assert hh.strand_count() == 4, "hh should have 4 strands. strand_count: " + str(hh.strand_count())
+    assert len([s for s in hh.iterate_strands()]) == 4, "Strand iteration on hh should count 4 strands, but instead counts " + len([s for s in hh.iterate_strands()]) + " strands."
     hh.thin()
     hh.thin()
     assert hh.strand_count() == 2, "hh should have 2 strands. strand_count: " + str(hh.strand_count())
@@ -130,13 +131,16 @@ def half_hourglass_tests():
     hh.insert_ccw_next(hh4)
 
     # list order should now be hh, hhp, hh3, hh4
-    assert (
-        hh.strand_count() == 2 and 
-        hhp.strand_count() == 0 and 
-        hh3.strand_count() == 5 and 
-        hh4.strand_count() == 2
-    ), "Strands were not linked properly between hourglasses during insertions."
+    assert hh.strand_count()  == 2, "Strands were not linked properly between hourglasses during insertions. hh should have 2 strands. Instead has " + str(hh.strand_count()) + "."
+    assert hhp.strand_count() == 0, "Strands were not linked properly between hourglasses during insertions. hhp should have 2 strands. Instead has " + str(hhp.strand_count()) + "."
+    assert hh3.strand_count() == 5, "Strands were not linked properly between hourglasses during insertions. hh3 should have 2 strands. Instead has " + str(hh3.strand_count()) + "."
+    assert hh4.strand_count() == 2, "Strands were not linked properly between hourglasses during insertions. hh4 should have 2 strands. Instead has " + str(hh4.strand_count()) + "."
     assert hh._half_strands_head.get_num_elements() == 2 + 5 + 2, "Strands were not linked properly all the way around during insertions."
+
+    assert len([s for s in hh.iterate_strands()]) == 2, "Strand iteration on hh should count 2 strands, but instead counts " + len([s for s in hh.iterate_strands()]) + " strands."
+    assert len([s for s in hhp.iterate_strands()]) == 0, "Strand iteration on hhp should count 0 strands, but instead counts " + len([s for s in hhp.iterate_strands()]) + " strands."
+    assert len([s for s in hh3.iterate_strands()]) == 5, "Strand iteration on hh3 should count 5 strands, but instead counts " + len([s for s in hh3.iterate_strands()]) + " strands."
+    assert len([s for s in hh4.iterate_strands()]) == 2, "Strand iteration on hh4 should count 2 strands, but instead counts " + len([s for s in hh4.iterate_strands()]) + " strands."
 
     hhp.remove()
     hh3.remove()
