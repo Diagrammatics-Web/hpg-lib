@@ -219,13 +219,23 @@ class HourglassPlabicGraph:
         - r-valent
         - All trips should have no self-intersections, including nontrivial isolated trips
         - For boundary trips, no trip_i should have an essential double crossing with another trip_i or a trip_i+1
+        An isolated trip is a trip starting from an interior strand that never reaches the boundary.
+        It is trivial if it loops within the same hourglass.
         An essential double crossing occurs when two paths intersect (cross rather than reflect) twice 
-        while traveling in the same direction.
-        Ignore consecutive intersections.
+        while traveling in the same direction, ignoring consecutive intersections.
         '''
 
         # Verify r-valence
         if (not self.is_r_valent(r, verbose)): return False
+
+        # Verify no nontrivial isolated trips
+        for hh in self._get_interior_hourglasses():
+            for strand in hh.iterate_strands():
+                for i in range(1, r):
+                    trip = strand.get_trip(i)
+                    if not trip[0].v_from().boundary and len(trip) > 2:
+                        if verbose: print("Isolated trip " + str(i) + " detected passing through " + str(trip[0]) + ".")
+                        return False
 
         trips = [[self.get_trip(v, i, 'half_hourglasses') for v in self._boundary_vertices.values()] for i in range(1, r)]
 
@@ -353,7 +363,6 @@ class HourglassPlabicGraph:
                                           + " and trip" + (str(i+1) if b < len(trip_is) else str(i+2)) 
                                           + " from vertex " + str(trip2[0].v_from().id) + " double cross.")
                         return False
-
         return True
     
     # Layout functions
@@ -429,10 +438,12 @@ class HourglassPlabicGraph:
         return v1.get_hourglass_to(v2)
 
     def _get_interior_hourglasses(self):
-        hourglasses = {}
+        hourglasses = set()
         for vertex in self._inner_vertices.values():
             for hh in vertex:
-                pass # TODO
+                if hh.twin() not in hourglasses:
+                    hourglasses.add(hh)
+        return hourglasses
 
     def order(self):
         ''' The number of vertices in this graph.'''

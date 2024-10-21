@@ -444,41 +444,40 @@ def serialization_tests():
 
 def reduced_tests():
     print("Testing is_fully_reduced.")
-    verbose = False
+    verbose = True
+
+    def test_reducedness(graphdict, name, r, expected):
+        if verbose: print("Testing " + name + " for reducedness.")
+        if (expected is not None): 
+            assert HourglassPlabicGraph.from_dict(graphdict).is_fully_reduced(r, verbose) == expected, name + " should " + ("" if expected else "not ") + "be fully reduced."
+            if verbose: print(name + " is " + ("" if expected else "not ") + "fully reduced.")
+        else: print(name + " is " + ("" if HourglassPlabicGraph.from_dict(graphdict).is_fully_reduced(r, verbose) else "not ") + "fully reduced.")
 
     # Reduced HPGs
-    assert HourglassPlabicGraph.from_dict(Examples.example_ASM).is_fully_reduced(4, verbose), "example_ASM should be fully reduced."
-    assert HourglassPlabicGraph.from_dict(Examples.example_5_by_2).is_fully_reduced(5, verbose), "example_5_by_2 should be fully reduced."
-    assert HourglassPlabicGraph.from_dict(Examples.example_5_by_3_ASM).is_fully_reduced(5, verbose), "example_5_by_3_ASM should be fully reduced."
-    assert HourglassPlabicGraph.from_dict(Examples.example_9_by_2).is_fully_reduced(9, verbose), "example_9_by_2 should be fully reduced."
-    assert HourglassPlabicGraph.from_dict(Examples.example_2_column_running).is_fully_reduced(7, verbose), "example_2_column_running should be fully reduced."
-    assert HourglassPlabicGraph.from_dict(Examples.example_2_column_running_after_squaremove).is_fully_reduced(7, verbose), "example_2_column_running_after_squaremove should be fully reduced."
-    assert HourglassPlabicGraph.from_dict(Examples.example_2_column_running_ear_cut).is_fully_reduced(7, verbose), "example_2_column_running_ear_cut should be fully reduced."
-    assert HourglassPlabicGraph.from_dict(Examples.example_benzene).is_fully_reduced(4, verbose), "example_benzene should be fully reduced."
-    assert HourglassPlabicGraph.from_dict(Examples.example_double_crossing).is_fully_reduced(4, verbose), "example_double_crossing should be fully reduced."
-    assert HourglassPlabicGraph.from_dict(Examples.example_6_by_3).is_fully_reduced(6, verbose), "example_6_by_3 should be fully reduced."
+    test_reducedness(Examples.example_ASM, "example_ASM", 4, True)
+    test_reducedness(Examples.example_5_by_2, "example_5_by_2", 5, True)
+    test_reducedness(Examples.example_5_by_3_ASM, "example_5_by_3_ASM", 5, True)
+    test_reducedness(Examples.example_9_by_2, "example_9_by_2", 9, True)
+    test_reducedness(Examples.example_2_column_running, "example_2_column_running", 7, True)
+    test_reducedness(Examples.example_2_column_running_after_squaremove, "example_2_column_running_after_squaremove", 7, True)
+    test_reducedness(Examples.example_2_column_running_ear_cut, "example_2_column_running_ear_cut", 7, True)
+    test_reducedness(Examples.example_benzene, "example_benzene", 4, True)
+    test_reducedness(Examples.example_double_crossing, "example_double_crossing", 4, True)
+    test_reducedness(Examples.example_6_by_3, "example_6_by_3", 6, True)
     
     # Non-reduced HPGs
-    assert not HourglassPlabicGraph.from_dict(Examples.example_benzene_full_nonreduced).is_fully_reduced(4, verbose), "example_benzene_full_nonreduced should not be fully reduced."
-    assert not HourglassPlabicGraph.from_dict(Examples.example_5x4_badsep).is_fully_reduced(5, verbose), "example_5x4_badsep should not be fully reduced."
-    assert not HourglassPlabicGraph.from_dict(Examples.example_6_by_3_bad).is_fully_reduced(6, verbose), "example_6_by_3_bad should not be fully reduced."
-    assert not HourglassPlabicGraph.from_dict(Examples.example_christian_is_working_with).is_fully_reduced(3, verbose), "example_christian_is_working_with should not be fully reduced."
+    test_reducedness(Examples.example_benzene_full_nonreduced, "example_benzene_full_nonreduced", 4, False)
+    test_reducedness(Examples.example_5x4_badsep, "example_5x4_badsep", 5, False)
+    test_reducedness(Examples.example_6_by_3_bad, "example_6_by_3_bad", 6, False)
+    test_reducedness(Examples.example_christian_is_working_with, "example_christian_is_working_with", 4, False)
+    test_reducedness(Examples.examples_christian_plabic, "examples_christian_plabic", 3, False)
 
     if verbose:
         # Test unknown examples
-        print("Testing example_6_by_6 for reducedness.")
-        print("example_6_by_6 is " + ("" if HourglassPlabicGraph.from_dict(Examples.example_6_by_6).is_fully_reduced(6, verbose) else "not ") + "fully reduced.")
-        print("Testing examples_ICERM for reducedness.")
-        print("examples_ICERM is " + ("" if HourglassPlabicGraph.from_dict(Examples.examples_ICERM).is_fully_reduced(5, verbose) else "not ") + "fully reduced.")
-        
-        # These examples are not well-formed graphs.
-        print("Testing examples_christian_plabic for reducedness.")
-        print("examples_christian_plabic is " + ("" if HourglassPlabicGraph.from_dict(Examples.examples_christian_plabic).is_fully_reduced(7, verbose) else "not ") + "fully reduced.")
+        test_reducedness(Examples.example_6_by_6, "example_6_by_6", 6, None)
+        test_reducedness(Examples.examples_ICERM, "examples_ICERM", 5, None)
         # Throws NotImplementedError
-        '''
-        print("Testing example_contractable for reducedness.")
-        print("example_contractable is " + ("" if HourglassPlabicGraph.from_dict(Examples.example_contractable).is_fully_reduced(5, True) else "not ") + "fully reduced.")
-        '''
+        #test_reducedness(Examples.example_contractable, "example_contractable", 5, None)
 
     print("is_fully_reduced tests complete.")
 
