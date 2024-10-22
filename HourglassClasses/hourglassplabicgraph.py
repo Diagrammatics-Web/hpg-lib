@@ -15,6 +15,15 @@ class HourglassPlabicGraph:
         self.layout = 'circular'
         if n > 0: self.create_boundary(n)
 
+    def __eq__(self, other):
+        '''Equality on HourglassPlabicGraphs is considered to be
+           (embedded planar) graph isomorphism. Currently breaks
+           if there are components not connected to the boundary.'''
+        return isinstance(other, HourglassPlabicGraph) and self.is_isomorphic(other)
+
+    def is_isomorphic(self, other):
+        raise NotImplementedError("is_isomorphic not yet implemented!") # TODO
+
     # Construction functions
 
     def create_boundary(self, n, r=10):
