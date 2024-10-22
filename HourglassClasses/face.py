@@ -46,10 +46,9 @@ class Face:
     def square_move(self, r=4):
         ''' Performs a square move on this face. Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
             To verify that this move will be valid, call is_square_move_valid().
-            OUTPUT: A tuple of arrays. the first is of created vertices that result from this move; the second is of all removed vertices.'''
+            OUTPUT: A tuple of arrays: the first is of created vertices that result from this move, the second is of all removed vertices.'''
         new_vertices = []
         removed_vertices = []
-        ret_tuple = (new_vertices, removed_vertices)
 
         # diagnose vertices and perform expansion or contraction as necessary
         hourglasses = [hh for hh in self] # cache half hourglasses for safe iteration
@@ -66,7 +65,7 @@ class Face:
             while hh.multiplicity() > target_multiplicities[i]: hh.thin()
             while hh.multiplicity() < target_multiplicities[i]: hh.thicken()
         
-        return ret_tuple
+        return new_vertices, removed_vertices
 
     # SL4 Square move (should operate identically to square_move(r=4))
 
@@ -87,12 +86,12 @@ class Face:
         return True
         
     def square_move4(self):
-        ''' Performs a square move on this face. Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
-            To verify that this move will be valid, call is_square_move_valid().
-            OUTPUT: A tuple of arrays. the first is of created vertices that result from this move; the second is of all removed vertices.'''
+        ''' Performs a square move on this face, assuming the graph is in SL4. Vertices with one outgoing edge are contracted,
+            while vertices with two outgoing edges are split into two vertices.
+            To verify that this move will be valid, call is_square_move4_valid().
+            OUTPUT: A tuple of arrays: the first is of created vertices that result from this move, the second is of all removed vertices.'''
         new_vertices = []
         removed_vertices = []
-        ret_tuple = (new_vertices, removed_vertices)
 
         # diagnose vertices and perform expansion or contraction as necessary
         hourglasses = [hh for hh in self] # cache half hourglasses for safe iteration
@@ -101,7 +100,7 @@ class Face:
             if v.simple_degree() == 4: new_vertices.append(v.square_move_expand(hh, hh.cw_next()))
             else: removed_vertices.append(v.square_move_contract(hh.ccw_next()))
         
-        return ret_tuple
+        return new_vertices, removed_vertices
 
     # Benzene move
 

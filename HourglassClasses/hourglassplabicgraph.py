@@ -193,12 +193,11 @@ class HourglassPlabicGraph:
     def square_move(self, face_id, r=4):
         face = self._get_face(face_id)
         
-        tup = face.square_move(r)
-        # Returned tuple is (new_vertices, removed_vertices)
+        new_vertices, removed_vertices = face.square_move(r)
         # NOTE: By assumption, all vertices involved in a square move are inner vertices
-        for v in tup[0]:
+        for v in new_vertices:
             self._inner_vertices[v.id] = v
-        for v in tup[1]:
+        for v in removed_vertices:
             del self._inner_vertices[v.id]
         # A square move does not add or remove any faces, but adjacent faces
         # should have their hourglass heads set to hourglasses that are guaranteed
@@ -350,7 +349,7 @@ class HourglassPlabicGraph:
                     # a potential self intersection on trip1's hourglass but it
                     # fails, we won't encounter another one for that hourglass.
                     if count == -1: break
-                    return (i1 + count, i2 + count)
+                    return i1 + count, i2 + count
             return None
 
         def do_trips_double_cross(trip1, trip2):
