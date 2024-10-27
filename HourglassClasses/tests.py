@@ -273,9 +273,9 @@ def face_tests():
 
     v1 = Vertex(1, 0, 0, True)
     v2 = Vertex(2, 1, 0, False)
-    v3 = Vertex(3, 3, 1, True)
-    v4 = Vertex(4, 2, 2, False)
-    v5 = Vertex(5, 1, 2, True)
+    v3 = Vertex(3, 2, 1, True)
+    v4 = Vertex(4, 1, 2, False)
+    v5 = Vertex(5, 0, 2, True)
     v6 = Vertex(6, -1, 1, False)
 
     hh1 = Vertex.create_hourglass_between(v2, v1, 1)
@@ -318,8 +318,8 @@ def face_tests():
         hh5.multiplicity() == 2 and
         hh6.multiplicity() == 1
     ), "Hourglass multiplicities are incorrect after first cycle."
-    assert face.is_benzene_move_valid(), "Cycle move should be valid even after performing a cycle."
-    face.cycle(hh2.twin())
+    assert face.is_cycle_valid(hh1.twin()), "Cycle move should be valid on hh1 after performing a cycle."
+    face.cycle(hh1.twin())
     assert (
         hh1.multiplicity() == 1 and
         hh2.multiplicity() == 2 and

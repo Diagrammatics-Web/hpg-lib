@@ -110,8 +110,8 @@ class Face:
             a multiplicity greater than 1.
             In a cycle move, hourglasses starting from start_hh are alternatively thickened and thinned.
             start_hh: The starting hourglass in this face.'''
-        if start_hh.right_face is not self:
-            if start_hh.left_face is self: start_hh = start_hh.twin()
+        if start_hh.right_face() is not self:
+            if start_hh.left_face() is self: start_hh = start_hh.twin()
             else: raise ValueError("start_hh does not belong to this face!")
         
         count = 0
@@ -131,7 +131,7 @@ class Face:
         ''' Performs a cycle move on this face. Its edges are alternatingly thinned and thickened,
             starting from start_hh.
             To verify that this move will be valid, call is_cycle_valid(start_hh).'''
-        if start_hh.right_face is not self: start_hh = start_hh.twin()
+        if start_hh.right_face() is not self: start_hh = start_hh.twin()
         
         thicken = False
         for hh in start_hh.iterate_right_turns():
