@@ -220,6 +220,8 @@ class HourglassPlabicGraph:
     def is_benzene_move_valid(self, face_id):
         return self._get_face(face_id).is_benzene_move_valid()
 
+    move_square = square_move # alias
+
     def benzene_move(self, face_id):
         self._get_face(face_id).benzene_move()
 
