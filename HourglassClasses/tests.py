@@ -35,6 +35,8 @@ def all_tests():
     serialization_tests()
     reduced_tests()
 
+# TESTS FOR BASE CLASS FUNCTIONALITY
+
 def dihedral_element_tests():
     print("Testing DihedralElement class.")
 
@@ -70,7 +72,7 @@ def dihedral_element_tests():
     d2.remove()
     assert d1.get_num_elements() == 1, "d2 should have been removed correctly."
     
-    print("DihedralElement tests complete.")
+    print("DihedralElement tests complete.\n")
 
 def half_strand_tests():
     print("Testing HalfStrand class.")
@@ -98,7 +100,7 @@ def half_strand_tests():
     s4.insert_cw_next(s5)
     assert s4.get_last_strand_same_hourglass() == s5, "s4 is not linked to other strands properly when multiple hourglasses."
 
-    print("HalfStrand tests complete.")
+    print("HalfStrand tests complete.\n")
 
 def half_hourglass_tests():
     print("Testing HalfHourglass class.")
@@ -150,7 +152,7 @@ def half_hourglass_tests():
 
     #TODO: test is_left_face_valid
     
-    print("HalfHourglass tests complete.")
+    print("HalfHourglass tests complete.\n")
 
 def vertex_tests():
     print("Testing Vertex class.")
@@ -217,7 +219,7 @@ def vertex_tests():
         v6.get_neighbors() == [extras[2], v5, extras[3]]
     ), "Graph should have returned to previous state."
     
-    print("Vertex tests complete.")
+    print("Vertex tests complete.\n")
 
 def face_tests():
     print("Testing Face class.")
@@ -267,7 +269,7 @@ def face_tests():
     v1.get_hourglass_to(v2).thicken()
     assert not face.is_square_move_valid(), "Square move should not be valid on face with improper hourglass multiplicities."
 
-    # Benzene move tests
+    # Benzene move and cycle tests
 
     v1 = Vertex(1, 0, 0, True)
     v2 = Vertex(2, 1, 0, False)
@@ -276,15 +278,17 @@ def face_tests():
     v5 = Vertex(5, 1, 2, True)
     v6 = Vertex(6, -1, 1, False)
 
-    hh1 = Vertex.create_hourglass_between(v1, v2, 1)
-    hh2 = Vertex.create_hourglass_between(v2, v3, 2)
-    hh3 = Vertex.create_hourglass_between(v3, v4, 1)
-    hh4 = Vertex.create_hourglass_between(v4, v5, 2)
-    hh5 = Vertex.create_hourglass_between(v5, v6, 1)
-    hh6 = Vertex.create_hourglass_between(v6, v1, 2)
-    face = Face("face", hh1.twin())
+    hh1 = Vertex.create_hourglass_between(v2, v1, 1)
+    hh2 = Vertex.create_hourglass_between(v3, v2, 2)
+    hh3 = Vertex.create_hourglass_between(v4, v3, 1)
+    hh4 = Vertex.create_hourglass_between(v5, v4, 2)
+    hh5 = Vertex.create_hourglass_between(v6, v5, 1)
+    hh6 = Vertex.create_hourglass_between(v1, v6, 2)
+    face = Face("face", hh1)
 
     assert face.is_benzene_move_valid(), "Benzene move should be valid."
+    assert face.is_cycle_valid(hh2), "Cycle move should be valid."
+    
     face.benzene_move()
     assert (
         hh1.multiplicity() == 2 and
@@ -293,7 +297,7 @@ def face_tests():
         hh4.multiplicity() == 1 and
         hh5.multiplicity() == 2 and
         hh6.multiplicity() == 1
-    ), "Hourglass multiplicities are incorrect."
+    ), "Hourglass multiplicities are incorrect after first benzene move."
     assert face.is_benzene_move_valid(), "Benzene move should be valid even after performing a benzene move."
     face.benzene_move()
     assert (
@@ -303,15 +307,38 @@ def face_tests():
         hh4.multiplicity() == 2 and
         hh5.multiplicity() == 1 and
         hh6.multiplicity() == 2
-    ), "Hourglass multiplicities are incorrect."
+    ), "Hourglass multiplicities are incorrect after second benzene move."
+    
+    face.cycle(hh2)
+    assert (
+        hh1.multiplicity() == 2 and
+        hh2.multiplicity() == 1 and
+        hh3.multiplicity() == 2 and
+        hh4.multiplicity() == 1 and
+        hh5.multiplicity() == 2 and
+        hh6.multiplicity() == 1
+    ), "Hourglass multiplicities are incorrect after first cycle."
+    assert face.is_benzene_move_valid(), "Cycle move should be valid even after performing a cycle."
+    face.cycle(hh2.twin())
+    assert (
+        hh1.multiplicity() == 1 and
+        hh2.multiplicity() == 2 and
+        hh3.multiplicity() == 1 and
+        hh4.multiplicity() == 2 and
+        hh5.multiplicity() == 1 and
+        hh6.multiplicity() == 2
+    ), "Hourglass multiplicities are incorrect after second cycle."
 
-    hh1.thicken()
+    hh2.thin()
     assert not face.is_benzene_move_valid(), "Cannot perform benzene move on hourglass with incorrect multiplicity."
-    hh1.thin()
+    assert not face.is_cycle_valid(hh2), "Cannot perform cycle move on hourglass with incorrect multiplicity."
+    hh2.thicken()
     Vertex.create_hourglass_between(v5, v1, 1)
     assert not face.is_benzene_move_valid(), "Cannot perform benzene move on face with odd number of hourglasses."
+    assert not face.is_cycle_valid(hh2), "Cannot perform cycle move on face with odd number of hourglasses."
     
-    print("Face tests complete.")
+    
+    print("Face tests complete.\n")
 
 def hourglass_plabic_graph_tests():
     print("Testing HourglassPlabicGraph class.")
@@ -361,7 +388,9 @@ def hourglass_plabic_graph_tests():
     HPG.print_faces()
     #'''
 
-    print("HourglassPlabicGraph test complete.")
+    print("HourglassPlabicGraph test complete.\n")
+
+# TESTS FOR EXTENDED HOURGLASS PLABIC GRAPH FUNCTIONALITY
 
 def move_tests():
     print("Testing moves.")
@@ -417,7 +446,7 @@ def move_tests():
     plots.append(("HPG after second square move in SL7:", HPG.plot()))
     assert HPG.is_square_move_valid(face_id, 7), "Square move should be valid on " + str(face_id) + " after performing second square move."
     
-    print("Move tests complete.")
+    print("Move tests complete.\n")
     return plots
 
 def trip_tests():
@@ -430,7 +459,7 @@ def trip_tests():
     HPG.square_move("face12")
     trip_perms2 = HPG.get_trip_perms()
     assert trip_perms1 == trip_perms2, "Trip permutations should be unchanged after performing a square move."
-    print("Trip tests complete.")
+    print("Trip tests complete.\n")
 
 def serialization_tests():
     print("Testing serialization.")
@@ -440,7 +469,7 @@ def serialization_tests():
     #print(HPGstr)
     HPG2 = HourglassPlabicGraph.from_dict(HPGdict)
     #HPG2.print_faces()
-    print("Serialization tests complete.")
+    print("Serialization tests complete.\n")
 
 def reduced_tests():
     print("Testing is_fully_reduced.")
@@ -451,7 +480,7 @@ def reduced_tests():
         if (expected is not None): 
             assert HourglassPlabicGraph.from_dict(graphdict).is_fully_reduced(r, verbose) == expected, name + " should " + ("" if expected else "not ") + "be fully reduced."
             if verbose: print(name + " is " + ("" if expected else "not ") + "fully reduced.")
-        else: print(name + " is " + ("" if HourglassPlabicGraph.from_dict(graphdict).is_fully_reduced(r, verbose) else "not ") + "fully reduced.")
+        else: print(name + " is " + ("" if HourglassPlabicGraph.from_dict(graphdict).is_fully_reduced(r, verbose) else "not ") + "fully reduced (unkown expectation).")
 
     # Reduced HPGs
     test_reducedness(Examples.example_ASM, "example_ASM", 4, True)
@@ -479,7 +508,7 @@ def reduced_tests():
         # Throws NotImplementedError
         #test_reducedness(Examples.example_contractable, "example_contractable", 5, None)
 
-    print("is_fully_reduced tests complete.")
+    print("is_fully_reduced tests complete.\n")
 
 def create_test_HPG():
     ''' 

@@ -34,11 +34,11 @@ class Face:
         multiplicity_sum = 0
         should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
         for hh in self:
-            #checks
+            # Checks
             if hh.v_to().filled != should_be_filled: return False
             if count > 4: return False
             multiplicity_sum += hh.multiplicity()
-            # iterate
+            # Iterate
             count += 1
             should_be_filled = not should_be_filled
         return (multiplicity_sum == r)
@@ -76,11 +76,11 @@ class Face:
         count = 0
         should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
         for hh in self:
-            #checks
+            # Checks
             if hh.multiplicity() != 1: return False
             if hh.v_to().filled != should_be_filled: return False
             if count > 4: return False
-            # iterate
+            # Iterate
             count += 1
             should_be_filled = not should_be_filled
         return True
@@ -102,6 +102,43 @@ class Face:
         
         return new_vertices, removed_vertices
 
+    # Cycle
+
+    def is_cycle_valid(self, start_hh):
+        ''' Verifies that this face can perform a cycle move. This requires the face to have an even number of
+            vertices, with alternating filled/unfilled status. Each other hourglass starting from start_hh should have
+            a multiplicity greater than 1.
+            In a cycle move, hourglasses starting from start_hh are alternatively thickened and thinned.
+            start_hh: The starting hourglass in this face.'''
+        if start_hh.right_face is not self:
+            if start_hh.left_face is self: start_hh = start_hh.twin()
+            else: raise ValueError("start_hh does not belong to this face!")
+        
+        count = 0
+        should_be_filled = not start_hh.v_from().filled
+        check_mult = True
+        for hh in start_hh.iterate_right_turns():
+            # Checks
+            if check_mult and hh.multiplicity() <= 1: return False
+            if hh.v_to().filled != should_be_filled: return False
+            # Iterate
+            count += 1
+            should_be_filled = not should_be_filled
+            check_mult = not check_mult
+        return count % 2 == 0
+
+    def cycle(self, start_hh):
+        ''' Performs a cycle move on this face. Its edges are alternatingly thinned and thickened,
+            starting from start_hh.
+            To verify that this move will be valid, call is_cycle_valid(start_hh).'''
+        if start_hh.right_face is not self: start_hh = start_hh.twin()
+        
+        thicken = False
+        for hh in start_hh.iterate_right_turns():
+            if thicken: hh.thicken()
+            else: hh.thin()
+            thicken = not thicken
+    
     # Benzene move
 
     def is_benzene_move_valid(self):
@@ -112,10 +149,10 @@ class Face:
         should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
         expected_mult = 1 if self._half_hourglasses_head.strand_count() == 1 else 2
         for hh in self:
-            #checks
+            # Checks
             if hh.multiplicity() != expected_mult: return False
             if hh.v_to().filled != should_be_filled: return False
-            # iterate
+            # Iterate
             count += 1
             should_be_filled = not should_be_filled
             expected_mult = 3 - expected_mult # maps 2 -> 1 and 1 -> 2

@@ -211,6 +211,12 @@ class HourglassPlabicGraph:
         for hh in face:
             hh.left_face().initialize_half_hourglasses(hh.twin())
 
+    def is_cycle_valid(self, face_id, v1_id, v2_id):
+        return self._get_face(face_id).is_cycle_valid(self._get_hourglass_by_id(v1_id, v2_id))
+
+    def cycle(self, face_id, v1_id, v2_id):
+        self._get_face(face_id).cycle(self._get_hourglass_by_id(v1_id, v2_id))
+
     def is_benzene_move_valid(self, face_id):
         return self._get_face(face_id).is_benzene_move_valid()
 
