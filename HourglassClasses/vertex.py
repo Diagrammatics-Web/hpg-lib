@@ -44,7 +44,7 @@ class Vertex:
             OUTPUT: The constructed hourglass.
             '''
         hh_id = str(v1.id) + "_" + str(v2.id)
-        hh = HalfHourglass(hh_id, v1, v2, multiplicity, hh_id)
+        hh = HalfHourglass(hh_id, v1, v2, multiplicity)
         v1._insert_hourglass(hh)
         v2._insert_hourglass(hh.twin())
         return hh

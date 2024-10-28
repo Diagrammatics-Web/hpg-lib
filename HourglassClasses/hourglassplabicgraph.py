@@ -257,7 +257,8 @@ class HourglassPlabicGraph:
                         if verbose: print("Isolated trip " + str(i) + " detected passing through " + str(trip[0]) + ".")
                         return False
 
-        trips = [[self.get_trip(v, i, 'half_strands') for v in self._boundary_vertices.values()] for i in range(1, r)]
+        # Get all trips starting on the boundary in half-strand format
+        trips = [[self.get_trip(v, i) for v in self._boundary_vertices.values()] for i in range(1, r)]
 
         # Returns true if trip does not intersect with itself.
         def validate_no_self_intersections(trip):

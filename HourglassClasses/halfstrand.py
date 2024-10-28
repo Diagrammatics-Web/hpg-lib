@@ -60,7 +60,7 @@ class HalfStrand(DihedralElement):
             i: computes trip_i by taking the ith left at unfilled/ith right at filled
             output: if output = 'half_strands', returns an array of HalfStrands. If output = 'half_hourglasses', returns HalfHourglasses.
                     Otherwise, returns the ids of the HalfStrands.'''
-        #print("get_trip(" + str(i) + ") called on ", self) # TESTING
+        print("get_trip(" + str(i) + ") called on ", self) # TESTING
         trip_value = (lambda strand : strand) if output == 'half_strands' else (lambda strand : strand.hourglass()) if output == 'half_hourglasses' else (lambda strand : strand.id)
 
         visited = list()

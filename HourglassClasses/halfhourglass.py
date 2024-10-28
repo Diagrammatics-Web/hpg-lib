@@ -26,18 +26,18 @@ class HalfHourglass(DihedralElement):
             if multiplicity == 0: 
                 self._half_strands_head = None
                 self._half_strands_tail = None
-                self._twin._half_strands_head = None
-                self._twin._half_strands_tail = None
+                self.twin()._half_strands_head = None
+                self.twin()._half_strands_tail = None
             else:
                 self._half_strands_head = HalfStrand(ID.get_new_id(str(id) + "_s"), self)
-                self._twin._half_strands_head = self._half_strands_head.twin()
+                self.twin()._half_strands_head = self._half_strands_head.twin()
                 for i in range(1, multiplicity): # runs multiplicity-1 times as we have already created a head strand
                     # potentially use thicken() instead of doing this manually?
                     strand = HalfStrand(ID.get_new_id(str(id) + "_s"), self)
                     self._half_strands_head.append_cw(strand)
-                    self._twin._half_strands_head.append_cw(strand.twin())
+                    self.twin()._half_strands_head.append_cw(strand.twin())
                 self._half_strands_tail = self._half_strands_head.cw_last()
-                self._twin._half_strands_tail = self._half_strands_tail.twin()
+                self.twin()._half_strands_tail = self._half_strands_tail.twin()
         else: self._twin = twin
         
         self._left_face = None
@@ -54,10 +54,11 @@ class HalfHourglass(DihedralElement):
 
         # link up strands
         next_strand = element.cw_next()._get_first_strand()
-        prev_strand = next_strand.cw_prev() if next_strand is not None else None
-        if next_strand is not None: 
-            element._half_strands_tail.link_cw_next(next_strand)
-            element._half_strands_head.link_cw_prev(prev_strand)
+        if next_strand is None: return
+
+        prev_strand = next_strand.cw_prev()
+        element._half_strands_tail.link_cw_next(next_strand)
+        element._half_strands_head.link_cw_prev(prev_strand)
 
     def insert_ccw_next(self, element):
         super().insert_ccw_next(element)
@@ -65,10 +66,11 @@ class HalfHourglass(DihedralElement):
 
         # link up strands - same procedure as for insert_cw_next
         next_strand = element.cw_next()._get_first_strand()
-        prev_strand = next_strand.cw_prev() if next_strand is not None else None
-        if next_strand is not None: 
-            element._half_strands_tail.link_cw_next(next_strand)
-            element._half_strands_head.link_cw_prev(prev_strand)
+        if next_strand is None: return
+
+        prev_strand = next_strand.cw_prev()
+        element._half_strands_tail.link_cw_next(next_strand)
+        element._half_strands_head.link_cw_prev(prev_strand)
 
     def remove(self):
         if self._half_strands_head is not None:

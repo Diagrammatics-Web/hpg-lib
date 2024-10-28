@@ -60,6 +60,7 @@ class DihedralElement:
         e = self
         while i > 0:
             e = e.cw_next()
+            print("rotated cw to", e) # TESTING
             i -= 1
         return e
 
@@ -70,6 +71,7 @@ class DihedralElement:
         e = self
         while i > 0:
             e = e.ccw_next()
+            print("rotated cw to", e) # TESTING
             i -= 1
         return e
 
