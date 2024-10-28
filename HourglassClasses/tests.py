@@ -371,11 +371,10 @@ def hourglass_plabic_graph_tests():
     HPG.remove_vertex_by_id("5")
     HPG.remove_vertex_by_id("12")
 
-    #'''
+    '''
     print("Testing vertex removal.")
     HPG.print_faces()
-    print()
-    #'''
+    '''
     
     HPG = create_test_HPG()
 
@@ -383,10 +382,10 @@ def hourglass_plabic_graph_tests():
     HPG.remove_hourglass_by_id("12", "9")
     HPG.remove_hourglass_by_id("8", "1")
 
-    #'''
+    '''
     print("Testing hourglass removal.")
     HPG.print_faces()
-    #'''
+    '''
 
     print("HourglassPlabicGraph test complete.\n")
 

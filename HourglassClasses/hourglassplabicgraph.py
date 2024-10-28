@@ -31,16 +31,17 @@ class HourglassPlabicGraph:
 
     # Construction functions
 
-    def create_boundary(self, n, r=10):
+    def create_boundary(self, n, r=10, filling=True):
         r"""
         Creates n boundary vertices, labeled from 0 to n-1, and connects them with phantom edges.
-        The vertices will be filled. This function can only be called on an empty graph.
+        The vertices will be set to filling, unless. This function can only be called on an empty graph.
 
         INPUT:
     
         - ``n`` -- integer; the number of boundary vertices to create.
-        - ``r`` -- float; the radius of the boundary.
-
+        - ``r`` -- float; the radius of the boundary. Defaults to 10.
+        - ``filling`` -- boolean or boolean iterable; Whether the vertices should be filled. If an iterable, the filled/unfilled statuses of the boundary vertices, starting from 0. Defaults to True.
+        
         EXAMPLES:
     
             sage: HPG = HourglassPlabicGraph()
@@ -50,7 +51,7 @@ class HourglassPlabicGraph:
 
         for i in range(0, n):
             id = str(i)
-            self._boundary_vertices[id] = Vertex(id, r*math.sin((i+0.5)*2*math.pi/n), r*math.cos((i+0.5)*2*math.pi/n), True, True, id)
+            self._boundary_vertices[id] = Vertex(id, r*math.sin((i+0.5)*2*math.pi/n), r*math.cos((i+0.5)*2*math.pi/n), filling if isinstance(filling, bool) else filling[i], True, id)
 
         for i in range(0, n-1):
             Vertex.create_hourglass_between(self._boundary_vertices[str(i)], self._boundary_vertices[str(i+1)], 0)
@@ -60,6 +61,8 @@ class HourglassPlabicGraph:
         outer_face = Face(ID.get_new_id("face"), hh.twin())
         self._faces[inner_face.id] = inner_face
         self._faces[outer_face.id] = outer_face
+
+    #def construct_face(self, 
                           
     def create_vertex(self, v_id, x, y, filled, boundary=False, label='', verify_id=False):
         ''' Adds a vertex to the graph.
@@ -254,22 +257,23 @@ class HourglassPlabicGraph:
                         if verbose: print("Isolated trip " + str(i) + " detected passing through " + str(trip[0]) + ".")
                         return False
 
-        trips = [[self.get_trip(v, i, 'half_hourglasses') for v in self._boundary_vertices.values()] for i in range(1, r)]
+        trips = [[self.get_trip(v, i, 'half_strands') for v in self._boundary_vertices.values()] for i in range(1, r)]
 
         # Returns true if trip does not intersect with itself.
         def validate_no_self_intersections(trip):
             vertices = { trip[0].v_from() }
-            for hh in trip:
-                if hh.v_to() in vertices: 
+            for strand in trip:
+                if strand.v_to() in vertices: 
                     return False
-                vertices.add(hh.v_to())
+                vertices.add(strand.v_to())
             return True
 
         # Verify no self-intersections
         for i in range(0, len(trips)):
-            for trip in trips[i]: 
+            for trip in trips[i]:
+                print("trip" + str(i+1) + " from vertex " + str(trip[0].v_from().id) + ": " + str(trip)) # TESTING
                 if not validate_no_self_intersections(trip):
-                    if verbose: print("trip" + str(i) + " from vertex " + str(trip[0].v_from().id) + " self-intersects.")
+                    if verbose: print("trip" + str(i+1) + " from vertex " + str(trip[0].v_from().id) + " self-intersects.")
                     return False
 
         # Internal helper functions for double crossing checks

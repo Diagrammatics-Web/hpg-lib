@@ -27,7 +27,7 @@ class DihedralElement:
         self._ccw_next._cw_next = element
         self._ccw_next = element
     insert_cw_prev = insert_ccw_next # alias
-    append_cw(self, element) = insert_ccw_next # alias
+    append_cw = insert_ccw_next # alias
 
     def remove(self):
         ''' Removes itself from the list.
@@ -56,12 +56,22 @@ class DihedralElement:
     def get_cw_ith_element(self, i):
         ''' Returns the element i elements clockwise.
             i: how many elements to travel. Assumed to be an integer >= 1.'''
-        return self._cw_next if i == 1 else self._cw_next.get_cw_ith_element(i-1)
+        print("get_cw_ith_element(", i, ") called on ", self) # TESTING
+        e = self
+        while i > 0:
+            e = e.cw_next()
+            i -= 1
+        return e
 
     def get_ccw_ith_element(self, i):
         ''' Returns the element i elements counterclockwise.
             i: how many elements to travel. Assumed to be an integer >= 1.'''
-        return self._ccw_next if i == 1 else self._ccw_next.get_ccw_ith_element(i-1)
+        print("get_ccw_ith_element(", i, ") called on ", self) # TESTING
+        e = self
+        while i > 0:
+            e = e.ccw_next()
+            i -= 1
+        return e
 
     # Turn functions
     
@@ -71,8 +81,10 @@ class DihedralElement:
         return self.twin().ccw_next()
 
     def get_ith_left(self, i):
+        print("get_ith_left(", i, ") called on ", self) # TESTING
         return self.twin().get_cw_ith_element(i)
     def get_ith_right(self, i):
+        print("get_ith_right(", i, ") called on ", self) # TESTING
         return self.twin().get_ccw_ith_element(i)
 
     # Directly connects two elements. Use insert functions instead if possible.

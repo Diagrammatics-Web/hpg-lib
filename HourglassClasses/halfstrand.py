@@ -46,7 +46,10 @@ class HalfStrand(DihedralElement):
             i += 1
 
     def get_ith_trip_turn(self, i):
-        return self.get_ith_right(i) if self.v_to().filled else self.get_ith_left(i)
+        print("get_ith_trip_turn(", i, ") called on ", self) # TESTING
+        val = self.get_ith_right(i) if self.v_to().filled else self.get_ith_left(i)
+        print("get_ith_trip_turn(", i, ") returned ", val) # TESTING
+        return val
 
     def invert_ith_trip_turn(self, i):
         return self.get_cw_ith_element(i).twin() if self.v_from().filled else self.get_ccw_ith_element(i).twin()
@@ -57,6 +60,7 @@ class HalfStrand(DihedralElement):
             i: computes trip_i by taking the ith left at unfilled/ith right at filled
             output: if output = 'half_strands', returns an array of HalfStrands. If output = 'half_hourglasses', returns HalfHourglasses.
                     Otherwise, returns the ids of the HalfStrands.'''
+        #print("get_trip(" + str(i) + ") called on ", self) # TESTING
         trip_value = (lambda strand : strand) if output == 'half_strands' else (lambda strand : strand.hourglass()) if output == 'half_hourglasses' else (lambda strand : strand.id)
 
         visited = list()
@@ -76,7 +80,9 @@ class HalfStrand(DihedralElement):
         if strand not in visited_set:
             add_data(strand)
         # If we are in an isolated trip, no further work is necessary.
-        else: return visited
+        else:  
+            #print("Final trip: ", visited) # TESTING
+            return visited
 
         # We may need to find the other direction of the trip if we didn't start on the boundary.
         if (not self.v_from().boundary):
@@ -91,4 +97,5 @@ class HalfStrand(DihedralElement):
             prepend_visited.reverse()
             visited = prepend_visited + visited
 
+        #print("Final trip: ", visited) # TESTING
         return visited
