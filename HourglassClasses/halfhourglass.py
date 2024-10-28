@@ -91,8 +91,7 @@ class HalfHourglass(DihedralElement):
 
         self._multiplicity += 1
         self._twin._multiplicity += 1
-    def thicken(self): # alias
-        self.add_strand()
+    thicken = add_strand # alias
 
     def remove_strand(self):
         ''' Removes the clockwise last strand for itself and its twin.
@@ -108,8 +107,7 @@ class HalfHourglass(DihedralElement):
         
         self._multiplicity -= 1
         self._twin._multiplicity -= 1
-    def thin(self): # alias
-        self.remove_strand()
+    thin = remove_strand # alias
 
     def _get_first_strand(self):
         ''' Returns the first strand clockwise around v_from relative to this hourglass.
@@ -139,14 +137,12 @@ class HalfHourglass(DihedralElement):
     def multiplicity(self):
         '''Returns the number of strands owned by this hourglass.'''
         return self._multiplicity
-    def strand_count(self): # alias
-        return self.multiplicity()
+    strand_count = multiplicity # alias
     
     def is_boundary(self):
         '''Returns True if this hourglass is on the boundary (or otherwise has multiplicity 0).'''
         return self._multiplicity == 0
-    def is_phantom(self): # alias
-        return self.is_boundary()
+    is_phantom = is_boundary # alias
 
     def get_angle(self):
         ''' Returns the angle between the vector from v_from to v_to and the x-axis.

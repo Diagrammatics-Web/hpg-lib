@@ -170,25 +170,21 @@ class HourglassPlabicGraph:
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
         self.thicken_hourglass(v1, v2)
-    def add_strand_by_id(self, v1_id, v2_id): # alias
-        self.thicken_hourglass_by_id(v1_id, v2_id)
+    add_strand_by_id = thicken_hourglass_by_id # alias
 
     def thicken_hourglass(self, v1, v2):
         self._get_hourglass(v1, v2).thicken()
-    def add_strand(self, v1, v2): # alias
-        self.thicken_hourglass(v1, v2)
+    add_strand = thicken_hourglass # alias
         
     def thin_hourglass_by_id(self, v1_id, v2_id):
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
         self.thin_hourglass(v1, v2)
-    def remove_strand_by_id(self, v1_id, v2_id): # alias
-        self.thin_hourglass_by_id(v1_id, v2_id)
+    remove_strand_by_id = thin_hourglass_by_id # alias
 
     def thin_hourglass(self, v1, v2):
         self._get_hourglass(v1, v2).thin()
-    def remove_strand(self, v1, v2): # alias
-        self.thin_hourglass(v1, v2)
+    remove_strand = thin_hourglass # alias
     
     # Moves
 
@@ -219,11 +215,11 @@ class HourglassPlabicGraph:
 
     def is_benzene_move_valid(self, face_id):
         return self._get_face(face_id).is_benzene_move_valid()
-
     move_square = square_move # alias
 
     def benzene_move(self, face_id):
         self._get_face(face_id).benzene_move()
+    move_benzene = benzene_move # alias
 
     # Checks
 

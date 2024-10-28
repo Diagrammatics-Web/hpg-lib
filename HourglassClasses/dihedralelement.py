@@ -17,10 +17,8 @@ class DihedralElement:
         element._cw_next = self._cw_next
         self._cw_next._ccw_next = element
         self._cw_next = element
-    def insert_ccw_prev(self, element): # alias
-        self.insert_cw_next(element)
-    def append_ccw(self, element): # alias
-        self.insert_cw_next(element)
+    insert_ccw_prev = insert_cw_next # alias
+    append_ccw = insert_cw_next # alias
 
     def insert_ccw_next(self, element):
         '''Inserts element into the list as the next counterclockwise element.'''
@@ -28,10 +26,8 @@ class DihedralElement:
         element._ccw_next = self._ccw_next
         self._ccw_next._cw_next = element
         self._ccw_next = element
-    def insert_cw_prev(self, element): # alias
-        self.insert_ccw_next(element)
-    def append_cw(self, element): # alias
-        self.insert_ccw_next(element)
+    insert_cw_prev = insert_ccw_next # alias
+    append_cw(self, element) = insert_ccw_next # alias
 
     def remove(self):
         ''' Removes itself from the list.
@@ -45,17 +41,13 @@ class DihedralElement:
     
     def cw_next(self):
         return self._cw_next
-    def ccw_prev(self): # alias
-        return self.cw_next()
-    def ccw_last(self): # alias
-        return self.cw_next()
+    ccw_prev = cw_next # alias
+    ccw_last = cw_next # alias
 
     def ccw_next(self):
         return self._ccw_next
-    def cw_prev(self): # alias
-        return self.ccw_next()
-    def cw_last(self): # alias
-        return self.ccw_next()
+    cw_prev = ccw_next # alias
+    cw_last = ccw_next # alias
 
     def twin(self):
         '''Returns an object of the same type representing movement in the opposite direction.'''
@@ -88,14 +80,12 @@ class DihedralElement:
     def link_cw_next(self, element):
         self._cw_next = element
         element._ccw_next = self
-    def link_ccw_prev(self, element): # alias
-        self.link_cw_next(element)
+    link_ccw_prev = link_cw_next # alias
 
     def link_ccw_next(self, element):
         self._ccw_next = element
         element._cw_next = self
-    def link_cw_prev(self, element): # alias
-        self.link_ccw_next(element)
+    link_cw_prev = link_ccw_next # alias
 
     # List data functions
 
