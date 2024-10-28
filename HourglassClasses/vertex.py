@@ -69,8 +69,6 @@ class Vertex:
         # we've run the entire loop, so angle is greater than every other edge
         self._half_hourglasses_head.append_ccw(hh)
 
-        # print("testing vertex " + str(self.id) + ": " + str([hh.v_to().id for hh in self])) # TESTING
-
     @classmethod
     def remove_hourglass_between(cls, v1, v2):
         hh = v1.get_hourglass_to(v2)

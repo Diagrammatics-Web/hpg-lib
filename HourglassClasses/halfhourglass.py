@@ -59,6 +59,9 @@ class HalfHourglass(DihedralElement):
         prev_strand = next_strand.cw_prev()
         element._half_strands_tail.link_cw_next(next_strand)
         element._half_strands_head.link_cw_prev(prev_strand)
+    # Redefinitions of aliases necessary for inherited class override
+    insert_ccw_prev = insert_cw_next # alias
+    append_ccw = insert_cw_next # alias
 
     def insert_ccw_next(self, element):
         super().insert_ccw_next(element)
@@ -71,6 +74,9 @@ class HalfHourglass(DihedralElement):
         prev_strand = next_strand.cw_prev()
         element._half_strands_tail.link_cw_next(next_strand)
         element._half_strands_head.link_cw_prev(prev_strand)
+    # Redefinitions of aliases necessary for inherited class override
+    insert_cw_prev = insert_ccw_next # alias
+    append_cw = insert_ccw_next # alias
 
     def remove(self):
         if self._half_strands_head is not None:

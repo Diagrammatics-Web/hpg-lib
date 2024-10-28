@@ -272,7 +272,6 @@ class HourglassPlabicGraph:
         # Verify no self-intersections
         for i in range(0, len(trips)):
             for trip in trips[i]:
-                print("trip" + str(i+1) + " from vertex " + str(trip[0].v_from().id) + ": " + str(trip)) # TESTING
                 if not validate_no_self_intersections(trip):
                     if verbose: print("trip" + str(i+1) + " from vertex " + str(trip[0].v_from().id) + " self-intersects.")
                     return False

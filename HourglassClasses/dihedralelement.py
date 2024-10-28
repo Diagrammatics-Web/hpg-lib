@@ -56,22 +56,18 @@ class DihedralElement:
     def get_cw_ith_element(self, i):
         ''' Returns the element i elements clockwise.
             i: how many elements to travel. Assumed to be an integer >= 1.'''
-        print("get_cw_ith_element(", i, ") called on ", self) # TESTING
         e = self
         while i > 0:
             e = e.cw_next()
-            print("rotated cw to", e) # TESTING
             i -= 1
         return e
 
     def get_ccw_ith_element(self, i):
         ''' Returns the element i elements counterclockwise.
             i: how many elements to travel. Assumed to be an integer >= 1.'''
-        print("get_ccw_ith_element(", i, ") called on ", self) # TESTING
         e = self
         while i > 0:
             e = e.ccw_next()
-            print("rotated cw to", e) # TESTING
             i -= 1
         return e
 
@@ -83,10 +79,8 @@ class DihedralElement:
         return self.twin().ccw_next()
 
     def get_ith_left(self, i):
-        print("get_ith_left(", i, ") called on ", self) # TESTING
         return self.twin().get_cw_ith_element(i)
     def get_ith_right(self, i):
-        print("get_ith_right(", i, ") called on ", self) # TESTING
         return self.twin().get_ccw_ith_element(i)
 
     # Directly connects two elements. Use insert functions instead if possible.
