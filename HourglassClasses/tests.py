@@ -343,14 +343,21 @@ def face_tests():
 def hourglass_plabic_graph_tests():
     print("Testing HourglassPlabicGraph class.")
 
-    # initialization/create_boundary
+    # initialization/construct_boundary
     
     HPG = HourglassPlabicGraph(10)
 
-    assert len(HPG._boundary_vertices) == 10, "HPG should have been initialized with 10 boundary vertices."
+    assert len(HPG._boundary_vertices) == 10, "HPG should have been initialized with 10 boundary vertices. Instead, has " + str(len(HPG._boundary_vertices)) + "."
     for v in HPG._boundary_vertices.values():
         assert v.boundary, "Vertex " + str(v.id) + " is not marked as a boundary vertex."
-    assert len(HPG._faces) == 2, "HPG should have two faces."
+    assert len(HPG._faces) == 2, "HPG should have two faces. Instead, has " + str(len(HPG._faces)) + "."
+
+    HPG = HourglassPlabicGraph()
+    HPG.construct_face(6, [1+(i%2) for i in range(0, 6)])
+    assert len(HPG._boundary_vertices) == 6, "HPG should have been initialized with 6 boundary vertices. Instead, has " + str(len(HPG._boundary_vertices)) + "."
+    assert len(HPG._inner_vertices) == 6, "HPG should have been initialized with 6 inner vertices. Instead, has " + str(len(HPG._inner_vertices)) + "."
+    assert len(HPG._faces) == 8, "HPG should have eight faces. Instead, has " + str(len(HPG._faces)) + "."
+    assert str(HPG.get_trip_perms()) == "[['4', '3', '0', '5', '2', '1'], ['3', '4', '5', '0', '1', '2'], ['2', '5', '4', '1', '0', '3']]", "Issue with trip permutations. Should be [['4', '3', '0', '5', '2', '1'], ['3', '4', '5', '0', '1', '2'], ['2', '5', '4', '1', '0', '3']], instead are " + str(HPG.get_trip_perms()) + '.'
 
     # adding vertices and hourglasses
 
@@ -472,7 +479,7 @@ def serialization_tests():
 
 def reduced_tests():
     print("Testing is_fully_reduced.")
-    verbose = True
+    verbose = False
 
     def test_reducedness(graphdict, name, r, expected):
         if verbose: print("Testing " + name + " for reducedness.")

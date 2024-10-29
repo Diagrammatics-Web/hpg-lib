@@ -13,7 +13,7 @@ class HourglassPlabicGraph:
         self._faces = dict()
         
         self.layout = 'circular'
-        if n > 0: self.create_boundary(n)
+        if n > 0: self.construct_boundary(n)
 
     def __eq__(self, other):
         '''
@@ -31,7 +31,7 @@ class HourglassPlabicGraph:
 
     # Construction functions
 
-    def create_boundary(self, n, r=10, filling=True):
+    def construct_boundary(self, n, r=10, filling=True):
         r"""
         Creates n boundary vertices, labeled from 0 to n-1, and connects them with phantom edges.
         The vertices will be set to filling, unless. This function can only be called on an empty graph.
@@ -45,9 +45,9 @@ class HourglassPlabicGraph:
         EXAMPLES:
     
             sage: HPG = HourglassPlabicGraph()
-            sage: HPG.create_boundary()
+            sage: HPG.construct_boundary(8)
         """
-        assert self.order() == 0, "Cannot call create_boundary on a non-empty graph."
+        assert self.order() == 0, "Cannot call construct_boundary on a non-empty graph."
 
         for i in range(0, n):
             id = str(i)
@@ -62,23 +62,65 @@ class HourglassPlabicGraph:
         self._faces[inner_face.id] = inner_face
         self._faces[outer_face.id] = outer_face
 
-    #def construct_face(self, 
-                          
+    def construct_face(self, n, multiplicities, r=10):
+        r"""
+        Initializes an hourglass plabic graph with n boundary vertices at a radius of r and an inner face of n vertices connected to the boundary.
+        The vertices on the boundary and the vertices on the face will alternate in filled/unfilled status. The multiplicities of the hourglasses
+        between the face vertices is specified using the multiplicities array.
+        This function can only be called on an empty graph.
+
+        INPUT:
+        - ``n`` -- integer; the number of boundary vertices and face vertices to create each. Must be even.
+        - ``r`` -- float; the radius of the boundary. Defaults to 10.
+
+        EXAMPLES:
+
+        sage: HPG = HourglassPlabicGraph()
+        sage: HPG.construct_face(6)
+        sage: print(HPG.get_trip_perms())
+        """
+        assert n % 2 == 0, "n must be an even number."
+        
+        fillings = [i % 2 == 1 for i in range(0, n)]
+        self.construct_boundary(n, r, fillings)
+        
+        r *= 0.6
+        last_id = None
+        first_id = None
+
+        for i in range(0, n):
+            v_id = ID.get_new_id('v')
+            self.create_vertex(v_id, r*math.sin((i+0.5)*2*math.pi/n), r*math.cos((i+0.5)*2*math.pi/n), not fillings[i], False, id)
+
+            # Hourglass to boundary
+            self.create_hourglass_by_id(v_id, str(i), 1)
+            if first_id is None:
+                first_id = v_id
+            else:
+                # Hourglass to previous vertex in face
+                self.create_hourglass_by_id(v_id, last_id, multiplicities[i-1])
+                if i == n - 1:
+                    # Hourglass from last to first vertex in face
+                    self.create_hourglass_by_id(v_id, first_id, multiplicities[i])
+            last_id = v_id
+
     def create_vertex(self, v_id, x, y, filled, boundary=False, label='', verify_id=False):
-        ''' Adds a vertex to the graph.
-            v_id: The id given to the vertex. Should be unique.
-            label: 
-            x: The x position of the vertex
-            y: The y position of the vertex
-            filled: Whether the vertex is to be filled or not.
-            boundary: Whether the vertex is on the boundary. Defaults to False.
-            verify_id: Check whether v_id is already in use. Defaults to False.
-            '''
+        '''
+        Adds a vertex to the graph and returns it.
+        v_id: The id given to the vertex. Should be unique.
+        label: 
+        x: The x position of the vertex
+        y: The y position of the vertex
+        filled: Whether the vertex is to be filled or not.
+        boundary: Whether the vertex is on the boundary. Defaults to False.
+        verify_id: Check whether v_id is already in use. Defaults to False.
+        '''
         if verify_id and ((not boundary and v_id in self._inner_vertices) or (boundary and v_id in self._boundary_vertices)): raise ValueError("v_id already in use.")
 
         vertex = Vertex(v_id, x, y, filled, boundary, v_id if label == '' else label)
         if boundary: self._boundary_vertices[v_id] = vertex
         else: self._inner_vertices[v_id] = vertex
+        return vertex
 
     def remove_vertex_by_id(self, v_id):
         del_vertex = self._get_vertex(v_id)
@@ -98,7 +140,7 @@ class HourglassPlabicGraph:
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
 
-        self.create_hourglass(v1, v2, multiplicity)
+        return self.create_hourglass(v1, v2, multiplicity)
 
     def create_hourglass(self, v1, v2, multiplicity=1):
         new_hh = Vertex.create_hourglass_between(v1, v2, multiplicity)
@@ -127,6 +169,8 @@ class HourglassPlabicGraph:
         if new_hh.twin().right_face() is None:
             face = Face(ID.get_new_id("face"), new_hh.twin())
             self._faces[face.id] = face
+
+        return new_hh
         
     def remove_hourglass_by_id(self, v1_id, v2_id):
         v1 = self._get_vertex(v1_id)
