@@ -23,11 +23,20 @@ class HourglassPlabicGraph:
         '''
         return isinstance(other, HourglassPlabicGraph) and self.is_isomorphic(other)
 
-    def is_isomorphic(self, other):
-        raise NotImplementedError("is_isomorphic not yet implemented!") # TODO
+    def __neq__(self, other):
+        return not self.__eq__(other)   
 
     def traverse(self):
-        raise NotImplementedError("traverse not yet implemented!") # TODO
+        raise NotImplementedError("traverse not yet implemented!") # TODO 
+        
+    def __hash__(self):
+        hh_visited, hh_history, v_visited, v_history = self.traverse()
+        hh_hash = tuple((hh_visited.index(hh), hh._hourglass.multiplicity) for hh in hh_history)
+        v_hash = tuple((v_visited.index(v), v.is_filled()) for v in v_history)
+        return hash((hh_hash, v_hash))
+
+    def is_isomorphic(self, other):
+        raise NotImplementedError("is_isomorphic not yet implemented!") # TODO
 
     # Construction functions
 
@@ -39,13 +48,17 @@ class HourglassPlabicGraph:
         INPUT:
     
         - ``n`` -- integer; the number of boundary vertices to create.
-        - ``r`` -- float; the radius of the boundary. Defaults to 10.
-        - ``filling`` -- boolean or boolean iterable; Whether the vertices should be filled. If an iterable, the filled/unfilled statuses of the boundary vertices, starting from 0. Defaults to True.
+        
+        - ``r`` -- float (default: `10`); the radius of the boundary.
+        
+        - ``filling`` -- boolean or boolean iterable (default: ``True``); Whether the vertices should be filled. If an iterable, the filled/unfilled statuses of the boundary vertices, starting from 0.
         
         EXAMPLES:
     
             sage: HPG = HourglassPlabicGraph()
             sage: HPG.construct_boundary(8)
+            sage: HPG.order()
+            8
         """
         assert self.order() == 0, "Cannot call construct_boundary on a non-empty graph."
 
