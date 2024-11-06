@@ -52,16 +52,69 @@ class HourglassPlabicGraph:
         return not self.__eq__(other)   
 
     def traverse(self):
-        raise NotImplementedError("traverse not yet implemented!") # TODO 
+        if len(self._boundary_vertices) <= 1: return (None, None)
+
+        # Find edge into the graph; this is assumed to be the first hourglass from the
+        # first boundary vertex into the graph
+        hh = self._get_hourglass_by_id(0, len(self._boundary_vertices) - 1).ccw_next()
+
+        half_hourglasses_visited = [hh]
+        half_hourglass_history = [hh]
+        vertices_visited = []
+        vertex_history = []
+
+        # Perform depth-first search to traverse the graph
+        i = 0
+        while i < len(half_hourglasses_visited):
+            hh = half_hourglasses_visited[i]
+            hh_twin = hh.twin()
+            hh_next = hh.cw_next()
+            v = hh.v_from()
+            if hh_twin not in half_hourglasses_visited:
+                half_hourglasses_visited.append(hh_twin)
+            half_hourglass_history.append(hh_twin)
+
+            if hh_next not in half_hourglasses_visited:
+                half_hourglasses_visited.append(hh_next)
+            half_hourglass_history.append(hh_next)
+
+            if v not in vertices_visited:
+                vertices_visited.append(v)
+            vertex_history.append(v)
+
+            i += 1
+
+        return half_hourglasses_visited, half_hourglass_history, vertices_visited, vertex_history
         
     def __hash__(self):
         hh_visited, hh_history, v_visited, v_history = self.traverse()
-        hh_hash = tuple((hh_visited.index(hh), hh._hourglass.multiplicity) for hh in hh_history)
-        v_hash = tuple((v_visited.index(v), v.is_filled()) for v in v_history)
+        hh_hash = tuple((hh_visited.index(hh), hh.multiplicity()) for hh in hh_history)
+        v_hash = tuple((v_visited.index(v), v.filled) for v in v_history)
         return hash((hh_hash, v_hash))
 
     def is_isomorphic(self, other):
-        raise NotImplementedError("is_isomorphic not yet implemented!") # TODO
+        self_hh_visited, self_hh_history, self_v_visited, self_v_history = self.traverse()
+        other_hh_visited, other_hh_history, other_v_visited, other_v_history = other.traverse()
+
+        if len(self_v_visited) != len(other_v_visited) or len(self_v_history) != len(other_v_history):
+            return False
+
+        v_iso = set(zip(self_v_visited, other_v_visited))
+        v_check = set(zip(self_v_history, other_v_history))
+
+        if v_iso != v_check or any(a.filled != b.filled for a, b in v_iso):
+            return False
+
+        if len(self_hh_visited) != len(other_hh_visited) or len(self_hh_history) != len(other_hh_history):
+            return False
+
+        hh_iso = set(zip(self_hh_visited, other_hh_visited))
+        hh_check = set(zip(self_hh_history, other_hh_history))
+
+        if hh_iso != hh_check or any(a.multiplicity() != b.multiplicity() for a, b in hh_iso):
+            return False
+
+        return True
 
     # Construction functions
 
