@@ -6,14 +6,39 @@ from .idgenerator import ID
 
 class HourglassPlabicGraph:
     '''Represents an hourglass plabic graph.'''
-    def __init__(self, n=0):
+    def __init__(self, n=0, filling=True, r=10):
+        r"""
+        Constructs an Hourglass Plabic Graph.
+
+        INPUT:
+
+        - ``n`` -- nonnegative integer (default: `0`); the number of boundary vertices to create. If 0, does not initialize any vertices.
+        
+        - ``filling`` -- boolean or boolean iterable (default: ``True``); Whether the vertices should be filled. If an iterable, the filled/unfilled statuses of the boundary vertices, starting from 0.
+        
+        - ``r`` -- float (default: `10`); the radius of the boundary.
+
+        EXAMPLES:
+
+            sage: HPG = HourglassPlabicGraph()
+            sage: HPG.order()
+            0
+    
+            sage: HPG = HourglassPlabicGraph(8)
+            sage: HPG.order()
+            8
+            
+        .. NOTE::
+
+            If ``n>0``, internally calls `construct_boundary(n, filling, r)`.
+        """
         # dictionaries pairing IDs to vertices and faces
         self._inner_vertices = dict()
         self._boundary_vertices = dict()
         self._faces = dict()
         
         self.layout = 'circular'
-        if n > 0: self.construct_boundary(n)
+        if n > 0: self.construct_boundary(n, filling, r)
 
     def __eq__(self, other):
         '''
@@ -40,18 +65,18 @@ class HourglassPlabicGraph:
 
     # Construction functions
 
-    def construct_boundary(self, n, r=10, filling=True):
+    def construct_boundary(self, n, filling=True, r=10):
         r"""
         Creates n boundary vertices, labeled from 0 to n-1, and connects them with phantom edges.
         The vertices will be set to filling, unless. This function can only be called on an empty graph.
 
         INPUT:
     
-        - ``n`` -- integer; the number of boundary vertices to create.
-        
-        - ``r`` -- float (default: `10`); the radius of the boundary.
+        - ``n`` -- positive integer; the number of boundary vertices to create.
         
         - ``filling`` -- boolean or boolean iterable (default: ``True``); Whether the vertices should be filled. If an iterable, the filled/unfilled statuses of the boundary vertices, starting from 0.
+        
+        - ``r`` -- float (default: `10`); the radius of the boundary.
         
         EXAMPLES:
     
@@ -59,6 +84,12 @@ class HourglassPlabicGraph:
             sage: HPG.construct_boundary(8)
             sage: HPG.order()
             8
+
+        It is an error to call this function on a non-empty graph.
+
+            sage: HPG = HourglassPlabicGraph(10)
+            sage: HPG.construct_boundary(10)
+            AssertionError: Cannot call construct_boundary on a non-empty graph.
         """
         assert self.order() == 0, "Cannot call construct_boundary on a non-empty graph."
 
@@ -83,19 +114,30 @@ class HourglassPlabicGraph:
         This function can only be called on an empty graph.
 
         INPUT:
+        
         - ``n`` -- integer; the number of boundary vertices and face vertices to create each. Must be even.
+
+        - `multiplicities` -- positive int array; the multiplicities of the hourglasses between internal vertices.
+        
         - ``r`` -- float; the radius of the boundary. Defaults to 10.
 
         EXAMPLES:
 
-        sage: HPG = HourglassPlabicGraph()
-        sage: HPG.construct_face(6)
-        sage: print(HPG.get_trip_perms())
+            sage: HPG = HourglassPlabicGraph()
+            sage: HPG.construct_face(6, [2, 1, 2, 1, 2, 1])
+            sage: print(HPG.get_trip_perms())
+            [['4', '3', '0', '5', '2', '1'], ['3', '4', '5', '0', '1', '2'], ['2', '5', '4', '1', '0', '3']]
+
+        It is an error to call this function on a non-empty graph.
+
+            sage: HPG = HourglassPlabicGraph(10)
+            sage: HPG.construct_face(6, [2, 1, 2, 1, 2, 1])
+            AssertionError: Cannot call construct_boundary on a non-empty graph.
         """
         assert n % 2 == 0, "n must be an even number."
         
         fillings = [i % 2 == 1 for i in range(0, n)]
-        self.construct_boundary(n, r, fillings)
+        self.construct_boundary(n, fillings, r)
         
         r *= 0.6
         last_id = None
@@ -118,7 +160,7 @@ class HourglassPlabicGraph:
             last_id = v_id
 
     def create_vertex(self, v_id, x, y, filled, boundary=False, label='', verify_id=False):
-        '''
+        r"""
         Adds a vertex to the graph and returns it.
         v_id: The id given to the vertex. Should be unique.
         label: 
@@ -127,7 +169,7 @@ class HourglassPlabicGraph:
         filled: Whether the vertex is to be filled or not.
         boundary: Whether the vertex is on the boundary. Defaults to False.
         verify_id: Check whether v_id is already in use. Defaults to False.
-        '''
+        """
         if verify_id and ((not boundary and v_id in self._inner_vertices) or (boundary and v_id in self._boundary_vertices)): raise ValueError("v_id already in use.")
 
         vertex = Vertex(v_id, x, y, filled, boundary, v_id if label == '' else label)

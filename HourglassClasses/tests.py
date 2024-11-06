@@ -460,7 +460,8 @@ def trip_tests():
     ID.reset_id()
     HPG = create_test_HPG()
     trip_perms1 = HPG.get_trip_perms()
-    print(trip_perms1)
+    print("Calcualted:", trip_perms1)
+    print("Expected:   [['1', '4', '3', '6', '5', '0', '7', '2'], ['3', '6', '5', '0', '7', '2', '1', '4'], ['5', '0', '7', '2', '1', '4', '3', '6']]")
     # Should be the same
     HPG.square_move("face12")
     trip_perms2 = HPG.get_trip_perms()
