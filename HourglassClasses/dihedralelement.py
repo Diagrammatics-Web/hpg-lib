@@ -1,11 +1,44 @@
+r"""
+Abstract class for half hourglasses and half strands.
+
+Enables efficient access and modification of edges in embedded planar graphs such as HourglassPlabicGraphs.
+
+AUTHORS:
+
+- Stefano L. Corno (2024-05-10): initial version
+
+"""
+
+# ****************************************************************************
+#       Copyright (C) 2024 Stefano Corno <stlecorno@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
+
 class DihedralElement:
-    '''
+    r"""
     Abstract class for half hourglasses and half strands.
     Has a twin, cw_next, and ccw_next.
-    Twin must be set by the inherited class.
+    Twin must be set and managed by the inherited class (see :func: DihedralElement.twin()).
     Acts as a circular, doubly linked list where each element links to another such list.
-    '''
+    """
+    
     def __init__(self, id):
+        r"""
+        Constructs a DihedralElement with the given ID.
+
+        INPUT:
+
+        - `id` -- hashable, unique object
+
+        .. WARNING::
+
+            This class is intended to be abstract and should not be used directly.
+        """
         self.id = id
         self._twin = None
         self._cw_next = self
@@ -496,17 +529,74 @@ class DihedralElement:
         else: [element for element in self.iterate_counterclockwise()]
 
     def __iter__(self): # by default, iteration will go clockwise
+        r"""
+        Iterates over the elements in the linked list clockwise.
+
+        OUTPUT: _DihedralIterator; Set as clockwise iterator
+
+        EXAMPLES:
+
+        Used on a three-element list.
+        
+            sage: d1 = DihedralElement(1)
+            sage: d2 = DihedralElement(2)
+            sage: d3 = DihedralElement(3)
+            sage: d1.insert_cw_next(d2)
+            sage: d1.insert_cw_next(d3)
+            sage: [d for d in d1]
+            [1, 3, 2]
+
+        .. NOTE::
+
+            Use iterate_clockwise if the direction of iteration is important to indicate for legibility.
+        """
         return _DihedralIterator(self, True)
     
     def iterate_clockwise(self): # for specificity, if it's important
+        r"""
+        Iterates over the elements in the linked list clockwise.
+
+        OUTPUT: _DihedralIterator; Set as clockwise iterator
+
+        EXAMPLES:
+
+        Used on a three-element list.
+        
+            sage: d1 = DihedralElement(1)
+            sage: d2 = DihedralElement(2)
+            sage: d3 = DihedralElement(3)
+            sage: d1.insert_cw_next(d2)
+            sage: d1.insert_cw_next(d3)
+            sage: [d for d in d1.iterate_clockwise()]
+            [1, 3, 2]
+        """
         return _DihedralIterator(self, True)
 
     def iterate_counterclockwise(self):
+        r"""
+        Iterates over the elements in the linked list counterclockwise.
+
+        OUTPUT: _DihedralIterator; Set as counterclockwise iterator
+
+        EXAMPLES:
+
+        Used on a three-element list.
+        
+            sage: d1 = DihedralElement(1)
+            sage: d2 = DihedralElement(2)
+            sage: d3 = DihedralElement(3)
+            sage: d1.insert_cw_next(d2)
+            sage: d1.insert_cw_next(d3)
+            sage: [d for d in d1.iterate_counterclockwise()]
+            [1, 2, 3]
+        """
         return _DihedralIterator(self, False)
 
 class _DihedralIterator:
-    ''' Internal class for iterating over dihedral elements. Iteration can be specified to occur in clockwise or counterclockwise order.
-        Modification of the list while iterating can cause errors with iteration.'''
+    r"""
+    Internal class for iterating over dihedral elements. Iteration can be specified to occur in clockwise or counterclockwise order.
+    Modification of the list while iterating can cause errors with iteration.
+    """
     def __init__(self, head, clockwise): 
         self.head = head
         self.iter = head
