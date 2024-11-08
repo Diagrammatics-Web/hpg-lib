@@ -23,7 +23,9 @@ class DihedralElement:
     r"""
     Abstract class for half hourglasses and half strands.
     Has a twin, cw_next, and ccw_next.
-    Twin must be set and managed by the inherited class (see :func: DihedralElement.twin()).
+    cw_next and ccw_next are always assumed to be defined; if this is the only element in the list,
+    these should point to itself.
+    twin must be set and managed by the inherited class (see :func: DihedralElement.twin()).
     Acts as a circular, doubly linked list where each element links to another such list.
     """
     
@@ -34,6 +36,8 @@ class DihedralElement:
         INPUT:
 
         - `id` -- hashable, unique object
+
+        OUTPUT: DihedralElement; the constructed DihedralElement.
 
         .. WARNING::
 

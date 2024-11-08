@@ -1,40 +1,205 @@
+r"""
+Represents one direction of a strand in an hourglass plabic graph.
+
+A strand is part of an hourglass edge that can be traversed.
+
+AUTHORS:
+
+- Stefano L. Corno (2024-05-10): initial version
+
+"""
+
+# ****************************************************************************
+#       Copyright (C) 2024 Stefano Corno <stlecorno@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
+
 from .dihedralelement import DihedralElement
 
 class HalfStrand(DihedralElement):
-    '''Represents movement along one direction of a strand of an edge in an hourglass plabic graph.'''
+    r"""
+    Represents movement along one direction of a strand of an edge in an hourglass plabic graph.
+
+    A HalfStrand is always assumed to be owned by a HalfHourglass and to have a twin HalfStrand;
+    violating these assumptions may lead to crashes or infinite loops. HalfStrands should not
+    typically be instantiated on their own, and are instead managed by higher level classes.
+    """
     
     def __init__(self, id, hourglass, twin=None):
-        '''Represents movement along one direction of a strand of an edge in an hourglass plabic graph.'''
+        r"""
+        Constructs a HalfStrand with the given ID, owned by the provided HalfHourglass.
+
+        INPUT:
+
+        - `id` -- hashable, unique object
+
+        - `hourglass` -- HalfHourglass; the owning half hourglass. This HalfStrand will travel in the same direction.
+
+        - `twin` -- HalfStrand; this parameter should be left blank. It is used internally to automatically construct this strand's twin.
+
+        OUTPUT: HalfStrand; the constructed HalfStrand
+
+        EXAMPLES:
+
+        The HalfHourglass class automatically manages its strands; do not directly construct strands, as this example does.
+        
+            sage: hh = HalfHourglass('hh', None, None, 0)
+            sage: hs = HalfStrand('1', hh)
+            sage: hs.twin().id
+            '1_t'
+
+        .. WARNING::
+
+            Do not assign any value to the twin parameter of this constructor.
+
+            It is very unlikely you will need to directly construct HalfStrands; instead, use HalfHourglass's thicken(), thin(), and __init__() functions.
+        """
         super().__init__(id)
         self._hourglass = hourglass
         
         # the half strand representing movement in the opposite direction, between the same vertices
-        self._twin = HalfStrand(str(id) + "_t", hourglass.twin(), self) if twin is None else twin
+        self._twin = HalfStrand(str(id) + "_t", hourglass.twin() if hourglass is not None else None, self) if twin is None else twin
 
     def __repr__(self):
-        return "Strand " + str(self.get_index_in_hourglass()) + " (ID: " + str(self.id) + ") from " + str(self.v_from().id) + " to " + str(self.v_to().id)
+        r"""
+        Returns a String representation of this HalfStrand, providing its index, ID, and vertices.
+
+        OUTPUT: str
+
+        EXAMPLES:
+        
+            sage: ID.reset_id()
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh._half_strands_head.__repr__()
+            Strand 0 (ID: v1_v2_s0) from v1 to v2
+        """
+        return "HalfStrand " + str(self.get_index_in_hourglass()) + " (ID: " + str(self.id) + ") from " + ("None" if self.v_from() is None else str(self.v_from().id)) + " to " + ("None" if self.v_to() is None else str(self.v_to().id))
 
     def hourglass(self):
-        '''Returns the parent hourglass of this strand.'''
+        r"""
+        Returns the parent hourglass of this strand.
+
+        OUTPUT: HalfHourglass
+
+        EXAMPLES:
+
+            sage: hh = HalfHourglass('hh', None, None, 1)
+            sage: hh._half_strands_head.hourglass().id
+            hh
+        """
         return self._hourglass
 
     def v_to(self):
+        r"""
+        Returns the vertex this HalfStrand traverses to.
+
+        OUTPUT: Vertex
+        
+        EXAMPLES:
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh._half_strands_head.v_to().id
+            v2
+        """
         return self._hourglass.v_to()
+        
     def v_from(self):
+        r"""
+        Returns the vertex this HalfStrand traverses from.
+
+        OUTPUT: Vertex
+        
+        EXAMPLES:
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh._half_strands_head.v_from().id
+            v1
+        """
         return self._hourglass.v_from()
+        
     def left_face(self):
+        r"""
+        Returns the Face on the left of this HalfStrand.
+
+        OUTPUT: Face
+        
+        EXAMPLES:
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: face = Face('face', hh)
+            sage: hh._half_strands_head.left_face().id
+            face
+        """
         return self._hourglass.left_face()
+        
     def right_face(self):
+        r"""
+        Returns the Face on the left of this HalfStrand.
+
+        OUTPUT: Face
+        
+        EXAMPLES:    
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: face = Face('face', hh)
+            sage: hh._half_strands_head.left_face().id
+            face
+        """
         return self._hourglass.right_face()
 
     def get_last_strand_same_hourglass(self):
-        ''' Returns the last strand clockwise owned by the same parent hourglass.
-            Avoid using instead of HalfHourglass._half_strands_tail.'''
+        r"""
+        Returns the clockwise last strand owned by the same parent hourglass.
+
+        OUTPUT: HalfStrand
+
+        EXAMPLES:
+
+            sage: ID.reset_id()
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 5)
+            sage: hh._half_strands_head.get_last_strand_same_hourglass()
+            Strand 4 (ID: v1_v2_s4) from v1 to v2
+
+        .. WARNING::
+        
+           Avoid using. Instead, use hourglass()._half_strands_tail if possible.
+            
+        """
         for strand in self.cw_next().iterate_clockwise():
             if strand.hourglass() is not self.hourglass() or strand == self: return strand.cw_prev()
 
     def get_num_strands_same_hourglass(self):
-        '''Returns the number of strands owned by the same parent hourglass.'''
+        r"""
+        Returns the number of strands owned by the same parent hourglass.
+
+        OUTPUT: integer
+
+        EXAMPLES:
+        
+            sage: hh = HalfHourglass('hh', None, None, 6)
+            sage: hh._half_strands_head.get_num_strands_same_hourglass()
+            6
+
+        .. NOTE::
+
+            Internally calls hourglass().strand_count(). Use that instead if possible.
+        """
         return self.hourglass().strand_count()
 
     def get_index_in_hourglass(self):
