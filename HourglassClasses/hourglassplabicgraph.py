@@ -147,12 +147,11 @@ class HourglassPlabicGraph:
         assert self.order() == 0, "Cannot call construct_boundary on a non-empty graph."
 
         for i in range(0, n):
-            id = str(i)
-            self._boundary_vertices[id] = Vertex(id, r*math.sin((i+0.5)*2*math.pi/n), r*math.cos((i+0.5)*2*math.pi/n), filling if isinstance(filling, bool) else filling[i], True, id)
+            self._boundary_vertices[i] = Vertex(i, r*math.sin((i+0.5)*2*math.pi/n), r*math.cos((i+0.5)*2*math.pi/n), filling if isinstance(filling, bool) else filling[i], True, str(i))
 
         for i in range(0, n-1):
-            Vertex.create_hourglass_between(self._boundary_vertices[str(i)], self._boundary_vertices[str(i+1)], 0)
-        hh = Vertex.create_hourglass_between(self._boundary_vertices[str(n-1)], self._boundary_vertices[str(0)], 0)
+            Vertex.create_hourglass_between(self._boundary_vertices[i], self._boundary_vertices[i+1], 0)
+        hh = Vertex.create_hourglass_between(self._boundary_vertices[n-1], self._boundary_vertices[0], 0)
 
         inner_face = Face(ID.get_new_id("face"), hh)
         outer_face = Face(ID.get_new_id("face"), hh.twin())
@@ -197,11 +196,11 @@ class HourglassPlabicGraph:
         first_id = None
 
         for i in range(0, n):
-            v_id = ID.get_new_id('v')
-            self.create_vertex(v_id, r*math.sin((i+0.5)*2*math.pi/n), r*math.cos((i+0.5)*2*math.pi/n), not fillings[i], False, id)
+            v_id = i + n
+            self.create_vertex(v_id, r*math.sin((i+0.5)*2*math.pi/n), r*math.cos((i+0.5)*2*math.pi/n), not fillings[i], False, v_id)
 
             # Hourglass to boundary
-            self.create_hourglass_by_id(v_id, str(i), 1)
+            self.create_hourglass_by_id(v_id, i, 1)
             if first_id is None:
                 first_id = v_id
             else:

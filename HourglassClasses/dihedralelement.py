@@ -260,6 +260,10 @@ class DihedralElement:
             sage: d1.insert_cw_next(d2)
             sage: d1.get_cw_ith_element(-5) == d1
             True
+            
+        .. NOTE::
+
+            Runtime: O(n)
         """
         e = self
         while i > 0:
@@ -296,6 +300,10 @@ class DihedralElement:
             sage: d1.insert_ccw_next(d2)
             sage: d1.get_ccw_ith_element(-5) == d1
             True
+            
+        .. NOTE::
+
+            Runtime: O(n)
         """
         e = self
         while i > 0:
@@ -307,85 +315,93 @@ class DihedralElement:
     
     def left_turn(self):
         r"""
-            Returns the element representing taking a left turn from this element; 
-            that is, traveling in the direction of this element, then traversing clockwise
-            relative to this element's twin.
-    
-            OUTPUT: DihedralElement
-    
-            .. WARNING::
-    
-                Functionality related to twin is not implemented in the base class; this should
-                be implemented in derived class constructors.
-    
-            .. SEEALSO:
-    
-                :func:`twin`
+        Returns the element representing taking a left turn from this element; 
+        that is, traveling in the direction of this element, then traversing clockwise
+        relative to this element's twin.
+
+        OUTPUT: DihedralElement
+
+        .. WARNING::
+
+            Functionality related to twin is not implemented in the base class; this should
+            be implemented in derived class constructors.
+
+        .. SEEALSO:
+
+            :func:`twin`
         """
         return self.twin().cw_next()
 
     def right_turn(self):
         r"""
-            Returns the element representing taking a right turn from this element; 
-            that is, traveling in the direction of this element, then traversing counterclockwise
-            relative to this element's twin.
-    
-            OUTPUT: DihedralElement
-    
-            .. WARNING::
-    
-                Functionality related to twin is not implemented in the base class; this should
-                be implemented in derived class constructors.
-    
-            .. SEEALSO:
-    
-                :func:`twin`
+        Returns the element representing taking a right turn from this element; 
+        that is, traveling in the direction of this element, then traversing counterclockwise
+        relative to this element's twin.
+
+        OUTPUT: DihedralElement
+
+        .. WARNING::
+
+            Functionality related to twin is not implemented in the base class; this should
+            be implemented in derived class constructors.
+
+        .. SEEALSO:
+
+            :func:`twin`
         """
         return self.twin().ccw_next()
 
     def get_ith_left(self, i):
         r"""
-            Returns the element representing taking the ith left turn from this element; 
-            that is, traveling in the direction of this element, then traversing clockwise i times
-            relative to this element's twin.
-    
-            INPUT:
-    
-            - ``i`` -- positive integer; how far to turn left.  Assumed to be an integer `\geq 1`.
-    
-            OUTPUT: DihedralElement
-    
-            .. WARNING::
-    
-                Functionality related to twin is not implemented in the base class; this should
-                be implemented in derived class constructors.
-    
-            .. SEEALSO:
-    
-                :func:`twin`
+        Returns the element representing taking the ith left turn from this element; 
+        that is, traveling in the direction of this element, then traversing clockwise i times
+        relative to this element's twin.
+
+        INPUT:
+
+        - ``i`` -- positive integer; how far to turn left.  Assumed to be an integer `\geq 1`.
+
+        OUTPUT: DihedralElement
+        
+        .. NOTE::
+
+            Runtime: O(n)
+
+        .. WARNING::
+
+            Functionality related to twin is not implemented in the base class; this should
+            be implemented in derived class constructors.
+
+        .. SEEALSO:
+
+            :func:`twin`
         """
         return self.twin().get_cw_ith_element(i)
         
     def get_ith_right(self, i):
         r"""
-            Returns the element representing taking the ith right turn from this element; 
-            that is, traveling in the direction of this element, then traversing counterclockwise i times
-            relative to this element's twin.
-    
-            INPUT:
-    
-            - ``i`` -- positive integer; how far to turn right.  Assumed to be an integer `\geq 1`.
-    
-            OUTPUT: DihedralElement
-    
-            .. WARNING::
-    
-                Functionality related to twin is not implemented in the base class; this should
-                be implemented in derived class constructors.
-    
-            .. SEEALSO:
-    
-                :func:`twin`
+        Returns the element representing taking the ith right turn from this element; 
+        that is, traveling in the direction of this element, then traversing counterclockwise i times
+        relative to this element's twin.
+
+        INPUT:
+
+        - ``i`` -- positive integer; how far to turn right.  Assumed to be an integer `\geq 1`.
+
+        OUTPUT: DihedralElement
+        
+        .. NOTE::
+
+            Runtime: O(n)
+
+        .. WARNING::
+
+            Functionality related to twin is not implemented in the base class; this should
+            be implemented in derived class constructors.
+
+        .. SEEALSO:
+
+            :func:`twin`
         """
         return self.twin().get_ccw_ith_element(i)
 
@@ -393,39 +409,39 @@ class DihedralElement:
     
     def link_cw_next(self, element):
         r"""
-            Directly connects this element clockwise to element.
-    
-            INPUT:
-    
-            - `element` -- DihedralElement
-    
-            EXAMPLES:
-    
-            This example demonstrates how to combine two lists.
-    
-                sage: d1 = DihedralElement(1)
-                sage: d2 = DihedralElement(2)
-                sage: d3 = DihedralElement(3)
-                sage: d1.insert_cw_next(d2)
-                sage: d1.insert_cw_next(d3)
-                sage: e1 = DihedralElement(11)
-                sage: e2 = DihedralElement(12)
-                sage: e3 = DihedralElement(13)
-                sage: e1.insert_cw_next(e2)
-                sage: e1.insert_cw_next(e3)
-                sage: d1.link_cw_next(e1)
-                sage: e2.link_cw_next(d3)
-                sage: d1.get_elements_as_list() == [d1, e1, e3, e2, d3, d2]
-                True
-    
-            .. NOTE::
-    
-                This function is aliased by link_ccw_prev.
-    
-            .. WARNING::
-    
-                Use insert_cw_next if possible. This function may break lists if not used properly.
-                It is intended to be used internally, but may be useful outside.
+        Directly connects this element clockwise to element.
+
+        INPUT:
+
+        - `element` -- DihedralElement
+
+        EXAMPLES:
+
+        This example demonstrates how to combine two lists.
+
+            sage: d1 = DihedralElement(1)
+            sage: d2 = DihedralElement(2)
+            sage: d3 = DihedralElement(3)
+            sage: d1.insert_cw_next(d2)
+            sage: d1.insert_cw_next(d3)
+            sage: e1 = DihedralElement(11)
+            sage: e2 = DihedralElement(12)
+            sage: e3 = DihedralElement(13)
+            sage: e1.insert_cw_next(e2)
+            sage: e1.insert_cw_next(e3)
+            sage: d1.link_cw_next(e1)
+            sage: e2.link_cw_next(d3)
+            sage: d1.get_elements_as_list() == [d1, e1, e3, e2, d3, d2]
+            True
+
+        .. NOTE::
+
+            This function is aliased by link_ccw_prev.
+
+        .. WARNING::
+
+            Use insert_cw_next if possible. This function may break lists if not used properly.
+            It is intended to be used internally, but may be useful outside.
         """
         self._cw_next = element
         element._ccw_next = self
@@ -433,39 +449,39 @@ class DihedralElement:
 
     def link_ccw_next(self, element):
         r"""
-            Directly connects this element counterclockwise to element.
-    
-            INPUT:
-    
-            - `element` -- DihedralElement
-    
-            EXAMPLES:
-    
-            This example demonstrates how to combine two lists.
-    
-                sage: d1 = DihedralElement(1)
-                sage: d2 = DihedralElement(2)
-                sage: d3 = DihedralElement(3)
-                sage: d1.insert_cw_next(d2)
-                sage: d1.insert_cw_next(d3)
-                sage: e1 = DihedralElement(11)
-                sage: e2 = DihedralElement(12)
-                sage: e3 = DihedralElement(13)
-                sage: e1.insert_cw_next(e2)
-                sage: e1.insert_cw_next(e3)
-                sage: d3.link_ccw_next(e2)
-                sage: e1.link_ccw_next(d1)
-                sage: d1.get_elements_as_list() == [d1, e1, e3, e2, d3, d2]
-                True
-    
-            .. NOTE::
-    
-                This function is aliased by link_cw_prev.
-    
-            .. WARNING::
-    
-                Use insert_ccw_next if possible. This function may break lists if not used properly.
-                It is intended to be used internally, but may be useful outside.
+        Directly connects this element counterclockwise to element.
+
+        INPUT:
+
+        - `element` -- DihedralElement
+
+        EXAMPLES:
+
+        This example demonstrates how to combine two lists.
+
+            sage: d1 = DihedralElement(1)
+            sage: d2 = DihedralElement(2)
+            sage: d3 = DihedralElement(3)
+            sage: d1.insert_cw_next(d2)
+            sage: d1.insert_cw_next(d3)
+            sage: e1 = DihedralElement(11)
+            sage: e2 = DihedralElement(12)
+            sage: e3 = DihedralElement(13)
+            sage: e1.insert_cw_next(e2)
+            sage: e1.insert_cw_next(e3)
+            sage: d3.link_ccw_next(e2)
+            sage: e1.link_ccw_next(d1)
+            sage: d1.get_elements_as_list() == [d1, e1, e3, e2, d3, d2]
+            True
+
+        .. NOTE::
+
+            This function is aliased by link_cw_prev.
+
+        .. WARNING::
+
+            Use insert_ccw_next if possible. This function may break lists if not used properly.
+            It is intended to be used internally, but may be useful outside.
         """
         self._ccw_next = element
         element._cw_next = self

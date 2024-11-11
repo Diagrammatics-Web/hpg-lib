@@ -31,7 +31,6 @@ def all_tests():
     face_tests()
     hourglass_plabic_graph_tests()
     move_tests()
-    trip_tests()
     serialization_tests()
     reduced_tests()
 
@@ -352,17 +351,17 @@ def hourglass_plabic_graph_tests():
         assert v.boundary, "Vertex " + str(v.id) + " is not marked as a boundary vertex."
     assert len(HPG._faces) == 2, "HPG should have two faces. Instead, has " + str(len(HPG._faces)) + "."
 
+    ID.reset_id()
     HPG = HourglassPlabicGraph()
     HPG.construct_face(6, [1+(i%2) for i in range(0, 6)])
     assert len(HPG._boundary_vertices) == 6, "HPG should have been initialized with 6 boundary vertices. Instead, has " + str(len(HPG._boundary_vertices)) + "."
     assert len(HPG._inner_vertices) == 6, "HPG should have been initialized with 6 inner vertices. Instead, has " + str(len(HPG._inner_vertices)) + "."
     assert len(HPG._faces) == 8, "HPG should have eight faces. Instead, has " + str(len(HPG._faces)) + "."
-    assert str(HPG.get_trip_perms()) == "[['4', '3', '0', '5', '2', '1'], ['3', '4', '5', '0', '1', '2'], ['2', '5', '4', '1', '0', '3']]", "Issue with trip permutations. Should be [['4', '3', '0', '5', '2', '1'], ['3', '4', '5', '0', '1', '2'], ['2', '5', '4', '1', '0', '3']], instead are " + str(HPG.get_trip_perms()) + '.'
+    assert str(HPG.get_trip_perms()) == "[[4, 3, 0, 5, 2, 1], [3, 4, 5, 0, 1, 2], [2, 5, 4, 1, 0, 3]]", "Issue with trip permutations. Should be [[4, 3, 0, 5, 2, 1], [3, 4, 5, 0, 1, 2], [2, 5, 4, 1, 0, 3]], instead are " + str(HPG.get_trip_perms()) + '.'
 
     # adding vertices and hourglasses
 
     HPG = create_test_HPG()
-    #HPG = HourglassPlabicGraph.from_dict(Examples.example_ASM)
 
     '''
     print("Checking for proper face initialization.")
@@ -374,9 +373,9 @@ def hourglass_plabic_graph_tests():
     
     # removing vertices and hourglasses
 
-    HPG.remove_vertex_by_id("8")
-    HPG.remove_vertex_by_id("5")
-    HPG.remove_vertex_by_id("12")
+    HPG.remove_vertex_by_id(8)
+    HPG.remove_vertex_by_id(5)
+    HPG.remove_vertex_by_id(12)
 
     '''
     print("Testing vertex removal.")
@@ -385,14 +384,26 @@ def hourglass_plabic_graph_tests():
     
     HPG = create_test_HPG()
 
-    HPG.remove_hourglass_by_id("13", "10")
-    HPG.remove_hourglass_by_id("12", "9")
-    HPG.remove_hourglass_by_id("8", "1")
+    HPG.remove_hourglass_by_id(13, 10)
+    HPG.remove_hourglass_by_id(12, 9)
+    HPG.remove_hourglass_by_id(8, 1)
 
     '''
     print("Testing hourglass removal.")
     HPG.print_faces()
     '''
+    
+    # Trip tests
+    
+    ID.reset_id()
+    HPG = create_test_HPG()
+    
+    trip_perms1 = HPG.get_trip_perms()
+    assert trip_perms1 == [[1, 4, 3, 6, 5, 0, 7, 2], [3, 6, 5, 0, 7, 2, 1, 4], [5, 0, 7, 2, 1, 4, 3, 6]], "Trip permutations should be [[1, 4, 3, 6, 5, 0, 7, 2], [3, 6, 5, 0, 7, 2, 1, 4], [5, 0, 7, 2, 1, 4, 3, 6]]. Instead are " + str(trip_perms1) + "."
+    # Should be the same
+    HPG.square_move("face12")
+    trip_perms2 = HPG.get_trip_perms()
+    assert trip_perms1 == trip_perms2, "Trip permutations should be unchanged after performing a square move."
 
     print("HourglassPlabicGraph test complete.\n")
 
@@ -454,19 +465,6 @@ def move_tests():
     
     print("Move tests complete.\n")
     return plots
-
-def trip_tests():
-    print("Testing trips.")
-    ID.reset_id()
-    HPG = create_test_HPG()
-    trip_perms1 = HPG.get_trip_perms()
-    print("Calcualted:", trip_perms1)
-    print("Expected:   [['1', '4', '3', '6', '5', '0', '7', '2'], ['3', '6', '5', '0', '7', '2', '1', '4'], ['5', '0', '7', '2', '1', '4', '3', '6']]")
-    # Should be the same
-    HPG.square_move("face12")
-    trip_perms2 = HPG.get_trip_perms()
-    assert trip_perms1 == trip_perms2, "Trip permutations should be unchanged after performing a square move."
-    print("Trip tests complete.\n")
 
 def serialization_tests():
     print("Testing serialization.")
@@ -540,24 +538,24 @@ def create_test_HPG():
     while 8, 9, 10, and 11 are unfilled.
     '''
     HPG = HourglassPlabicGraph(8)
-    HPG.create_vertex("8",  5,  5, False )
-    HPG.create_vertex("9",  5, -5, False)
-    HPG.create_vertex("10", -5, -5, False )
-    HPG.create_vertex("11", -5,  5, False)
-    HPG.create_vertex("12", 2,  2, True)
-    HPG.create_vertex("13", -2,  -2, True)
-    HPG.create_hourglass_by_id("8", "12", 2)
-    HPG.create_hourglass_by_id("10", "13", 2)
-    HPG.create_hourglass_by_id("9", "12")
-    HPG.create_hourglass_by_id("9", "13")
-    HPG.create_hourglass_by_id("11", "12")
-    HPG.create_hourglass_by_id("11", "13")
-    HPG.create_hourglass_by_id("8", "0")
-    HPG.create_hourglass_by_id("8", "1")
-    HPG.create_hourglass_by_id("9", "2")
-    HPG.create_hourglass_by_id("9", "3")
-    HPG.create_hourglass_by_id("10", "4")
-    HPG.create_hourglass_by_id("10", "5")
-    HPG.create_hourglass_by_id("11", "6")
-    HPG.create_hourglass_by_id("11", "7")
+    HPG.create_vertex(8,  5,  5, False )
+    HPG.create_vertex(9,  5, -5, False)
+    HPG.create_vertex(10, -5, -5, False )
+    HPG.create_vertex(11, -5,  5, False)
+    HPG.create_vertex(12, 2,  2, True)
+    HPG.create_vertex(13, -2,  -2, True)
+    HPG.create_hourglass_by_id(8, 12, 2)
+    HPG.create_hourglass_by_id(10, 13, 2)
+    HPG.create_hourglass_by_id(9, 12)
+    HPG.create_hourglass_by_id(9, 13)
+    HPG.create_hourglass_by_id(11, 12)
+    HPG.create_hourglass_by_id(11, 13)
+    HPG.create_hourglass_by_id(8, 0)
+    HPG.create_hourglass_by_id(8, 1)
+    HPG.create_hourglass_by_id(9, 2)
+    HPG.create_hourglass_by_id(9, 3)
+    HPG.create_hourglass_by_id(10, 4)
+    HPG.create_hourglass_by_id(10, 5)
+    HPG.create_hourglass_by_id(11, 6)
+    HPG.create_hourglass_by_id(11, 7)
     return HPG

@@ -151,7 +151,8 @@ class HalfStrand(DihedralElement):
 
         OUTPUT: Face
         
-        EXAMPLES:    
+        EXAMPLES:   
+        
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
@@ -178,8 +179,7 @@ class HalfStrand(DihedralElement):
 
         .. WARNING::
         
-           Avoid using. Instead, use hourglass()._half_strands_tail if possible.
-            
+           Avoid using. Instead, use hourglass()._half_strands_tail if possible. Runtime: O(n)
         """
         for strand in self.cw_next().iterate_clockwise():
             if strand.hourglass() is not self.hourglass() or strand == self: return strand.cw_prev()
@@ -203,7 +203,27 @@ class HalfStrand(DihedralElement):
         return self.hourglass().strand_count()
 
     def get_index_in_hourglass(self):
-        '''Returns the index of this strand in its parent hourglass, starting at 0 from the hourglass's _half_strand_head.'''
+        r"""
+        Returns the index of this strand in its parent hourglass.
+        
+        Indexing starts at 0 from the hourglass's _half_strand_head and proceeds clockwise.
+
+        OUTPUT: integer
+
+        EXAMPLES:
+        
+            sage: hh = HalfHourglass('hh', None, None, 6)
+            sage: hh._half_strands_head.get_index_in_hourglass()
+            0
+            
+            sage: hh = HalfHourglass('hh', None, None, 6)
+            sage: hh._half_strands_head.get_cw_ith_element(3).get_index_in_hourglass()
+            3
+
+        .. NOTE::
+
+            Runtime: O(n)
+        """
         i = 0
         for s in self.hourglass().iterate_strands():
             if s is self:
@@ -211,17 +231,60 @@ class HalfStrand(DihedralElement):
             i += 1
 
     def get_ith_trip_turn(self, i):
+        r"""
+        Helper function returning the correct turn for trip i on this strand.
+
+        INTPUT:
+
+            - ``i`` -- positive integer; the trip number. Assumed to be an integer `\geq 1`.
+
+        OUTPUT: HalfStrand
+
+        .. SEEALSO::
+
+            :func:`get_trip`
+        """
         return self.get_ith_right(i) if self.v_to().filled else self.get_ith_left(i)
 
     def invert_ith_trip_turn(self, i):
+        r"""
+        Helper function returning the strand that turns onto this strand on trip i.
+
+        INTPUT:
+
+            - ``i`` -- positive integer; the trip number. Assumed to be an integer `\geq 1`.
+
+        OUTPUT: HalfStrand
+
+        .. SEEALSO::
+
+            :func:`get_trip`
+        """
         return self.get_cw_ith_element(i).twin() if self.v_from().filled else self.get_ccw_ith_element(i).twin()
 
     def get_trip(self, i, output='half_strands'):
-        ''' Traverses the graph to compute trip i and returns an array of all visited half strands or half hourglasses.
-            Can be called on any strand, even non-boundary strands; will find the entire trip regardless.
-            i: computes trip_i by taking the ith left at unfilled/ith right at filled
-            output: if output = 'half_strands', returns an array of HalfStrands. If output = 'half_hourglasses', returns HalfHourglasses.
-                    Otherwise, returns the ids of the HalfStrands.'''
+        r"""
+        Traverses the graph to compute trip i and returns an array of all visited elements.
+
+        A trip is computed by turning right at filled vertices and turning left at unfilled vertices. This process is 
+        repeated until the boundary is reached or an isolated trip is identified.
+        The ith trip specifies that the ith right/left is taken; that is, the ith strand counterclockwise/clockwise.
+        Can be called on any strand, even non-boundary strands. This function will find the entire trip regardless.
+
+        INPUT:
+        
+            - ``i`` -- positive integer; the trip number. Assumed to be an integer `\geq 1`.
+
+            - `output` -- String (default: 'half_strands'); The data type stored in the output array. If 'half_strands', returns the
+                encountered HalfStrands. If 'half_hourglasses', returns the encountered HalfHourglasses. Anything else will return
+                the strand IDs.
+            
+        OUTPUT: List; see `output` parameter for details
+
+        EXAMPLES: # TODO
+
+        
+        """
         trip_value = (lambda strand : strand) if output == 'half_strands' else (lambda strand : strand.hourglass()) if output == 'half_hourglasses' else (lambda strand : strand.id)
 
         visited = list()
