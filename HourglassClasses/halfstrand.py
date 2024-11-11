@@ -283,7 +283,13 @@ class HalfStrand(DihedralElement):
 
         EXAMPLES: # TODO
 
-        
+        .. NOTE::
+
+            This function runs slower if called on an internal strand as it will require additional overhead to detect isolated trips.
+
+            This function assumes a "properly formed" hourglass plabic graph.
+
+            Runtime: O(rn), where r is the valence of the graph.
         """
         trip_value = (lambda strand : strand) if output == 'half_strands' else (lambda strand : strand.hourglass()) if output == 'half_hourglasses' else (lambda strand : strand.id)
 
