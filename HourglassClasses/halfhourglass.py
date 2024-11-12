@@ -1,15 +1,71 @@
+r"""
+Represents one direction of an hourglass edge in an hourglass plabic graph.
+
+An edge is composed of strands, represented by a multiplicity, which can be traversed.
+
+AUTHORS:
+
+- Stefano L. Corno (2024-05-10): initial version
+
+"""
+
+# ****************************************************************************
+#       Copyright (C) 2024 Stefano Corno <stlecorno@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
+
 import math
 from .dihedralelement import DihedralElement
 from .halfstrand import HalfStrand
 from .idgenerator import ID
 
 class HalfHourglass(DihedralElement):
-    ''' Represents part of an edge from one vertex to another in an hourglass plabic graph.
-        When iterating over strands, the head strand is the most counterclockwise.'''
+    r"""
+    Represents movement on an edge from one vertex to another in an hourglass plabic graph.
+    """
     def __init__(self, id, v_from, v_to, multiplicity, label='', twin=None):
-        ''' id: an object, assumed unique, should be hashable
-            multiplicity: number of strands between from and to. if 0, this is an edge boundary
-            label: an object'''
+        r"""
+        Constructs a HalfHourglass with the given ID, between vertices v_from and v_to, and constructs `multiplicity` strands.
+        Also contsructs its own twin.
+
+        INPUT:
+    
+        - `id` -- hashable, unique object
+        
+        - `multiplicity` -- nonnegative integer; number of strands between from and to. if 0, this is an edge boundary. Assumed to be an integer `\geq 1`.
+        
+        - `label` -- object
+
+        - `twin` -- HalfHourglass (default: None); this parameter should be left blank. It is used internally to automatically construct this strand's twin.
+
+        OUTPUT: HalfHourglass; the constructed HalfHourglas
+
+        EXAMPLES:
+
+        The HalfHourglass constructor automatically constructs its own twin.
+
+            sage: hh = HalfHourglass('hh', None, None, 0)
+            sage: hh.twin().id
+            'hh_t'
+
+        The HalfHourglass constructor automatically constructs HalfStrands based on `multiplicity`.
+
+            sage: ID.reset_id()
+            sage: hh = HalfHourglass('hh', None, None, 3)
+            sage: hh._half_strands_head.id
+            'hh_s0'
+
+        .. WARNING::
+
+            Do not assign any value to the twin parameter of this constructor.
+
+            It is very unlikely you will need to directly construct HalfHourglasses; instead, use Vertex's create_hourglass_between function.
+        """
         super().__init__(id)
         self._v_from = v_from
         self._v_to = v_to
@@ -44,11 +100,69 @@ class HalfHourglass(DihedralElement):
         self._right_face = None
 
     def __repr__(self):
-        return "HalfHourglass between " + str(self.v_from().id) + " to " + str(self.v_to().id) + " with multiplicity " + str(self.multiplicity())
+        r"""
+        Returns a String representation of this HalfHourglass, providing its ID, vertices, and multiplicity.
+
+        OUTPUT: str
+
+        EXAMPLES:
+        
+            sage: ID.reset_id()
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh.__repr__()
+            'HalfHourglass between v1 to v2 with multiplicity 1'
+        """
+        return "HalfHourglass " + " (ID: " + str(self.id) + ") from " + ("None" if self.v_from() is None else str(self.v_from().id)) + " to " + ("None" if self.v_to() is None else str(self.v_to().id)) + " with multiplicity " + str(self.multiplicity())
 
     # Insert/remove overrides. These must be overridden as strands must be linked up as well.
 
     def insert_cw_next(self, element):
+        r"""
+        Inserts element into the list as the next clockwise element, including linking its HalfStrands.
+        This function is an override of the DihedralElement implementation.
+
+        INPUT:
+
+        - `element` -- HalfHourglass; the element to insert.
+
+        EXAMPLES:
+        
+        This example constructs a list of three HalfHourglasses using insert_cw_next.
+
+            sage: hh1 = HalfHourglass('hh1', None, None, 1)
+            sage: hh2 = HalfHourglass('hh2', None, None, 1)
+            sage: hh3 = HalfHourglass('hh3', None, None, 1)
+            sage: hh1.insert_cw_next(hh2)
+            sage: hh1.insert_cw_next(hh3)
+            sage: hh1.get_elements_as_list() == [hh1, hh3, hh2]
+            True
+
+        This example demonstrates how HalfStrands are connected.
+
+            sage: ID.reset_id()
+            sage: hh1 = HalfHourglass('hh1', None, None, 1)
+            sage: hh2 = HalfHourglass('hh2', None, None, 1)
+            sage: hh1.insert_cw_next(hh2)
+            sage: [s.id for s in hh1._half_strands_head]
+            ['hh1_s0', 'hh2_s1']
+
+        This example demonstrates how inserting HalfHourglasses with no HalfStrands is handled properly.
+
+            sage: ID.reset_id()
+            sage: hh1 = HalfHourglass('hh1', None, None, 1)
+            sage: hh2 = HalfHourglass('hh2', None, None, 1)
+            sage: hh3 = HalfHourglass('hh3', None, None, 0)
+            sage: hh1.insert_cw_next(hh2)
+            sage: hh1.insert_cw_next(hh3)
+            sage: [s.id for s in hh1._half_strands_head]
+            ['hh1_s0', 'hh2_s1']
+
+        .. NOTE::
+
+            This function is aliased by insert_ccw_prev and append_ccw.
+        """
         super().insert_cw_next(element)
         if element._half_strands_head is None: return
 
@@ -64,6 +178,50 @@ class HalfHourglass(DihedralElement):
     append_ccw = insert_cw_next # alias
 
     def insert_ccw_next(self, element):
+        r"""
+        Inserts element into the list as the next counterclockwise element, including linking its HalfStrands.
+        This function is an override of the DihedralElement implementation.
+
+        INPUT:
+
+        - `element` -- HalfHourglass; the element to insert.
+
+        EXAMPLES:
+        
+        This example constructs a list of three HalfHourglasses using insert_ccw_next.
+
+            sage: hh1 = HalfHourglass('hh1', None, None, 1)
+            sage: hh2 = HalfHourglass('hh2', None, None, 1)
+            sage: hh3 = HalfHourglass('hh3', None, None, 1)
+            sage: hh1.insert_ccw_next(hh2)
+            sage: hh1.insert_ccw_next(hh3)
+            sage: hh1.get_elements_as_list() == [hh1, hh2, hh3]
+            True
+
+        This example demonstrates how HalfStrands are connected.
+
+            sage: ID.reset_id()
+            sage: hh1 = HalfHourglass('hh1', None, None, 1)
+            sage: hh2 = HalfHourglass('hh2', None, None, 1)
+            sage: hh1.insert_ccw_next(hh2)
+            sage: [s.id for s in hh1._half_strands_head]
+            ['hh1_s0', 'hh2_s1']
+
+        This example demonstrates how inserting HalfHourglasses with no HalfStrands is handled properly.
+
+            sage: ID.reset_id()
+            sage: hh1 = HalfHourglass('hh1', None, None, 1)
+            sage: hh2 = HalfHourglass('hh2', None, None, 1)
+            sage: hh3 = HalfHourglass('hh3', None, None, 0)
+            sage: hh1.insert_ccw_next(hh2)
+            sage: hh1.insert_ccw_next(hh3)
+            sage: [s.id for s in hh1._half_strands_head]
+            ['hh1_s0', 'hh2_s1']
+
+        .. NOTE::
+
+            This function is aliased by insert_cw_prev and append_cw.
+        """
         super().insert_ccw_next(element)
         if element._half_strands_head is None: return
 
@@ -79,6 +237,32 @@ class HalfHourglass(DihedralElement):
     append_cw = insert_ccw_next # alias
 
     def remove(self):
+        r"""
+        Removes this HalfHourglass from its list, including unlinking its HalfStrands.
+        The element will also become its own list to facilitate reuse.
+        This function is an override of the DihedralElement implementation.
+
+        EXAMPLES:
+
+            sage: hh1 = HalfHourglass('hh1', None, None, 1)
+            sage: hh2 = HalfHourglass('hh2', None, None, 1)
+            sage: hh3 = HalfHourglass('hh3', None, None, 1)
+            sage: hh1.insert_ccw_next(hh2)
+            sage: hh1.insert_ccw_next(hh3)
+            sage: hh2.remove()
+            sage: [hh for hh in hh1] == [hh1, hh3]
+
+        This example demonstrates how HalfStrands are automatically relinked upon removal.
+
+            sage: hh1 = HalfHourglass('hh1', None, None, 1)
+            sage: hh2 = HalfHourglass('hh2', None, None, 1)
+            sage: hh3 = HalfHourglass('hh3', None, None, 1)
+            sage: hh1.insert_ccw_next(hh2)
+            sage: hh1.insert_ccw_next(hh3)
+            sage: hh2.remove()
+            sage: hh1._half_strands_head.get_num_elements()
+            2
+        """
         if self._half_strands_head is not None:
             self._half_strands_head.cw_prev().link_cw_next(self._half_strands_tail.cw_next())
             self._half_strands_head.link_cw_prev(self._half_strands_tail)
@@ -87,49 +271,59 @@ class HalfHourglass(DihedralElement):
     # Strand modification and accessor functions
     
     def add_strand(self):
-        ''' Adds a strand to itself and its twin in the last position clockwise.
-            Will not work on phantom edges.'''
+        r"""
+        Adds a strand to itself and its twin in the last position clockwise.
+        Will not work on phantom edges (edges with no strands).
+        
+        """
         if (self.is_phantom()): raise RuntimeError("Cannot add a strand to a phantom/boundary edge.")
             
         new_strand = HalfStrand(ID.get_new_id(str(id) + "_"), self)
         self._half_strands_tail.insert_cw_next(new_strand)
         self._half_strands_tail.twin().insert_cw_next(new_strand.twin())
         self._half_strands_tail = new_strand
-        self._twin._half_strands_tail = new_strand.twin()
+        self.twin()._half_strands_tail = new_strand.twin()
 
         self._multiplicity += 1
-        self._twin._multiplicity += 1
+        self.twin()._multiplicity += 1
     thicken = add_strand # alias
 
     def remove_strand(self):
-        ''' Removes the clockwise last strand for itself and its twin.
-            Will not work on phantom edges or on edges with only 1 strand left.'''
+        r"""
+        Removes the clockwise last strand for itself and its twin.
+        Will not work on phantom edges or on edges with only 1 strand left.
+        """
         if (self.strand_count() <= 1): 
             if self.is_phantom(): raise RuntimeError("Cannot remove a strand from a phantom/boundary edge.") 
             else: raise RuntimeError("Cannot remove a strand from an edge with only one strand.")
             
         self._half_strands_tail = self._half_strands_tail.cw_prev()
-        self._twin._half_strands_tail = self._twin._half_strands_tail.cw_prev()
+        self.twin()._half_strands_tail = self.twin()._half_strands_tail.cw_prev()
         self._half_strands_tail.cw_next().remove()
-        self._twin._half_strands_tail.cw_next().remove()
+        self.twin()._half_strands_tail.cw_next().remove()
         
         self._multiplicity -= 1
-        self._twin._multiplicity -= 1
+        self.twin()._multiplicity -= 1
     thin = remove_strand # alias
 
     def _get_first_strand(self):
-        ''' Returns the first strand clockwise around v_from relative to this hourglass.
-            Typically will return _half_strands_head, unless its multiplicity is 0.'''
-        return self._half_strands_head if self._half_strands_head is not None or self._v_from.total_degree() == 0 else self._cw_next._get_first_strand()
+        r"""
+        Returns the first strand clockwise around v_from relative to this hourglass.
+        Typically will return _half_strands_head, unless its multiplicity is 0.
+        """
+        return self._half_strands_head if self._half_strands_head is not None or self.v_from().total_degree() == 0 else self.cw_next()._get_first_strand()
 
     # Accessors
 
     def v_from(self):
         return self._v_from
+
     def v_to(self):
         return self._v_to
+
     def left_face(self):
         return self._left_face
+
     def right_face(self):
         return self._right_face
 
@@ -155,7 +349,7 @@ class HalfHourglass(DihedralElement):
     def get_angle(self):
         ''' Returns the angle between the vector from v_from to v_to and the x-axis.
             Returned value is between 0 and 2pi.'''
-        angle = math.atan2(self._v_to.y-self._v_from.y, self._v_to.x-self._v_from.x)
+        angle = math.atan2(self.v_to().y - self.v_from().y, self.v_to().x - self.v_from().x)
         if angle < 0:
             angle += 2 * math.pi
         return angle

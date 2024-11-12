@@ -32,7 +32,7 @@ class HalfStrand(DihedralElement):
     
     def __init__(self, id, hourglass, twin=None):
         r"""
-        Constructs a HalfStrand with the given ID, owned by the provided HalfHourglass.
+        Constructs a HalfStrand with the given ID, owned by the provided HalfHourglass, and its twin.
 
         INPUT:
 
@@ -40,7 +40,7 @@ class HalfStrand(DihedralElement):
 
         - `hourglass` -- HalfHourglass; the owning half hourglass. This HalfStrand will travel in the same direction.
 
-        - `twin` -- HalfStrand; this parameter should be left blank. It is used internally to automatically construct this strand's twin.
+        - `twin` -- HalfStrand (default: None); this parameter should be left blank. It is used internally to automatically construct this strand's twin.
 
         OUTPUT: HalfStrand; the constructed HalfStrand
 
@@ -78,7 +78,7 @@ class HalfStrand(DihedralElement):
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
             sage: hh._half_strands_head.__repr__()
-            Strand 0 (ID: v1_v2_s0) from v1 to v2
+            'Strand 0 (ID: v1_v2_s0) from v1 to v2'
         """
         return "HalfStrand " + str(self.get_index_in_hourglass()) + " (ID: " + str(self.id) + ") from " + ("None" if self.v_from() is None else str(self.v_from().id)) + " to " + ("None" if self.v_to() is None else str(self.v_to().id))
 
@@ -92,7 +92,7 @@ class HalfStrand(DihedralElement):
 
             sage: hh = HalfHourglass('hh', None, None, 1)
             sage: hh._half_strands_head.hourglass().id
-            hh
+            'hh'
         """
         return self._hourglass
 
@@ -108,7 +108,7 @@ class HalfStrand(DihedralElement):
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
             sage: hh._half_strands_head.v_to().id
-            v2
+            'v2'
         """
         return self._hourglass.v_to()
         
@@ -124,7 +124,7 @@ class HalfStrand(DihedralElement):
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
             sage: hh._half_strands_head.v_from().id
-            v1
+            'v1'
         """
         return self._hourglass.v_from()
         
@@ -141,7 +141,7 @@ class HalfStrand(DihedralElement):
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
             sage: face = Face('face', hh)
             sage: hh._half_strands_head.left_face().id
-            face
+            'face'
         """
         return self._hourglass.left_face()
         
@@ -158,7 +158,7 @@ class HalfStrand(DihedralElement):
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
             sage: face = Face('face', hh)
             sage: hh._half_strands_head.left_face().id
-            face
+            'face'
         """
         return self._hourglass.right_face()
 
@@ -175,7 +175,7 @@ class HalfStrand(DihedralElement):
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 5)
             sage: hh._half_strands_head.get_last_strand_same_hourglass()
-            Strand 4 (ID: v1_v2_s4) from v1 to v2
+            'Strand 4 (ID: v1_v2_s4) from v1 to v2'
 
         .. WARNING::
         
