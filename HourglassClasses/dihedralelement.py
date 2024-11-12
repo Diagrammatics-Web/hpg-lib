@@ -28,7 +28,7 @@ class DihedralElement:
     twin must be set and managed by the inherited class (see :func: DihedralElement.twin()).
     Acts as a circular, doubly linked list where each element links to another such list.
     """
-    
+
     def __init__(self, id):
         r"""
         Constructs a DihedralElement with the given ID.
@@ -49,7 +49,7 @@ class DihedralElement:
         self._ccw_next = self
 
     # List modification functions
-    
+
     def insert_cw_next(self, element):
         r"""
         Inserts element into the list as the next clockwise element.
@@ -59,7 +59,7 @@ class DihedralElement:
         - `element` -- DihedralElement; the element to insert.
 
         EXAMPLES:
-        
+
         This example constructs a list of three elements using insert_cw_next.
 
             sage: d1 = DihedralElement(1)
@@ -147,29 +147,29 @@ class DihedralElement:
         self._ccw_next = self
 
     # Accessor functions
-    
+
     def cw_next(self):
         r"""
         Returns the element clockwise from this one.
-    
+
         OUTPUT: DihedralElement; the element clockwise from this one.
-    
-        EXAMPLES: 
-    
+
+        EXAMPLES:
+
         This example constructs a list of two elements.
-        
+
             sage: d1 = DihedralElement(1)
             sage: d2 = DihedralElement(2)
             sage: d1.insert_cw_next(d2)
             sage: d1.cw_next() == d2
             True
-    
+
         .. NOTE::
-    
+
             This function is aliased by ccw_prev and ccw_last.
-    
+
         TESTS::
-    
+
             sage: d1 = DihedralElement(1)
             sage: d1.cw_next() == d1
             True
@@ -181,25 +181,25 @@ class DihedralElement:
     def ccw_next(self):
         r"""
         Returns the element counterclockwise from this one.
-    
+
         OUTPUT: DihedralElement; the element counterclockwise from this one.
-    
-        EXAMPLES: 
-    
+
+        EXAMPLES:
+
         This example constructs a list of two elements.
-        
+
             sage: d1 = DihedralElement(1)
             sage: d2 = DihedralElement(2)
             sage: d1.insert_cw_next(d2)
             sage: d1.ccw_next() == d2
             True
-    
+
         .. NOTE::
-    
+
             This function is aliased by cw_prev and cw_last.
-    
+
         TESTS::
-    
+
             sage: d1 = DihedralElement(1)
             sage: d1.ccw_next() == d1
             True
@@ -216,7 +216,7 @@ class DihedralElement:
 
         .. NOTE::
 
-            ``d1.twin() == d2`` does not guarantee ``d1.cw_next() == d2.ccw_next()`` or 
+            ``d1.twin() == d2`` does not guarantee ``d1.cw_next() == d2.ccw_next()`` or
             ``d1.ccw_next() == d2.cw_next()``; in fact, this is typically not the case,
             depending on the implementation.
 
@@ -230,13 +230,13 @@ class DihedralElement:
             :meth:halfhourglass.__init__
         """
         return self._twin
-        
+
     def get_cw_ith_element(self, i):
         r"""
         Returns the element i elements clockwise of this one.
 
         INPUT:
-        
+
         - ``i`` -- positive integer; how many elements to iterate. Assumed to be an integer `\geq 1`.
 
         OUTPUT: DihedralElement
@@ -260,7 +260,7 @@ class DihedralElement:
             sage: d1.insert_cw_next(d2)
             sage: d1.get_cw_ith_element(-5) == d1
             True
-            
+
         .. NOTE::
 
             Runtime: O(n)
@@ -271,12 +271,12 @@ class DihedralElement:
             i -= 1
         return e
 
-    def get_ccw_ith_element(self, i):        
+    def get_ccw_ith_element(self, i):
         r"""
         Returns the element i elements counterclockwise of this one.
 
         INPUT:
-        
+
         - ``i`` -- positive integer; how many elements to iterate. Assumed to be an integer `\geq 1`.
 
         OUTPUT: DihedralElement
@@ -300,7 +300,7 @@ class DihedralElement:
             sage: d1.insert_ccw_next(d2)
             sage: d1.get_ccw_ith_element(-5) == d1
             True
-            
+
         .. NOTE::
 
             Runtime: O(n)
@@ -312,10 +312,10 @@ class DihedralElement:
         return e
 
     # Turn functions
-    
+
     def left_turn(self):
         r"""
-        Returns the element representing taking a left turn from this element; 
+        Returns the element representing taking a left turn from this element;
         that is, traveling in the direction of this element, then traversing clockwise
         relative to this element's twin.
 
@@ -334,7 +334,7 @@ class DihedralElement:
 
     def right_turn(self):
         r"""
-        Returns the element representing taking a right turn from this element; 
+        Returns the element representing taking a right turn from this element;
         that is, traveling in the direction of this element, then traversing counterclockwise
         relative to this element's twin.
 
@@ -353,7 +353,7 @@ class DihedralElement:
 
     def get_ith_left(self, i):
         r"""
-        Returns the element representing taking the ith left turn from this element; 
+        Returns the element representing taking the ith left turn from this element;
         that is, traveling in the direction of this element, then traversing clockwise i times
         relative to this element's twin.
 
@@ -362,7 +362,7 @@ class DihedralElement:
         - ``i`` -- positive integer; how far to turn left.  Assumed to be an integer `\geq 1`.
 
         OUTPUT: DihedralElement
-        
+
         .. NOTE::
 
             Runtime: O(n)
@@ -377,10 +377,10 @@ class DihedralElement:
             :func:`twin`
         """
         return self.twin().get_cw_ith_element(i)
-        
+
     def get_ith_right(self, i):
         r"""
-        Returns the element representing taking the ith right turn from this element; 
+        Returns the element representing taking the ith right turn from this element;
         that is, traveling in the direction of this element, then traversing counterclockwise i times
         relative to this element's twin.
 
@@ -389,7 +389,7 @@ class DihedralElement:
         - ``i`` -- positive integer; how far to turn right.  Assumed to be an integer `\geq 1`.
 
         OUTPUT: DihedralElement
-        
+
         .. NOTE::
 
             Runtime: O(n)
@@ -406,7 +406,7 @@ class DihedralElement:
         return self.twin().get_ccw_ith_element(i)
 
     # Directly connects two elements. Use insert functions instead if possible.
-    
+
     def link_cw_next(self, element):
         r"""
         Directly connects this element clockwise to element.
@@ -504,7 +504,7 @@ class DihedralElement:
             1
 
         Used on a three-element list.
-        
+
             sage: d1 = DihedralElement(1)
             sage: d2 = DihedralElement(2)
             sage: d3 = DihedralElement(3)
@@ -522,7 +522,7 @@ class DihedralElement:
         Returns the elements in the linked list in a python list.
 
         INPUT:
-        
+
         - `clockwise` -- boolean (default: `True`); If true, the list will be in clockwise order. Otherwise it will be in counterclockwise order.
 
         OUTPUT: DihedralElement list
@@ -536,14 +536,14 @@ class DihedralElement:
             True
 
         Used on a three-element list.
-        
+
             sage: d1 = DihedralElement(1)
             sage: d2 = DihedralElement(2)
             sage: d3 = DihedralElement(3)
             sage: d1.insert_cw_next(d2)
             sage: d1.insert_cw_next(d3)
             sage: d2.get_elements_as_list(False) == [d2, d3, d1]
-            True            
+            True
         """
         if clockwise: return [element for element in self.iterate_clockwise()]
         else: [element for element in self.iterate_counterclockwise()]
@@ -557,7 +557,7 @@ class DihedralElement:
         EXAMPLES:
 
         Used on a three-element list.
-        
+
             sage: d1 = DihedralElement(1)
             sage: d2 = DihedralElement(2)
             sage: d3 = DihedralElement(3)
@@ -571,7 +571,7 @@ class DihedralElement:
             Use iterate_clockwise if the direction of iteration is important to indicate for legibility.
         """
         return _DihedralIterator(self, True)
-    
+
     def iterate_clockwise(self): # for specificity, if it's important
         r"""
         Iterates over the elements in the linked list clockwise.
@@ -581,7 +581,7 @@ class DihedralElement:
         EXAMPLES:
 
         Used on a three-element list.
-        
+
             sage: d1 = DihedralElement(1)
             sage: d2 = DihedralElement(2)
             sage: d3 = DihedralElement(3)
@@ -601,7 +601,7 @@ class DihedralElement:
         EXAMPLES:
 
         Used on a three-element list.
-        
+
             sage: d1 = DihedralElement(1)
             sage: d2 = DihedralElement(2)
             sage: d3 = DihedralElement(3)
@@ -617,21 +617,21 @@ class _DihedralIterator:
     Internal class for iterating over dihedral elements. Iteration can be specified to occur in clockwise or counterclockwise order.
     Modification of the list while iterating can cause errors with iteration.
     """
-    def __init__(self, head, clockwise): 
+    def __init__(self, head, clockwise):
         self.head = head
         self.iter = head
         self.begin = False
         self.clockwise = clockwise
-        
+
     def __iter__(self):
         return self
-        
+
     def __next__(self):
         if self.iter is self.head:
             if self.begin: raise StopIteration
             else: self.begin = True
-                
+
         old = self.iter
         self.iter = self.iter.cw_next() if self.clockwise else self.iter.ccw_next()
         return old
-        
+

@@ -29,7 +29,7 @@ class HalfStrand(DihedralElement):
     violating these assumptions may lead to crashes or infinite loops. HalfStrands should not
     typically be instantiated on their own, and are instead managed by higher level classes.
     """
-    
+
     def __init__(self, id, hourglass, twin=None):
         r"""
         Constructs a HalfStrand with the given ID, owned by the provided HalfHourglass, and its twin.
@@ -47,7 +47,7 @@ class HalfStrand(DihedralElement):
         EXAMPLES:
 
         The HalfHourglass class automatically manages its strands; do not directly construct strands, as this example does.
-        
+
             sage: hh = HalfHourglass('hh', None, None, 0)
             sage: hs = HalfStrand('1', hh)
             sage: hs.twin().id
@@ -61,7 +61,7 @@ class HalfStrand(DihedralElement):
         """
         super().__init__(id)
         self._hourglass = hourglass
-        
+
         # the half strand representing movement in the opposite direction, between the same vertices
         self._twin = HalfStrand(str(id) + "_t", hourglass.twin() if hourglass is not None else None, self) if twin is None else twin
 
@@ -72,7 +72,7 @@ class HalfStrand(DihedralElement):
         OUTPUT: str
 
         EXAMPLES:
-        
+
             sage: ID.reset_id()
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 0, 1, True)
@@ -95,15 +95,15 @@ class HalfStrand(DihedralElement):
             'hh'
         """
         return self._hourglass
-        
+
     def v_from(self):
         r"""
         Returns the vertex this HalfStrand traverses from.
 
         OUTPUT: Vertex
-        
+
         EXAMPLES:
-        
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
@@ -117,9 +117,9 @@ class HalfStrand(DihedralElement):
         Returns the vertex this HalfStrand traverses to.
 
         OUTPUT: Vertex
-        
+
         EXAMPLES:
-        
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
@@ -127,15 +127,15 @@ class HalfStrand(DihedralElement):
             'v2'
         """
         return self._hourglass.v_to()
-        
+
     def left_face(self):
         r"""
         Returns the Face on the left of this HalfStrand.
 
         OUTPUT: Face
-        
+
         EXAMPLES:
-        
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
@@ -144,15 +144,15 @@ class HalfStrand(DihedralElement):
             'face'
         """
         return self._hourglass.left_face()
-        
+
     def right_face(self):
         r"""
         Returns the Face on the left of this HalfStrand.
 
         OUTPUT: Face
-        
-        EXAMPLES:   
-        
+
+        EXAMPLES:
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
@@ -178,7 +178,7 @@ class HalfStrand(DihedralElement):
             'Strand 4 (ID: v1_v2_s4) from v1 to v2'
 
         .. WARNING::
-        
+
            Avoid using. Instead, use hourglass()._half_strands_tail if possible. Runtime: O(n)
         """
         for strand in self.cw_next().iterate_clockwise():
@@ -191,7 +191,7 @@ class HalfStrand(DihedralElement):
         OUTPUT: integer
 
         EXAMPLES:
-        
+
             sage: hh = HalfHourglass('hh', None, None, 6)
             sage: hh._half_strands_head.get_num_strands_same_hourglass()
             6
@@ -205,17 +205,17 @@ class HalfStrand(DihedralElement):
     def get_index_in_hourglass(self):
         r"""
         Returns the index of this strand in its parent hourglass.
-        
+
         Indexing starts at 0 from the hourglass's _half_strand_head and proceeds clockwise.
 
         OUTPUT: integer
 
         EXAMPLES:
-        
+
             sage: hh = HalfHourglass('hh', None, None, 6)
             sage: hh._half_strands_head.get_index_in_hourglass()
             0
-            
+
             sage: hh = HalfHourglass('hh', None, None, 6)
             sage: hh._half_strands_head.get_cw_ith_element(3).get_index_in_hourglass()
             3
@@ -266,19 +266,19 @@ class HalfStrand(DihedralElement):
         r"""
         Traverses the graph to compute trip i and returns an array of all visited elements.
 
-        A trip is computed by turning right at filled vertices and turning left at unfilled vertices. This process is 
+        A trip is computed by turning right at filled vertices and turning left at unfilled vertices. This process is
         repeated until the boundary is reached or an isolated trip is identified.
         The ith trip specifies that the ith right/left is taken; that is, the ith strand counterclockwise/clockwise.
         Can be called on any strand, even non-boundary strands. This function will find the entire trip regardless.
 
         INPUT:
-        
+
             - ``i`` -- positive integer; the trip number. Assumed to be an integer `\geq 1`.
 
             - `output` -- String (default: 'half_strands'); The data type stored in the output array. If 'half_strands', returns the
                 encountered HalfStrands. If 'half_hourglasses', returns the encountered HalfHourglasses. Anything else will return
                 the strand IDs.
-            
+
         OUTPUT: List; see `output` parameter for details
 
         EXAMPLES: # TODO
@@ -301,7 +301,7 @@ class HalfStrand(DihedralElement):
         is_valid = (lambda strand : not strand.v_to().boundary) if self.v_from().boundary else (lambda strand : not strand.v_to().boundary and strand not in visited_set)
         # Only add strand to visited_set if we don't start on the boundary. Note that the second lambda returns a tuple of (None, None) while still executing both functions.
         add_data = (lambda strand : visited.append(trip_value(strand))) if self.v_from().boundary else (lambda strand: (visited.append(trip_value(strand)), visited_set.add(strand)))
-        
+
         strand = self
         while is_valid(strand):
             add_data(strand)
@@ -315,14 +315,14 @@ class HalfStrand(DihedralElement):
 
         # We may need to find the other direction of the trip if we didn't start on the boundary.
         if (not self.v_from().boundary):
-            
+
             strand = self.invert_ith_trip_turn(i)
             prepend_visited = [trip_value(strand)]
-            
+
             while not strand.v_from().boundary:
                 strand = strand.invert_ith_trip_turn(i)
                 prepend_visited.append(trip_value(strand))
-            
+
             prepend_visited.reverse()
             visited = prepend_visited + visited
         return visited

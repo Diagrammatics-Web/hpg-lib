@@ -50,15 +50,15 @@ class Vertex:
         return hh
 
     def _insert_hourglass(self, hh):
-        ''' Inserts a half hourglass into the hourglass list. 
+        ''' Inserts a half hourglass into the hourglass list.
             Maintains the list with the first angle being the one with the smallest angle ccw from the x-axis.'''
         # empty list case
-        if self._half_hourglasses_head is None: 
+        if self._half_hourglasses_head is None:
             self._half_hourglasses_head = hh
             return
 
         self._reset_head()
-        
+
         # find first edge with greater angle, then insert_cw_next
         hh_angle = hh.get_angle()
         for iter_hh in self:
@@ -76,7 +76,7 @@ class Vertex:
         v2._remove_hourglass(hh.twin())
 
         return hh
-    
+
     def _remove_hourglass(self, hh):
         "Safely removes the provided hourglass from this vertex's hourglass list. Does not affect its twin."
         # assert hh.v_from() is self, "Half hourglass " + str(hh.id) + " does not belong to this vertex."
@@ -93,7 +93,7 @@ class Vertex:
         for hh in self:
             hh.v_to()._remove_hourglass(hh.twin())
         self._half_hourglasses_head = None # this may not be memory-safe, depending on python's garbage collection
-    
+
     def get_hourglass_to(self, v_to):
         '''Returns the half hourglass from this vertex to v_to.'''
         for hh in self:
@@ -107,7 +107,7 @@ class Vertex:
                     Otherwise, returns the ids of the HalfStrands.'''
         # assert self.boundary, "Vertex " + str(self.id) + " should be on the boundary." # Not necessarily! Revise this when integrating with analyzer
         if self.total_degree() != 1: raise NotImplementedError("Fluctuating case not yet implemented for HPG trips.")
-        
+
         # find the hourglass to the graph interior
         hh = self._half_hourglasses_head
         while hh.is_boundary(): hh = hh.cw_next()
@@ -117,11 +117,11 @@ class Vertex:
     def get_hourglasses_as_list(self):
         '''Returns all hourglasses in a list.'''
         return self._half_hourglasses_head.get_elements_as_list()
-                
+
     def get_neighbors(self):
         '''Returns all adjacent vertices in a list.'''
         return [hh.v_to() for hh in self]
-    
+
     def total_degree(self):
         '''Returns the number of strands around this vertex.'''
         if (self._half_hourglasses_head is None): return 0
@@ -144,7 +144,7 @@ class Vertex:
         if (hh1.v_to().filled and hh2.v_to().filled and not self.filled) or (not hh1.v_to().filled and not hh2.v_to().filled and self.filled):
             return false
         return true
-    
+
     def contract(self):
         hh1 = self._half_hourglasses_head
         hh2 = hh1.cw_next()
@@ -156,7 +156,7 @@ class Vertex:
         hh = del_v._half_hourglasses_head
         while hh.v_from() is not sur_v:
             if hh is hh2.twin(): continue
-            
+
             hh_next = hh.cw_next()
             hh.reparent(sur_v)
             hh = hh_next

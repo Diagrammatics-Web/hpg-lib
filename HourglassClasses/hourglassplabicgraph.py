@@ -13,9 +13,9 @@ class HourglassPlabicGraph:
         INPUT:
 
         - ``n`` -- nonnegative integer (default: `0`); the number of boundary vertices to create. If 0, does not initialize any vertices.
-        
+
         - ``filling`` -- boolean or boolean iterable (default: ``True``); Whether the vertices should be filled. If an iterable, the filled/unfilled statuses of the boundary vertices, starting from 0.
-        
+
         - ``r`` -- float (default: `10`); the radius of the boundary.
 
         EXAMPLES:
@@ -23,11 +23,11 @@ class HourglassPlabicGraph:
             sage: HPG = HourglassPlabicGraph()
             sage: HPG.order()
             0
-    
+
             sage: HPG = HourglassPlabicGraph(8)
             sage: HPG.order()
             8
-            
+
         .. NOTE::
 
             If ``n>0``, internally calls `construct_boundary(n, filling, r)`.
@@ -36,7 +36,7 @@ class HourglassPlabicGraph:
         self._inner_vertices = dict()
         self._boundary_vertices = dict()
         self._faces = dict()
-        
+
         self.layout = 'circular'
         if n > 0: self.construct_boundary(n, filling, r)
 
@@ -49,7 +49,7 @@ class HourglassPlabicGraph:
         return isinstance(other, HourglassPlabicGraph) and self.is_isomorphic(other)
 
     def __neq__(self, other):
-        return not self.__eq__(other)   
+        return not self.__eq__(other)
 
     def traverse(self):
         if len(self._boundary_vertices) <= 1: return (None, None)
@@ -85,7 +85,7 @@ class HourglassPlabicGraph:
             i += 1
 
         return half_hourglasses_visited, half_hourglass_history, vertices_visited, vertex_history
-        
+
     def __hash__(self):
         hh_visited, hh_history, v_visited, v_history = self.traverse()
         hh_hash = tuple((hh_visited.index(hh), hh.multiplicity()) for hh in hh_history)
@@ -124,15 +124,15 @@ class HourglassPlabicGraph:
         The vertices will be set to filling, unless. This function can only be called on an empty graph.
 
         INPUT:
-    
+
         - ``n`` -- positive integer; the number of boundary vertices to create.
-        
+
         - ``filling`` -- boolean or boolean iterable (default: ``True``); Whether the vertices should be filled. If an iterable, the filled/unfilled statuses of the boundary vertices, starting from 0.
-        
+
         - ``r`` -- float (default: `10`); the radius of the boundary.
-        
+
         EXAMPLES:
-    
+
             sage: HPG = HourglassPlabicGraph()
             sage: HPG.construct_boundary(8)
             sage: HPG.order()
@@ -166,11 +166,11 @@ class HourglassPlabicGraph:
         This function can only be called on an empty graph.
 
         INPUT:
-        
+
         - ``n`` -- integer; the number of boundary vertices and face vertices to create each. Must be even.
 
         - `multiplicities` -- positive int array; the multiplicities of the hourglasses between internal vertices.
-        
+
         - ``r`` -- float; the radius of the boundary. Defaults to 10.
 
         EXAMPLES:
@@ -187,10 +187,10 @@ class HourglassPlabicGraph:
             AssertionError: Cannot call construct_boundary on a non-empty graph.
         """
         assert n % 2 == 0, "n must be an even number."
-        
+
         fillings = [i % 2 == 1 for i in range(0, n)]
         self.construct_boundary(n, fillings, r)
-        
+
         r *= 0.6
         last_id = None
         first_id = None
@@ -215,7 +215,7 @@ class HourglassPlabicGraph:
         r"""
         Adds a vertex to the graph and returns it.
         v_id: The id given to the vertex. Should be unique.
-        label: 
+        label:
         x: The x position of the vertex
         y: The y position of the vertex
         filled: Whether the vertex is to be filled or not.
@@ -239,7 +239,7 @@ class HourglassPlabicGraph:
         del_hourglasses = del_vertex.get_hourglasses_as_list()
         for hh in del_hourglasses:
             self._remove_hourglass_internal(hh, del_vertex, hh.v_to())
-        
+
         if del_vertex.id in self._inner_vertices: del self._inner_vertices[del_vertex.id]
         else: del self._boundary_vertices[del_vertex.id]
 
@@ -267,7 +267,7 @@ class HourglassPlabicGraph:
         if face is not None:
             face.initialize_half_hourglasses(new_hh)
         # If none exists, create a new one
-        else: 
+        else:
             face = Face(ID.get_new_id("face"), new_hh)
             self._faces[face.id] = face
 
@@ -278,7 +278,7 @@ class HourglassPlabicGraph:
             self._faces[face.id] = face
 
         return new_hh
-        
+
     def remove_hourglass_by_id(self, v1_id, v2_id):
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
@@ -303,7 +303,7 @@ class HourglassPlabicGraph:
                 face2 = hh.right_face()
                 hh2 = hh
                 break
-        
+
         Vertex.remove_hourglass_between(v1, v2)
 
         if face1 is not None:
@@ -329,7 +329,7 @@ class HourglassPlabicGraph:
     def thicken_hourglass(self, v1, v2):
         self._get_hourglass(v1, v2).thicken()
     add_strand = thicken_hourglass # alias
-        
+
     def thin_hourglass_by_id(self, v1_id, v2_id):
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
@@ -339,7 +339,7 @@ class HourglassPlabicGraph:
     def thin_hourglass(self, v1, v2):
         self._get_hourglass(v1, v2).thin()
     remove_strand = thin_hourglass # alias
-    
+
     # Moves
 
     def is_square_move_valid(self, face_id, r=4):
@@ -347,7 +347,7 @@ class HourglassPlabicGraph:
 
     def square_move(self, face_id, r=4):
         face = self._get_face(face_id)
-        
+
         new_vertices, removed_vertices = face.square_move(r)
         # NOTE: By assumption, all vertices involved in a square move are inner vertices
         for v in new_vertices:
@@ -379,7 +379,7 @@ class HourglassPlabicGraph:
 
     def is_r_valent(self, r=4, verbose=False):
         for v in self._inner_vertices.values():
-            if v.total_degree() != r: 
+            if v.total_degree() != r:
                 if verbose: print("Graph is not r-valent. Vertex " + str(v.id) + " does not have degree " + str(r) + ". Instead, degree is " + str(v.total_degree()) + ".")
                 return False
         return True
@@ -392,7 +392,7 @@ class HourglassPlabicGraph:
         - For boundary trips, no trip_i should have an essential double crossing with another trip_i or a trip_i+1
         An isolated trip is a trip starting from an interior strand that never reaches the boundary.
         It is trivial if it loops within the same hourglass.
-        An essential double crossing occurs when two paths intersect (cross rather than reflect) twice 
+        An essential double crossing occurs when two paths intersect (cross rather than reflect) twice
         while traveling in the same direction, ignoring consecutive intersections.
         '''
 
@@ -415,7 +415,7 @@ class HourglassPlabicGraph:
         def validate_no_self_intersections(trip):
             vertices = { trip[0].v_from() }
             for strand in trip:
-                if strand.v_to() in vertices: 
+                if strand.v_to() in vertices:
                     return False
                 vertices.add(strand.v_to())
             return True
@@ -428,11 +428,11 @@ class HourglassPlabicGraph:
                     return False
 
         # Internal helper functions for double crossing checks
-        
+
         # Returns an integer.
-        # If the resulting crossing is valid - that is, the 
-        # orientations of the hourglasses going in and out 
-        # of the crossing genuinely intersect - returns the 
+        # If the resulting crossing is valid - that is, the
+        # orientations of the hourglasses going in and out
+        # of the crossing genuinely intersect - returns the
         # number of shared vertices along the trips. Otherwise,
         # returns -1.
         def validate_crossing(trip1, ind1, trip2, ind2):
@@ -471,7 +471,7 @@ class HourglassPlabicGraph:
                     elif hh is inhh2 or outhh2: return count
                 # this should never be reached in a well-formed graph
                 raise Exception("Issue with crossing validation. Hourglasses do not belong to same vertex.")
-                
+
             # Case 2: Some shared edges along crossing
             # verify that that either the trip2 hourglasses
             # or the shared hourglasses are first in clockwise
@@ -504,10 +504,10 @@ class HourglassPlabicGraph:
         # If no crossing is found, returns None.
         def find_crossing_from(trip1, ind1, trip2, ind2):
             for i1 in range(ind1, len(trip1) - 1):
-                for i2 in range(ind2, len(trip2) - 1):                        
+                for i2 in range(ind2, len(trip2) - 1):
                     # We only care if we see an intersection
                     if trip1[i1].v_to() is not trip2[i2].v_to(): continue
-                    
+
                     count = validate_crossing(trip1, i1, trip2, i2)
                     # Because there are no self intersections, if we encounter
                     # a potential self intersection on trip1's hourglass but it
@@ -532,19 +532,19 @@ class HourglassPlabicGraph:
                     trip2 = all_compare_trips[b]
                     if (do_trips_double_cross(trip1, trip2)):
                         if verbose: print("trip" + str(i+1) + " from vertex " + str(trip1[0].v_from().id)
-                                          + " and trip" + (str(i+1) if b < len(trip_is) else str(i+2)) 
+                                          + " and trip" + (str(i+1) if b < len(trip_is) else str(i+2))
                                           + " from vertex " + str(trip2[0].v_from().id) + " double cross.")
                         return False
         return True
-    
+
     # Layout functions
-    
+
     def make_circular(self, r=10):
         n = len(self._boundary_vertices.values())
         for i,v in self._boundary_vertices:
             v.x = r*math.sin((i+0.5)*2*math.pi/n)
             v.y = r*math.cos((i+0.5)*2*math.pi/n)
-            
+
         self.tutte_layout()
         self.layout = "circular"
 
@@ -569,7 +569,7 @@ class HourglassPlabicGraph:
             output: if output = 'half_strands', returns an array of HalfStrands. Otherwise, returns HalfHourglasses.
 
             Returns the list of HalfHourglasses/HalfStrands the trip visits in order.'''
-        
+
         return vertex.get_trip(i, output)
 
     def get_trip_perm(self, i, output='half_strands'):
@@ -595,11 +595,11 @@ class HourglassPlabicGraph:
         face = self._faces.get(f_id)
         if face is None: raise ValueError("id " + str(f_id) + " does not correspond to any face.")
         return face
-        
+
     def _get_vertex(self, v_id):
         ''' Internal helper function that gets the vertex with the given id from either _inner_vertices or _boundary_vertices, and throws if the id is not found.'''
         v = self._inner_vertices.get(v_id)
-        if v is None: 
+        if v is None:
             v = self._boundary_vertices.get(v_id)
             if v is None: raise ValueError("id " + str(v_id) + " does not correspond to any vertex.")
         return v
@@ -666,7 +666,7 @@ class HourglassPlabicGraph:
         for e in data['edges']:
             label = e['label'] if 'label' in e else ''
             HPG.create_hourglass_by_id(e['sourceId'], e['targetId'], e['multiplicity']) # Use label?
-            
+
          # add boundary edges
         sorted_boundary_vertices = list(HPG._boundary_vertices.values())
         if HPG.layout == 'circular':
@@ -692,7 +692,7 @@ class HourglassPlabicGraph:
                 # do not record boundary edges
                 if not (hh.is_boundary() or hh.twin() in edges):
                     edges.add(hh)
-        
+
         d = {
             'edges': [{
                 "multiplicity": e.multiplicity(),

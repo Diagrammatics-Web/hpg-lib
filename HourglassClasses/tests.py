@@ -51,11 +51,11 @@ def dihedral_element_tests():
     assert d1.get_num_elements() == 3, "All 3 elements should be in list."
     assert d1.get_elements_as_list() == [d1, d3, d2], "Iteration does not form proper list."
     assert (
-        d1.cw_next() == d3  and 
+        d1.cw_next() == d3  and
         d1.ccw_next() == d2 and
-        d2.cw_next() == d1  and 
+        d2.cw_next() == d1  and
         d2.ccw_next() == d3 and
-        d3.cw_next() == d2  and 
+        d3.cw_next() == d2  and
         d3.ccw_next() == d1
     ), "List order is incorrect or list is broken."
     assert (
@@ -70,7 +70,7 @@ def dihedral_element_tests():
     assert d1.get_num_elements() == 2, "d3 should have been removed correctly."
     d2.remove()
     assert d1.get_num_elements() == 1, "d2 should have been removed correctly."
-    
+
     print("DihedralElement tests complete.\n")
 
 def half_strand_tests():
@@ -78,11 +78,11 @@ def half_strand_tests():
 
     hh1 = _TestHalfHourglass()
     hh2 = _TestHalfHourglass()
-    
+
     s1 = HalfStrand(1, hh1)
     assert s1.twin() != None, "s1 should have created a twin."
     assert s1.twin().twin() == s1, "s1's twin's twin should be s1."
-    
+
     assert s1.get_last_strand_same_hourglass() == s1, "s1 is not linked to itself properly when alone."
 
     s2 = HalfStrand(2, hh1)
@@ -120,7 +120,7 @@ def half_hourglass_tests():
     hh.thin()
     hh.thin()
     assert hh.strand_count() == 2, "hh should have 2 strands. strand_count: " + str(hh.strand_count())
-    
+
     hhp = HalfHourglass(2, v1, v2, 0)
     assert hhp.is_phantom() and hhp.strand_count() == 0, "hhp should be a phantom (boundary) edge."
 
@@ -150,7 +150,7 @@ def half_hourglass_tests():
     assert hh._half_strands_head.get_num_elements() == 2 + 2, "Strands were not linked properly all the way around during removals."
 
     #TODO: test is_left_face_valid
-    
+
     print("HalfHourglass tests complete.\n")
 
 def vertex_tests():
@@ -173,14 +173,14 @@ def vertex_tests():
 
     assert v4.get_hourglass_to(v2).v_to() == v2, "v4 should be able to find an hourglass to v2."
     assert v1.get_hourglass_to(v3).v_to() == v3, "v1 should be able to find an hourglass to v3."
-    
+
     v1.clear_hourglasses()
     assert v1.simple_degree() == 0, "v1 should have no hourglasses around it."
-    
+
     Vertex.create_hourglass_between(v1, v2, 1)
     Vertex.create_hourglass_between(v1, v3, 2)
     Vertex.create_hourglass_between(v1, v4, 5)
-    
+
     Vertex.remove_hourglass_between(v1, v2)
     Vertex.remove_hourglass_between(v2, v4)
 
@@ -192,7 +192,7 @@ def vertex_tests():
     assert v2.total_degree() == 0, "v2 should have 0 strands around it. Instead has " + str(v2.total_degree())
 
     # SQUARE MOVE TESTING
-    
+
     v5 = Vertex(5, 0, 0, False)
     v6 = Vertex(6, 1, 0, True)
     extras = [Vertex(7, -1, 1, True), Vertex(8, -1, -1, True), Vertex(9, 2, 1, True), Vertex(10, 2, -1, True)]
@@ -217,14 +217,14 @@ def vertex_tests():
         v5.get_neighbors() == [v6, extras[0], extras[1]] and
         v6.get_neighbors() == [extras[2], v5, extras[3]]
     ), "Graph should have returned to previous state."
-    
+
     print("Vertex tests complete.\n")
 
 def face_tests():
     print("Testing Face class.")
     # Square move tests
     ID.reset_id()
-    
+
     v1 = Vertex(1, 0, 0, True)
     v2 = Vertex(2, 1, 0, False)
     v3 = Vertex(3, 1, 1, True)
@@ -247,7 +247,7 @@ def face_tests():
     Vertex.create_hourglass_between(extras[1], extras[9], 1)
 
     assert [hh.v_from() for hh in face] == [v2, v1, v4, v3], "Face iteration does not work properly."
-    
+
     assert face.is_square_move_valid(), "Square move should be valid on face."
     rem_add_tuple = face.square_move()
     assert face.is_square_move_valid(), "Square move should be valid on face even after performing square move."
@@ -258,9 +258,9 @@ def face_tests():
 
     v2 = rem_add_tuple[0][0]
     v1 = rem_add_tuple[0][1]
-    
+
     Vertex.create_hourglass_between(v4, v2, 1)
-    assert not face.is_square_move_valid(), "Square move should not be valid on face with 3 edges."    
+    assert not face.is_square_move_valid(), "Square move should not be valid on face with 3 edges."
     Vertex.remove_hourglass_between(v4, v2)
     v4.filled = True
     assert not face.is_square_move_valid(), "Square move should not be valid on face with improper vertex fillings."
@@ -287,7 +287,7 @@ def face_tests():
 
     assert face.is_benzene_move_valid(), "Benzene move should be valid."
     assert face.is_cycle_valid(hh2), "Cycle move should be valid."
-    
+
     face.benzene_move()
     assert (
         hh1.multiplicity() == 2 and
@@ -307,7 +307,7 @@ def face_tests():
         hh5.multiplicity() == 1 and
         hh6.multiplicity() == 2
     ), "Hourglass multiplicities are incorrect after second benzene move."
-    
+
     face.cycle(hh2)
     assert (
         hh1.multiplicity() == 2 and
@@ -335,15 +335,14 @@ def face_tests():
     Vertex.create_hourglass_between(v5, v1, 1)
     assert not face.is_benzene_move_valid(), "Cannot perform benzene move on face with odd number of hourglasses."
     assert not face.is_cycle_valid(hh2), "Cannot perform cycle move on face with odd number of hourglasses."
-    
-    
+
     print("Face tests complete.\n")
 
 def hourglass_plabic_graph_tests():
     print("Testing HourglassPlabicGraph class.")
 
     # initialization/construct_boundary
-    
+
     HPG = HourglassPlabicGraph(10)
 
     assert len(HPG._boundary_vertices) == 10, "HPG should have been initialized with 10 boundary vertices. Instead, has " + str(len(HPG._boundary_vertices)) + "."
@@ -370,7 +369,7 @@ def hourglass_plabic_graph_tests():
         #v.print_neighbors()
     HPG.print_faces()
     '''
-    
+
     # removing vertices and hourglasses
 
     HPG.remove_vertex_by_id(8)
@@ -381,7 +380,7 @@ def hourglass_plabic_graph_tests():
     print("Testing vertex removal.")
     HPG.print_faces()
     '''
-    
+
     HPG = create_test_HPG()
 
     HPG.remove_hourglass_by_id(13, 10)
@@ -392,12 +391,12 @@ def hourglass_plabic_graph_tests():
     print("Testing hourglass removal.")
     HPG.print_faces()
     '''
-    
+
     # Trip tests
-    
+
     ID.reset_id()
     HPG = create_test_HPG()
-    
+
     trip_perms1 = HPG.get_trip_perms()
     assert trip_perms1 == [[1, 4, 3, 6, 5, 0, 7, 2], [3, 6, 5, 0, 7, 2, 1, 4], [5, 0, 7, 2, 1, 4, 3, 6]], "Trip permutations should be [[1, 4, 3, 6, 5, 0, 7, 2], [3, 6, 5, 0, 7, 2, 1, 4], [5, 0, 7, 2, 1, 4, 3, 6]]. Instead are " + str(trip_perms1) + "."
     # Should be the same
@@ -430,7 +429,7 @@ def move_tests():
     HPG.square_move(face_id)
     plots.append(("HPG after first square move:", HPG.plot()))
     assert HPG.is_square_move_valid(face_id), "Square move should be valid on " + str(face_id) + " after performing square move."
-    
+
     HPG.square_move(face_id)
     plots.append(("HPG after second square move:", HPG.plot()))
     assert HPG.is_square_move_valid(face_id), "Square move should be valid on " + str(face_id) + " after performing second square move."
@@ -454,15 +453,15 @@ def move_tests():
     face_id = "face9"
     plots.append(("HPG before square move in SL7:", HPG.plot()))
     assert HPG.is_square_move_valid(face_id, 7), "Square move should be valid on " + str(face_id) + "."
-    
+
     HPG.square_move(face_id, 7)
     plots.append(("HPG after first square move in SL7:", HPG.plot()))
     assert HPG.is_square_move_valid(face_id, 7), "Square move should be valid on " + str(face_id) + " after performing square move."
-    
+
     HPG.square_move(face_id, 7)
     plots.append(("HPG after second square move in SL7:", HPG.plot()))
     assert HPG.is_square_move_valid(face_id, 7), "Square move should be valid on " + str(face_id) + " after performing second square move."
-    
+
     print("Move tests complete.\n")
     return plots
 
@@ -482,7 +481,7 @@ def reduced_tests():
 
     def test_reducedness(graphdict, name, r, expected):
         if verbose: print("Testing " + name + " for reducedness.")
-        if (expected is not None): 
+        if (expected is not None):
             assert HourglassPlabicGraph.from_dict(graphdict).is_fully_reduced(r, verbose) == expected, name + " should " + ("" if expected else "not ") + "be fully reduced."
             if verbose: print(name + " is " + ("" if expected else "not ") + "fully reduced.")
         else: print(name + " is " + ("" if HourglassPlabicGraph.from_dict(graphdict).is_fully_reduced(r, verbose) else "not ") + "fully reduced (unkown expectation).")
@@ -498,7 +497,7 @@ def reduced_tests():
     test_reducedness(Examples.example_benzene, "example_benzene", 4, True)
     test_reducedness(Examples.example_double_crossing, "example_double_crossing", 4, True)
     test_reducedness(Examples.example_6_by_3, "example_6_by_3", 6, True)
-    
+
     # Non-reduced HPGs
     test_reducedness(Examples.example_benzene_full_nonreduced, "example_benzene_full_nonreduced", 4, False)
     test_reducedness(Examples.example_5x4_badsep, "example_5x4_badsep", 5, False)
@@ -516,7 +515,7 @@ def reduced_tests():
     print("is_fully_reduced tests complete.\n")
 
 def create_test_HPG():
-    ''' 
+    '''
     Creates the following graph with the labeled IDs:
     '''
 #           7----0
@@ -527,7 +526,7 @@ def create_test_HPG():
 #       |   |  \ ()  |
 #       |   |    12  |
 #       |   13   |   |
-#       |   ()\  |   |  
+#       |   ()\  |   |
 #       |   () \ |   |
 #       5---10   9---2
 #        \  |    |  /

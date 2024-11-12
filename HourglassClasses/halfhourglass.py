@@ -34,11 +34,11 @@ class HalfHourglass(DihedralElement):
         Also contsructs its own twin.
 
         INPUT:
-    
+
         - `id` -- hashable, unique object
-        
+
         - `multiplicity` -- nonnegative integer; number of strands between from and to. if 0, this is an edge boundary. Assumed to be an integer `\geq 1`.
-        
+
         - `label` -- object
 
         - `twin` -- HalfHourglass (default: None); this parameter should be left blank. It is used internally to automatically construct this strand's twin.
@@ -71,7 +71,7 @@ class HalfHourglass(DihedralElement):
         self._v_to = v_to
         self._multiplicity = multiplicity
         self.label = label
-        
+
         # the half hourglass representing movement in the opposite direction, between the same vertices
         # twin will have swapped to/from vertices
         # only the "base" hourglass will need to set up strands
@@ -79,7 +79,7 @@ class HalfHourglass(DihedralElement):
             self._twin = HalfHourglass(str(id) + "_t", v_to, v_from, multiplicity, '', self)
 
             # Create half strands and record head/tail
-            if multiplicity == 0: 
+            if multiplicity == 0:
                 self._half_strands_head = None
                 self._half_strands_tail = None
                 self.twin()._half_strands_head = None
@@ -95,7 +95,7 @@ class HalfHourglass(DihedralElement):
                 self._half_strands_tail = self._half_strands_head.cw_last()
                 self.twin()._half_strands_tail = self._half_strands_tail.twin()
         else: self._twin = twin
-        
+
         self._left_face = None
         self._right_face = None
 
@@ -106,7 +106,7 @@ class HalfHourglass(DihedralElement):
         OUTPUT: str
 
         EXAMPLES:
-        
+
             sage: ID.reset_id()
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 0, 1, True)
@@ -128,7 +128,7 @@ class HalfHourglass(DihedralElement):
         - `element` -- HalfHourglass; the element to insert.
 
         EXAMPLES:
-        
+
         This example constructs a list of three HalfHourglasses using insert_cw_next.
 
             sage: hh1 = HalfHourglass('hh1', None, None, 1)
@@ -187,7 +187,7 @@ class HalfHourglass(DihedralElement):
         - `element` -- HalfHourglass; the element to insert.
 
         EXAMPLES:
-        
+
         This example constructs a list of three HalfHourglasses using insert_ccw_next.
 
             sage: hh1 = HalfHourglass('hh1', None, None, 1)
@@ -269,7 +269,7 @@ class HalfHourglass(DihedralElement):
         super().remove()
 
     # Strand modification and accessor functions
-    
+
     def add_strand(self):
         r"""
         Adds a strand to itself and its twin in the last position clockwise.
@@ -294,7 +294,7 @@ class HalfHourglass(DihedralElement):
             This function is aliased by thicken.
         """
         if (self.is_phantom()): raise RuntimeError("Cannot add a strand to a phantom/boundary edge.")
-            
+
         new_strand = HalfStrand(ID.get_new_id(str(self.id) + "_"), self)
         self._half_strands_tail.insert_cw_next(new_strand)
         self._half_strands_tail.twin().insert_cw_next(new_strand.twin())
@@ -334,15 +334,15 @@ class HalfHourglass(DihedralElement):
 
             This function is aliased by thin.
         """
-        if (self.strand_count() <= 1): 
-            if self.is_phantom(): raise RuntimeError("Cannot remove a strand from a phantom/boundary edge.") 
+        if (self.strand_count() <= 1):
+            if self.is_phantom(): raise RuntimeError("Cannot remove a strand from a phantom/boundary edge.")
             else: raise RuntimeError("Cannot remove a strand from an edge with only one strand.")
-            
+
         self._half_strands_tail = self._half_strands_tail.cw_prev()
         self.twin()._half_strands_tail = self.twin()._half_strands_tail.cw_prev()
         self._half_strands_tail.cw_next().remove()
         self.twin()._half_strands_tail.cw_next().remove()
-        
+
         self._multiplicity -= 1
         self.twin()._multiplicity -= 1
     thin = remove_strand # alias
@@ -374,7 +374,7 @@ class HalfHourglass(DihedralElement):
             'hh2_s0'
         """
         if self._half_strands_head is not None: return self._half_strands_head
-        for hh in self: 
+        for hh in self:
             if hh.strand_count() > 0: return hh._half_strands_head
         return None
 
@@ -385,9 +385,9 @@ class HalfHourglass(DihedralElement):
         Returns the vertex this HalfHourglass traverses from.
 
         OUTPUT: Vertex
-        
+
         EXAMPLES:
-        
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
@@ -401,9 +401,9 @@ class HalfHourglass(DihedralElement):
         Returns the vertex this HalfHourglass traverses to.
 
         OUTPUT: Vertex
-        
+
         EXAMPLES:
-        
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
@@ -417,9 +417,9 @@ class HalfHourglass(DihedralElement):
         Returns the Face on the left of this HalfHourglass.
 
         OUTPUT: Face
-        
+
         EXAMPLES:
-        
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
@@ -434,9 +434,9 @@ class HalfHourglass(DihedralElement):
         Returns the Face on the left of this HalfHourglass.
 
         OUTPUT: Face
-        
-        EXAMPLES:   
-        
+
+        EXAMPLES:
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 0, 1, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
@@ -453,14 +453,18 @@ class HalfHourglass(DihedralElement):
         INPUT:
 
         - `v` -- Vertex; The new vertex this hourglass should come from.
+
+        EXAMPLES:
+
+            # TODO
         """
         self.v_from()._remove_hourglass(self)
         v._insert_hourglass(self)
-        
+
         # Reinsert twin as it may now have swapped places
         self.twin().v_from()._remove_hourglass(self.twin())
         self.twin().v_from()._insert_hourglass(self.twin())
-        
+
         self._v_from = v
         self.twin()._v_to = v
 
@@ -468,7 +472,7 @@ class HalfHourglass(DihedralElement):
         '''Returns the number of strands owned by this hourglass.'''
         return self._multiplicity
     strand_count = multiplicity # alias
-    
+
     def is_boundary(self):
         '''Returns True if this hourglass is on the boundary (or otherwise has multiplicity 0).'''
         return self._multiplicity == 0
@@ -484,7 +488,7 @@ class HalfHourglass(DihedralElement):
 
     def iterate_left_turns(self):
         return _TurnIterator(self, False)
-        
+
     def iterate_right_turns(self):
         return _TurnIterator(self, True)
 
@@ -497,20 +501,20 @@ class _TurnIterator:
     taking an hourglass's twin's cw/ccw_next element.
     Modification of the list while iterating can cause errors with iteration.
     '''
-    def __init__(self, head, turn_right): 
+    def __init__(self, head, turn_right):
         self.head = head
         self.iter = head
         self.begin = False
         self.turn_right = turn_right
-        
+
     def __iter__(self):
         return self
-        
+
     def __next__(self):
         if self.iter is self.head:
             if self.begin: raise StopIteration
             else: self.begin = True
-                
+
         old = self.iter
         self.iter = self.iter.right_turn() if self.turn_right else self.iter.left_turn()
         return old
@@ -537,5 +541,5 @@ class _StrandIterator:
         old = self.iter
         self.iter = self.iter.cw_next()
         return old
-            
-            
+
+

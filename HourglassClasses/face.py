@@ -22,13 +22,13 @@ class Face:
             if iter_hh.is_boundary(): self.boundary = True
 
     # Moves
-        
+
     # Square move
-    
+
     def is_square_move_valid(self, r=4):
         ''' Verifies that this face can perform a square move. The face should have 4 vertices,
             alternating filled/unfilled status. The sum of the multiplicities of connecting hourglasses should equal r.
-            In a square move, vertices with one outgoing edge are contracted, while vertices with two outgoing edges 
+            In a square move, vertices with one outgoing edge are contracted, while vertices with two outgoing edges
             are split into two vertices connected by an hourglass of sufficient multiplicity.'''
         count = 0
         multiplicity_sum = 0
@@ -42,7 +42,7 @@ class Face:
             count += 1
             should_be_filled = not should_be_filled
         return (multiplicity_sum == r)
-        
+
     def square_move(self, r=4):
         ''' Performs a square move on this face. Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
             To verify that this move will be valid, call is_square_move_valid().
@@ -64,7 +64,7 @@ class Face:
             hh = hourglasses[i]
             while hh.multiplicity() > target_multiplicities[i]: hh.thin()
             while hh.multiplicity() < target_multiplicities[i]: hh.thicken()
-        
+
         return new_vertices, removed_vertices
 
     # SL4 Square move (should operate identically to square_move(r=4))
@@ -84,7 +84,7 @@ class Face:
             count += 1
             should_be_filled = not should_be_filled
         return True
-        
+
     def square_move4(self):
         ''' Performs a square move on this face, assuming the graph is in SL4. Vertices with one outgoing edge are contracted,
             while vertices with two outgoing edges are split into two vertices.
@@ -99,7 +99,7 @@ class Face:
             v = hh.v_from()
             if v.simple_degree() == 4: new_vertices.append(v.square_move_expand(hh, hh.cw_next()))
             else: removed_vertices.append(v.square_move_contract(hh.ccw_next()))
-        
+
         return new_vertices, removed_vertices
 
     # Cycle
@@ -113,7 +113,7 @@ class Face:
         if start_hh.right_face() is not self:
             if start_hh.left_face() is self: start_hh = start_hh.twin()
             else: raise ValueError("start_hh does not belong to this face!")
-        
+
         count = 0
         should_be_filled = not start_hh.v_from().filled
         check_mult = True
@@ -132,13 +132,13 @@ class Face:
             starting from start_hh.
             To verify that this move will be valid, call is_cycle_valid(start_hh).'''
         if start_hh.right_face() is not self: start_hh = start_hh.twin()
-        
+
         thicken = False
         for hh in start_hh.iterate_right_turns():
             if thicken: hh.thicken()
             else: hh.thin()
             thicken = not thicken
-    
+
     # Benzene move
 
     def is_benzene_move_valid(self):
@@ -172,5 +172,5 @@ class Face:
         return self._half_hourglasses_head.iterate_right_turns()
 
     # TESTING
-    def print_vertices(self):   
+    def print_vertices(self):
         print(str([hh.v_from().id for hh in self]))
