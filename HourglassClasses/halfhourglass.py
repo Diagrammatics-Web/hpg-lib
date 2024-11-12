@@ -274,11 +274,28 @@ class HalfHourglass(DihedralElement):
         r"""
         Adds a strand to itself and its twin in the last position clockwise.
         Will not work on phantom edges (edges with no strands).
-        
+
+        EXAMPLES:
+
+            sage: ID.reset_id()
+            sage: hh = HalfHourglass('hh', None, None, 1)
+            sage: hh.add_strand()
+            sage: [s.id for s in hh._half_strands_head]
+            ['hh_s0', 'hh_1']
+
+        It is an error to add_strand on a phantom edge.
+
+            sage: hh = HalfHourglass('hh', None, None, 0)
+            sage: hh.add_strand()
+            RuntimeError: Cannot add a strand to a phantom/boundary edge.
+
+        .. NOTE::
+
+            This function is aliased by thicken.
         """
         if (self.is_phantom()): raise RuntimeError("Cannot add a strand to a phantom/boundary edge.")
             
-        new_strand = HalfStrand(ID.get_new_id(str(id) + "_"), self)
+        new_strand = HalfStrand(ID.get_new_id(str(self.id) + "_"), self)
         self._half_strands_tail.insert_cw_next(new_strand)
         self._half_strands_tail.twin().insert_cw_next(new_strand.twin())
         self._half_strands_tail = new_strand
@@ -291,7 +308,31 @@ class HalfHourglass(DihedralElement):
     def remove_strand(self):
         r"""
         Removes the clockwise last strand for itself and its twin.
-        Will not work on phantom edges or on edges with only 1 strand left.
+        Will not work on phantom edges or on edges with only one strand left.
+
+        EXAMPLES:
+
+            sage: ID.reset_id()
+            sage: hh = HalfHourglass('hh', None, None, 2)
+            sage: hh.remove_strand()
+            sage: [s.id for s in hh._half_strands_head]
+            ['hh_s0']
+
+        It is an error to remove_strand on a phantom edge.
+
+            sage: hh = HalfHourglass('hh', None, None, 0)
+            sage: hh.remove_strand()
+            RuntimeError: Cannot remove a strand to a phantom/boundary edge.
+
+        It is an error to remove_strand on an edge with only one strand.
+
+            sage: hh = HalfHourglass('hh', None, None, 1)
+            sage: hh.remove_strand()
+            RuntimeError: Cannot remove a strand from an edge with only one strand.
+
+        .. NOTE::
+
+            This function is aliased by thin.
         """
         if (self.strand_count() <= 1): 
             if self.is_phantom(): raise RuntimeError("Cannot remove a strand from a phantom/boundary edge.") 
@@ -310,31 +351,118 @@ class HalfHourglass(DihedralElement):
         r"""
         Returns the first strand clockwise around v_from relative to this hourglass.
         Typically will return _half_strands_head, unless its multiplicity is 0.
+        If there are no strands among adjacent hourglasses, None will be returned instead.
+
+        OUTPUT: HalfStrand
+
+        EXAMPLES:
+
+            sage: ID.reset_id()
+            sage: hh1 = HalfHourglass('hh1', None, None, 1)
+            sage: hh2 = HalfHourglass('hh2', None, None, 1)
+            sage: hh1.insert_cw_next(hh2)
+            sage: hh1._get_first_strand().id
+            'hh1_s0'
+
+        This example demonstrates when the hourglass owns no strands.
+
+            sage: ID.reset_id()
+            sage: hh1 = HalfHourglass('hh1', None, None, 0)
+            sage: hh2 = HalfHourglass('hh2', None, None, 1)
+            sage: hh1.insert_cw_next(hh2)
+            sage: hh1._get_first_strand().id
+            'hh2_s0'
         """
-        return self._half_strands_head if self._half_strands_head is not None or self.v_from().total_degree() == 0 else self.cw_next()._get_first_strand()
+        if self._half_strands_head is not None: return self._half_strands_head
+        for hh in self: 
+            if hh.strand_count() > 0: return hh._half_strands_head
+        return None
 
     # Accessors
 
     def v_from(self):
+        r"""
+        Returns the vertex this HalfHourglass traverses from.
+
+        OUTPUT: Vertex
+        
+        EXAMPLES:
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh.v_from().id
+            'v1'
+        """
         return self._v_from
 
     def v_to(self):
+        r"""
+        Returns the vertex this HalfHourglass traverses to.
+
+        OUTPUT: Vertex
+        
+        EXAMPLES:
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh.v_to().id
+            'v2'
+        """
         return self._v_to
 
     def left_face(self):
+        r"""
+        Returns the Face on the left of this HalfHourglass.
+
+        OUTPUT: Face
+        
+        EXAMPLES:
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: face = Face('face', hh)
+            sage: hh.left_face().id
+            'face'
+        """
         return self._left_face
 
     def right_face(self):
+        r"""
+        Returns the Face on the left of this HalfHourglass.
+
+        OUTPUT: Face
+        
+        EXAMPLES:   
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: face = Face('face', hh)
+            sage: hh.left_face().id
+            'face'
+        """
         return self._right_face
 
     def reparent(self, v):
-        '''Changes this half hourglass's v_from to v, along with associated bookkeeping.'''
+        r"""
+        Changes this half hourglass's v_from to v, performing all appropriate bookkeeping.
+
+        INPUT:
+
+        - `v` -- Vertex; The new vertex this hourglass should come from.
+        """
+        self.v_from()._remove_hourglass(self)
+        v._insert_hourglass(self)
+        
+        # Reinsert twin as it may now have swapped places
+        self.twin().v_from()._remove_hourglass(self.twin())
+        self.twin().v_from()._insert_hourglass(self.twin())
+        
         self._v_from = v
         self.twin()._v_to = v
-
-        self.remove() 
-        
-        v._insert_hourglass(self)
 
     def multiplicity(self):
         '''Returns the number of strands owned by this hourglass.'''

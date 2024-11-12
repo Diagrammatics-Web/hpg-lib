@@ -95,22 +95,6 @@ class HalfStrand(DihedralElement):
             'hh'
         """
         return self._hourglass
-
-    def v_to(self):
-        r"""
-        Returns the vertex this HalfStrand traverses to.
-
-        OUTPUT: Vertex
-        
-        EXAMPLES:
-        
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 0, 1, True)
-            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
-            sage: hh._half_strands_head.v_to().id
-            'v2'
-        """
-        return self._hourglass.v_to()
         
     def v_from(self):
         r"""
@@ -127,6 +111,22 @@ class HalfStrand(DihedralElement):
             'v1'
         """
         return self._hourglass.v_from()
+
+    def v_to(self):
+        r"""
+        Returns the vertex this HalfStrand traverses to.
+
+        OUTPUT: Vertex
+        
+        EXAMPLES:
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh._half_strands_head.v_to().id
+            'v2'
+        """
+        return self._hourglass.v_to()
         
     def left_face(self):
         r"""

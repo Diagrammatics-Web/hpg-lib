@@ -191,9 +191,6 @@ class Vertex:
         y = (2 * self.y + hh1.v_to().y + hh2.v_to().y) / 4
         new_v = Vertex(ID.get_new_id("v"), x, y, not self.filled)
 
-        # store in an array to make iteration safe while reparenting
-        while self._half_hourglasses_head is hh1 or self._half_hourglasses_head is hh2:
-            self._half_hourglasses_head = self._half_hourglasses_head.ccw_next()
         hh1.reparent(new_v)
         hh2.reparent(new_v)
 
