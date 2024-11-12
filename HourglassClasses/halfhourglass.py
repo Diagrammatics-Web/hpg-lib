@@ -114,7 +114,7 @@ class HalfHourglass(DihedralElement):
             sage: hh.__repr__()
             'HalfHourglass between v1 to v2 with multiplicity 1'
         """
-        return "HalfHourglass " + " (ID: " + str(self.id) + ") from " + ("None" if self.v_from() is None else str(self.v_from().id)) + " to " + ("None" if self.v_to() is None else str(self.v_to().id)) + " with multiplicity " + str(self.multiplicity())
+        return "HalfHourglass (ID: " + str(self.id) + ") from " + ("None" if self.v_from() is None else str(self.v_from().id)) + " to " + ("None" if self.v_to() is None else str(self.v_to().id)) + " with multiplicity " + str(self.multiplicity())
 
     # Insert/remove overrides. These must be overridden as strands must be linked up as well.
 
@@ -456,7 +456,14 @@ class HalfHourglass(DihedralElement):
 
         EXAMPLES:
 
-            # TODO
+            sage: ID.reset_id()
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: v3 = Vertex('v3', 1, 0, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh.reparent(v3)
+            sage: hh
+            HalfHourglass (ID: v1_v2) from v3 to v2 with multiplicity 1
         """
         self.v_from()._remove_hourglass(self)
         v._insert_hourglass(self)
