@@ -27,6 +27,8 @@ from .idgenerator import ID
 class HalfHourglass(DihedralElement):
     r"""
     Represents movement on an edge from one vertex to another in an hourglass plabic graph.
+
+    A HalfHourglass is always assumed to be between two Vertices and be linked to adjacent HalfHourglasses for v_from.
     """
     def __init__(self, id, v_from, v_to, multiplicity, label='', twin=None):
         r"""
@@ -268,6 +270,35 @@ class HalfHourglass(DihedralElement):
             self._half_strands_head.link_cw_prev(self._half_strands_tail)
         super().remove()
 
+    def reparent(self, v):
+        r"""
+        Changes this half hourglass's v_from to v, performing all appropriate bookkeeping.
+
+        INPUT:
+
+        - `v` -- Vertex; The new vertex this hourglass should come from.
+
+        EXAMPLES:
+
+            sage: ID.reset_id()
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: v3 = Vertex('v3', 1, 0, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh.reparent(v3)
+            sage: hh
+            HalfHourglass (ID: v1_v2) from v3 to v2 with multiplicity 1
+        """
+        self.v_from()._remove_hourglass(self)
+        v._insert_hourglass(self)
+
+        # Reinsert twin as it may now have swapped places
+        self.twin().v_from()._remove_hourglass(self.twin())
+        self.twin().v_from()._insert_hourglass(self.twin())
+
+        self._v_from = v
+        self.twin()._v_to = v
+
     # Strand modification and accessor functions
 
     def add_strand(self):
@@ -446,68 +477,215 @@ class HalfHourglass(DihedralElement):
         """
         return self._right_face
 
-    def reparent(self, v):
+    def multiplicity(self):
         r"""
-        Changes this half hourglass's v_from to v, performing all appropriate bookkeeping.
+        Returns the number of strands owned by this hourglass.
 
-        INPUT:
-
-        - `v` -- Vertex; The new vertex this hourglass should come from.
+        OUTPUT: integer
 
         EXAMPLES:
 
-            sage: ID.reset_id()
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 0, 1, True)
-            sage: v3 = Vertex('v3', 1, 0, True)
-            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
-            sage: hh.reparent(v3)
-            sage: hh
-            HalfHourglass (ID: v1_v2) from v3 to v2 with multiplicity 1
+            sage: hh = HalfHourglass('hh', None, None, 1)
+            sage: hh.multiplicity()
+            1
+
+            sage: hh = HalfHourglass('hh', None, None, 1)
+            sage: hh.thicken()
+            sage: hh.multiplicity()
+            2
+
+        .. NOTE::
+
+            This function is aliased by strand_count.
         """
-        self.v_from()._remove_hourglass(self)
-        v._insert_hourglass(self)
-
-        # Reinsert twin as it may now have swapped places
-        self.twin().v_from()._remove_hourglass(self.twin())
-        self.twin().v_from()._insert_hourglass(self.twin())
-
-        self._v_from = v
-        self.twin()._v_to = v
-
-    def multiplicity(self):
-        '''Returns the number of strands owned by this hourglass.'''
         return self._multiplicity
     strand_count = multiplicity # alias
 
     def is_boundary(self):
-        '''Returns True if this hourglass is on the boundary (or otherwise has multiplicity 0).'''
+        r"""
+        Returns True if this hourglass is on the boundary (or otherwise has multiplicity 0).
+
+        OUTPUT: boolean
+
+        EXAMPLES:
+
+            sage: hh = HalfHourglass('hh', None, None, 1)
+            sage: hh.is_boundary()
+            True
+
+            sage: hh = HalfHourglass('hh', None, None, 0)
+            sage: hh.is_boundary()
+            False
+
+        .. NOTE::
+
+            This function is aliased by is_phantom.
+        """
         return self._multiplicity == 0
     is_phantom = is_boundary # alias
 
     def get_angle(self):
-        ''' Returns the angle between the vector from v_from to v_to and the x-axis.
-            Returned value is between 0 and 2pi.'''
+        r"""
+        Returns the angle between the vector from v_from to v_to and the x-axis.
+        Returned value is between 0 and 2pi.
+
+        OUTPUT: float
+
+        EXAMPLES:
+
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 1, 0, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh.get_angle()
+            0.0
+
+            sage: v1 = Vertex('v1', 1, 1, True)
+            sage: v2 = Vertex('v2', -1, -1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh.get_angle()
+            3.9269908169872414
+
+        This example demonstrates output close to 2pi.
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 1, -0.01, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh.get_angle()
+            6.273185640492921
+        """
         angle = math.atan2(self.v_to().y - self.v_from().y, self.v_to().x - self.v_from().x)
         if angle < 0:
             angle += 2 * math.pi
         return angle
 
     def iterate_left_turns(self):
+        r"""
+        Iterates over the left turns of this HalfHourglass.
+        This can be used to find the HalfHourglasses in the left face of this HalfHourglass.
+
+        OUTPUT: _TurnIterator; set to iterate left turns
+
+        EXAMPLES:
+
+        This example constructs a face and iterates over its hourglasses.
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 1, 0, True)
+            sage: v3 = Vertex('v3', 1, 1, True)
+            sage: v4 = Vertex('v4', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: Vertex.create_hourglass_between(v3, v4, 1)
+            sage: Vertex.create_hourglass_between(v4, v1, 1)
+            sage: [ihh.id for ihh in hh.iterate_left_turns()]
+            ['v1_v2', 'v2_v3', 'v3_v4', 'v4_v1']
+            
+        This can also be used to iterate the hourglasses of an infinite face.
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 1, 0, True)
+            sage: v3 = Vertex('v3', 1, 1, True)
+            sage: v4 = Vertex('v4', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: Vertex.create_hourglass_between(v3, v4, 1)
+            sage: Vertex.create_hourglass_between(v4, v1, 1)
+            sage: [ihh.id for ihh in hh.twin().iterate_left_turns()]
+            ['v1_v2_t', 'v4_v1_t', 'v3_v4_t', 'v2_v3_t']
+
+        This example demonstrates what happens when iterating over a single hourglass not connected to anything.
+
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: [ihh.id for ihh in hh.iterate_left_turns()]
+            ['v1_v2', 'v1_v2_t']
+        """
         return _TurnIterator(self, False)
 
     def iterate_right_turns(self):
+        r"""
+        Iterates over the right turns of this HalfHourglass.
+        This can be used to find the HalfHourglasses in the right face of this HalfHourglass.
+
+        OUTPUT: _TurnIterator; set to iterate right turns
+
+        EXAMPLES:
+
+        This example constructs a face and iterates over its hourglasses.
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', -1, 0, True)
+            sage: v3 = Vertex('v3', -1, 1, True)
+            sage: v4 = Vertex('v4', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: Vertex.create_hourglass_between(v3, v4, 1)
+            sage: Vertex.create_hourglass_between(v4, v1, 1)
+            sage: [ihh.id for ihh in hh.iterate_right_turns()]
+            ['v1_v2', 'v2_v3', 'v3_v4', 'v4_v1']
+            
+        This can also be used to iterate the hourglasses of an infinite face.
+        
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', -1, 0, True)
+            sage: v3 = Vertex('v3', -1, 1, True)
+            sage: v4 = Vertex('v4', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: Vertex.create_hourglass_between(v3, v4, 1)
+            sage: Vertex.create_hourglass_between(v4, v1, 1)
+            sage: [ihh.id for ihh in hh.twin().iterate_right_turns()]
+            ['v1_v2_t', 'v4_v1_t', 'v3_v4_t', 'v2_v3_t']
+
+        This example demonstrates what happens when iterating over a single hourglass not connected to anything.
+
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: [ihh.id for ihh in hh.iterate_right_turns()]
+            ['v1_v2', 'v1_v2_t']
+        """
         return _TurnIterator(self, True)
 
     def iterate_strands(self):
+        r"""
+        Iterates over the HalfStrands owned by this HalfHourglass, in clockwise order.
+
+        OUTPUT: _StrandIterator
+
+        EXAMPLES:
+
+            sage: ID.reset_id()
+            sage: hh = HalfHourglass('hh', None, None, 3)
+            sage: [s.id for s in hh.iterate_strands()]
+            ['hh_s0', 'hh_s1', 'hh_s2']
+
+        This will only iterate over the strands owned by this HalfHourglass, even if there are other adjacent strands.
+
+            sage: ID.reset_id()
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: v3 = Vertex('v3', 0, -1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 2)
+            sage: Vertex.create_hourglass_between(v1, v3, 2)
+            sage: [s.id for s in hh.iterate_strands()]
+            ['v1_v2_s0', 'v1_v2_s1']
+
+        This example demonstrates what happens when iterating over an hourglass with no strands.
+
+            sage: hh = HalfHourglass('hh', None, None, 0)
+            sage: [s.id for s in hh.iterate_strands()]
+            []
+        """
         return _StrandIterator(self)
 
 class _TurnIterator:
-    '''
+    r"""
     Internal class for iterating left and right turns. A left/right turn is computed by
     taking an hourglass's twin's cw/ccw_next element.
     Modification of the list while iterating can cause errors with iteration.
-    '''
+    """
     def __init__(self, head, turn_right):
         self.head = head
         self.iter = head
@@ -527,7 +705,9 @@ class _TurnIterator:
         return old
 
 class _StrandIterator:
-    '''Internal class for iterating over the strands owned by this hourglass.'''
+    r"""
+    Internal class for iterating over the strands owned by this hourglass.
+    """
     def __init__(self, hh):
         self.hh = hh
         self.iter = hh._half_strands_head
