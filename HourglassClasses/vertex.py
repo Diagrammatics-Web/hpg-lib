@@ -65,11 +65,21 @@ class Vertex:
 
     def __repr__(self):
         r"""
+        Returns a String representation of this Vertex, providing its ID, position, and filled status.
+
+        OUTPUT: str
+
+        EXAMPLES:
+
+            sage: v = Vertex('v', 0, 0, True)
+            sage: v
+            Vertex v at (0, 0), filled
         """
-        return "HourglassPlabicGraph Vertex object: id=%s, label=%s"%(str(self.id), str(self.label))
+        return "Vertex " + str(self.id) + " at (" + str(self.x) + ", " + str(self.y) + "), " + ("filled" if self.filled else "unfilled")
 
     def _reset_head(self):
         r"""
+        Resets _half_hourglasses_head to the hourglass with the smallest angle.
         """
         while self._half_hourglasses_head.get_angle() > self._half_hourglasses_head.cw_next().get_angle():
             self._half_hourglasses_head = self._half_hourglasses_head.cw_next()
