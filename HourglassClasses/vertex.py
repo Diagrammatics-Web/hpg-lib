@@ -1,3 +1,22 @@
+r"""
+Represents a vertex in an hourglass plabic graph.
+
+AUTHORS:
+
+- Stefano L. Corno (2024-05-10): initial version
+
+"""
+
+# ****************************************************************************
+#       Copyright (C) 2024 Stefano Corno <stlecorno@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
+
 from .halfhourglass import HalfHourglass
 from .idgenerator import ID
 
@@ -6,30 +25,41 @@ class Vertex:
     Represents a vertex in an hourglass plabic graph.
     A vertex can be filled (black) or unfilled (white), and is connected to other
     vertices through hourglass edges.
-    When traversing a HPG, trip i turns at the ith left on an unfilled vertex
+    When traversing an HPG, trip i turns at the ith left on an unfilled vertex
     and the ith right on a filled vertex.
     """
     def __init__(self, id, x, y, filled, boundary=False, label=''):
         r"""
-        id: an object, assumed unique, should be hashable
-        (x, y) coordinates
-        filled boolean: true for filled/black, false for unfilled/white
-        boundary: true if on the boundary
-        label: an object
+        Constructs a Vertex with the given ID, x and y positions, and filled and boundary statuses.
+
+        INPUT:
+
+        - `id` -- an object, assumed unique, should be hashable
+
+        - ``x`` -- float; the x-position of this Vertex
+
+        - ``y`` -- float; the y-position of this Vertex
+
+        - `filled` -- boolean; True for filled/black, False for unfilled/white
+
+        - `boundary` -- boolean (default: False); True if on the boundary
+
+        - `label` -- object (default: '')
+
+        OUTPUT: Vertex; the constructed Vertex
         """
-        # first: true if first boundary vertex
-        # last: true if last boundary vertex
         self.id = id
         self.x = x
         self.y = y
         self.filled = filled
         self.boundary = boundary
         self.label = label
-        
+
         r"""
         Some half hourglass around this vertex. When the graph is properly embedded,
         the vertex will attempt to maintain this as the the one making the smallest
-        angle with the x-axis during insertions and deletions, but this behavior is not guaranteed.
+        angle with the x-axis during insertions and deletions, but this behavior may
+        not be guaranteed.
         """
         self._half_hourglasses_head = None
 
@@ -48,7 +78,7 @@ class Vertex:
 
     @classmethod
     def create_hourglass_between(cls, v1, v2, multiplicity=1):
-        r""" 
+        r"""
         Creates a half hourglass to and from v1 and v2, inserting it into each vertex's hourglass list.
         v1, v2: The vertices to create the hourglass between.
         multiplicity: the number of strands on the edge.
@@ -61,7 +91,7 @@ class Vertex:
         return hh
 
     def _insert_hourglass(self, hh):
-        r""" 
+        r"""
         Inserts a half hourglass into the hourglass list.
         Maintains the list with the first angle being the one with the smallest angle ccw from the x-axis.'''
         """
@@ -122,7 +152,7 @@ class Vertex:
         raise ValueError("Hourglass to vertex " + v_to.id() + " does not exist.")
 
     def get_trip(self, i, output='half_strands'):
-        r""" 
+        r"""
         Traverses the graph to compute trip i and returns an array of all visited half strands or half hourglasses.
         i: computes trip_i by taking the ith left at unfilled/ith right at filled
         output: if output = 'half_strands', returns an array of HalfStrands. If output = 'half_hourglasses', returns HalfHourglasses.
@@ -199,7 +229,7 @@ class Vertex:
     # Square move functions
 
     def square_move_contract(self, out_hh):
-        r""" 
+        r"""
         Contracts the vertex into the vertex it is connected to outside the face.
         Functionally, reparents all this vertex's half hourglasses to out_hh.v_to().
         This function should only be called on vertices with only one outgoing hourglass.

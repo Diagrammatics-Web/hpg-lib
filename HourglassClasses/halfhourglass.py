@@ -41,11 +41,11 @@ class HalfHourglass(DihedralElement):
 
         - `multiplicity` -- nonnegative integer; number of strands between from and to. if 0, this is an edge boundary. Assumed to be an integer `\geq 1`.
 
-        - `label` -- object
+        - `label` -- object (default: '')
 
         - `twin` -- HalfHourglass (default: None); this parameter should be left blank. It is used internally to automatically construct this strand's twin.
 
-        OUTPUT: HalfHourglass; the constructed HalfHourglas
+        OUTPUT: HalfHourglass; the constructed HalfHourglass
 
         EXAMPLES:
 
@@ -546,7 +546,7 @@ class HalfHourglass(DihedralElement):
             3.9269908169872414
 
         This example demonstrates output close to 2pi.
-        
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 1, -0.01, True)
             sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
@@ -568,7 +568,7 @@ class HalfHourglass(DihedralElement):
         EXAMPLES:
 
         This example constructs a face and iterates over its hourglasses.
-        
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 1, 0, True)
             sage: v3 = Vertex('v3', 1, 1, True)
@@ -579,9 +579,9 @@ class HalfHourglass(DihedralElement):
             sage: Vertex.create_hourglass_between(v4, v1, 1)
             sage: [ihh.id for ihh in hh.iterate_left_turns()]
             ['v1_v2', 'v2_v3', 'v3_v4', 'v4_v1']
-            
+
         This can also be used to iterate the hourglasses of an infinite face.
-        
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', 1, 0, True)
             sage: v3 = Vertex('v3', 1, 1, True)
@@ -613,7 +613,7 @@ class HalfHourglass(DihedralElement):
         EXAMPLES:
 
         This example constructs a face and iterates over its hourglasses.
-        
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', -1, 0, True)
             sage: v3 = Vertex('v3', -1, 1, True)
@@ -624,9 +624,9 @@ class HalfHourglass(DihedralElement):
             sage: Vertex.create_hourglass_between(v4, v1, 1)
             sage: [ihh.id for ihh in hh.iterate_right_turns()]
             ['v1_v2', 'v2_v3', 'v3_v4', 'v4_v1']
-            
+
         This can also be used to iterate the hourglasses of an infinite face.
-        
+
             sage: v1 = Vertex('v1', 0, 0, True)
             sage: v2 = Vertex('v2', -1, 0, True)
             sage: v3 = Vertex('v3', -1, 1, True)
