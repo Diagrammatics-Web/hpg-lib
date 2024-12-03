@@ -1,7 +1,5 @@
 r"""
-TODO
-TODO
-TODO
+Represents a face in an hourglass plabic graph.
 
 AUTHORS:
 
