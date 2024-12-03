@@ -1,7 +1,5 @@
 r"""
-TODO
-TODO
-TODO
+Represents an hourglass plabic graph.
 
 AUTHORS:
 

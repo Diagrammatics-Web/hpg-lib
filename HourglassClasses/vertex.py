@@ -270,11 +270,11 @@ class Vertex:
 
         INPUT:
 
-            - ``i`` -- positive integer; the trip number. Assumed to be an integer `\geq 1`.
+        - ``i`` -- positive integer; the trip number. Assumed to be an integer `\geq 1`.
 
-            - `output` -- String (default: 'half_strands'); The data type stored in the output array. If 'half_strands', returns the
-                encountered HalfStrands. If 'half_hourglasses', returns the encountered HalfHourglasses. Anything else will return
-                the strand IDs.
+        - `output` -- String (default: 'half_strands'); The data type stored in the output array. If 'half_strands', returns the
+            encountered HalfStrands. If 'half_hourglasses', returns the encountered HalfHourglasses. Anything else will return
+            the strand IDs.
 
         OUTPUT: List; see `output` parameter for details
 
@@ -490,15 +490,6 @@ class Vertex:
 
         return new_v
 
-    # FOR TESTING PURPOSES
-    def print_neighbors(self):
-        if self._half_hourglasses_head is None: print("no neighbors")
-        else: print(str([hh.v_to().id for hh in self]))
-
-    def print_neighbors_and_angles(self):
-        if self._half_hourglasses_head is None: print("no neighbors")
-        else: print(str([(hh.v_to().id, hh.get_angle()) for hh in self]))
-
     def __iter__(self):
         r"""
         Iterates over this vertex's hourglasses counterclockwise (in degree order).
@@ -528,3 +519,12 @@ class Vertex:
         if self._half_hourglasses_head is None:
             return iter([])  # Return an empty iterator
         return self._half_hourglasses_head.iterate_counterclockwise()
+
+    # FOR TESTING PURPOSES
+    def print_neighbors(self):
+        if self._half_hourglasses_head is None: print("no neighbors")
+        else: print(str([hh.v_to().id for hh in self]))
+
+    def print_neighbors_and_angles(self):
+        if self._half_hourglasses_head is None: print("no neighbors")
+        else: print(str([(hh.v_to().id, hh.get_angle()) for hh in self]))

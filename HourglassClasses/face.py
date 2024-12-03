@@ -18,10 +18,38 @@ AUTHORS:
 # ****************************************************************************
 
 class Face:
-    ''' Represents a face of an hourglass plabic graph.
-        A face can be infinite.'''
+    r"""
+    Represents a face of an hourglass plabic graph.
+    A face can be infinite.
+    """
     def __init__(self, id, half_hourglass, label=''):
-        ''' half_hourglass: a HalfHourglass adjacent to this face with this face on its right.'''
+        r"""
+        Constructs a Face with the given ID to the right of the given half hourglass.
+
+        INPUT:
+
+        - `id` -- an object, assumed unique, should be hashable
+        
+        - `half_hourglass` -- HalfHourglass; a HalfHourglass adjacent to this face with this face on its right.
+
+        - `label` -- object (default: '')
+
+        OUTPUT: Face; the constructed Face
+
+        EXAMPLES:
+        
+            sage: v1 = Vertex('v1', 0, -1, True)
+            sage: v2 = Vertex('v2', 1, 0, False)
+            sage: v3 = Vertex('v3', 0, 1, False)
+            sage: v4 = Vertex('v4', -1, 0, False)
+            sage: Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: Vertex.create_hourglass_between(v3, v4, 1)
+            sage: hh = Vertex.create_hourglass_between(v4, v1, 1)
+            sage: face = Face('face', hh)
+            sage: [hh.v_to().id for hh in face]
+            ['v1', 'v2', 'v3', 'v4']
+        """
         self.id = id
         self.label = label
 
@@ -29,10 +57,16 @@ class Face:
         self.boundary = False
         self.initialize_half_hourglasses(half_hourglass)
 
+    def __repr__(self):
+        r"""
+        """
+
     def initialize_half_hourglasses(self, hh):
-        ''' Sets this face up as the face for hh and all other half hourglasses in the same rightward loop,
-            as well as the twin hourglasses in the reverse direction.
-            hh: a HalfHourglass adjacent to this face with this face on its right.'''
+        r"""
+        Sets this face up as the face for hh and all other half hourglasses in the same rightward loop,
+        as well as the twin hourglasses in the reverse direction.
+        hh: a HalfHourglass adjacent to this face with this face on its right.
+        """
         self._half_hourglasses_head = hh
         self.boundary = False
         for iter_hh in self:
@@ -45,10 +79,12 @@ class Face:
     # Square move
 
     def is_square_move_valid(self, r=4):
-        ''' Verifies that this face can perform a square move. The face should have 4 vertices,
-            alternating filled/unfilled status. The sum of the multiplicities of connecting hourglasses should equal r.
-            In a square move, vertices with one outgoing edge are contracted, while vertices with two outgoing edges
-            are split into two vertices connected by an hourglass of sufficient multiplicity.'''
+        r"""
+        Verifies that this face can perform a square move. The face should have 4 vertices,
+        alternating filled/unfilled status. The sum of the multiplicities of connecting hourglasses should equal r.
+        In a square move, vertices with one outgoing edge are contracted, while vertices with two outgoing edges
+        are split into two vertices connected by an hourglass of sufficient multiplicity.
+        """
         count = 0
         multiplicity_sum = 0
         should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
@@ -63,9 +99,11 @@ class Face:
         return (multiplicity_sum == r)
 
     def square_move(self, r=4):
-        ''' Performs a square move on this face. Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
-            To verify that this move will be valid, call is_square_move_valid().
-            OUTPUT: A tuple of arrays: the first is of created vertices that result from this move, the second is of all removed vertices.'''
+        r"""
+        Performs a square move on this face. Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
+        To verify that this move will be valid, call is_square_move_valid().
+        OUTPUT: A tuple of arrays: the first is of created vertices that result from this move, the second is of all removed vertices.
+        """
         new_vertices = []
         removed_vertices = []
 
@@ -89,9 +127,11 @@ class Face:
     # SL4 Square move (should operate identically to square_move(r=4))
 
     def is_square_move4_valid(self):
-        ''' Verifies that this face can perform a square move. In SL4, this requires the face to be made of 4 vertices,
-            alternating filled/unfilled status, with multiplicity 1 edges in between.
-            In a square move, vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.'''
+        r"""
+        Verifies that this face can perform a square move. In SL4, this requires the face to be made of 4 vertices,
+        alternating filled/unfilled status, with multiplicity 1 edges in between.
+        In a square move, vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
+        """
         count = 0
         should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
         for hh in self:
@@ -105,10 +145,12 @@ class Face:
         return True
 
     def square_move4(self):
-        ''' Performs a square move on this face, assuming the graph is in SL4. Vertices with one outgoing edge are contracted,
-            while vertices with two outgoing edges are split into two vertices.
-            To verify that this move will be valid, call is_square_move4_valid().
-            OUTPUT: A tuple of arrays: the first is of created vertices that result from this move, the second is of all removed vertices.'''
+        r"""
+        Performs a square move on this face, assuming the graph is in SL4. Vertices with one outgoing edge are contracted,
+        while vertices with two outgoing edges are split into two vertices.
+        To verify that this move will be valid, call is_square_move4_valid().
+        OUTPUT: A tuple of arrays: the first is of created vertices that result from this move, the second is of all removed vertices.
+        """
         new_vertices = []
         removed_vertices = []
 
@@ -124,11 +166,13 @@ class Face:
     # Cycle
 
     def is_cycle_valid(self, start_hh):
-        ''' Verifies that this face can perform a cycle move. This requires the face to have an even number of
-            vertices, with alternating filled/unfilled status. Each other hourglass starting from start_hh should have
-            a multiplicity greater than 1.
-            In a cycle move, hourglasses starting from start_hh are alternatively thickened and thinned.
-            start_hh: The starting hourglass in this face.'''
+        r"""
+        Verifies that this face can perform a cycle move. This requires the face to have an even number of
+        vertices, with alternating filled/unfilled status. Each other hourglass starting from start_hh should have
+        a multiplicity greater than 1.
+        In a cycle move, hourglasses starting from start_hh are alternatively thickened and thinned.
+        start_hh: The starting hourglass in this face.
+        """
         if start_hh.right_face() is not self:
             if start_hh.left_face() is self: start_hh = start_hh.twin()
             else: raise ValueError("start_hh does not belong to this face!")
@@ -147,9 +191,11 @@ class Face:
         return count % 2 == 0
 
     def cycle(self, start_hh):
-        ''' Performs a cycle move on this face. Its edges are alternatingly thinned and thickened,
-            starting from start_hh.
-            To verify that this move will be valid, call is_cycle_valid(start_hh).'''
+        r"""
+        Performs a cycle move on this face. Its edges are alternatingly thinned and thickened,
+        starting from start_hh.
+        To verify that this move will be valid, call is_cycle_valid(start_hh).
+        """
         if start_hh.right_face() is not self: start_hh = start_hh.twin()
 
         thicken = False
@@ -161,9 +207,11 @@ class Face:
     # Benzene move
 
     def is_benzene_move_valid(self):
-        ''' Verifies that this face can perform a square move. This requires the face to have an even number of
-            vertices, with alternating filled/unfilled status, and with edges of alternating 1 or 2 multiplicity in between.
-            In a benzene move, the multiplicities of the edges are swapped.'''
+        r"""
+        Verifies that this face can perform a square move. This requires the face to have an even number of
+        vertices, with alternating filled/unfilled status, and with edges of alternating 1 or 2 multiplicity in between.
+        In a benzene move, the multiplicities of the edges are swapped.
+        """
         count = 0
         should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
         expected_mult = 1 if self._half_hourglasses_head.strand_count() == 1 else 2
@@ -178,8 +226,10 @@ class Face:
         return count % 2 == 0
 
     def benzene_move(self):
-        ''' Performs a benzene move on this face. The multiplicities of its edges are swapped between 1 and 2.
-            To verify that this move will be valid, call is_benzene_move_valid().'''
+        r"""
+        Performs a benzene move on this face. The multiplicities of its edges are swapped between 1 and 2.
+        To verify that this move will be valid, call is_benzene_move_valid().
+        """
         thicken = self._half_hourglasses_head.strand_count() == 1
         for hh in self:
             if thicken: hh.thicken()
@@ -187,7 +237,9 @@ class Face:
             thicken = not thicken
 
     def __iter__(self):
-        '''Returns a HalfHourglass._TurnIterator. Iteration occurs beginning from face._half_hourglasses_head and continues clockwise.'''
+        r"""
+        Returns a HalfHourglass._TurnIterator. Iteration occurs beginning from face._half_hourglasses_head and continues clockwise.
+        """
         return self._half_hourglasses_head.iterate_right_turns()
 
     # TESTING
