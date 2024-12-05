@@ -20,7 +20,9 @@ AUTHORS:
 class Face:
     r"""
     Represents a face of an hourglass plabic graph.
-    A face can be infinite.
+    A face can be unbounded.
+    A Face is simply a reference to a collection of edges/vertices, and does not actually
+    directly manage them. This should instead be done though an HourglassPlabicGraph.
     """
     def __init__(self, id, half_hourglass, label=''):
         r"""
@@ -38,10 +40,10 @@ class Face:
 
         EXAMPLES:
         
-            sage: v1 = Vertex('v1', 0, -1, True)
-            sage: v2 = Vertex('v2', 1, 0, False)
-            sage: v3 = Vertex('v3', 0, 1, False)
-            sage: v4 = Vertex('v4', -1, 0, False)
+            sage: v1 = Vertex('v1', 0, 0, False)
+            sage: v2 = Vertex('v2', 0, 1, False)
+            sage: v3 = Vertex('v3', 1, 1, False)
+            sage: v4 = Vertex('v4', 1, 0, False)
             sage: Vertex.create_hourglass_between(v1, v2, 1)
             sage: Vertex.create_hourglass_between(v2, v3, 1)
             sage: Vertex.create_hourglass_between(v3, v4, 1)
@@ -49,6 +51,27 @@ class Face:
             sage: face = Face('face', hh)
             sage: [hh.v_to().id for hh in face]
             ['v1', 'v2', 'v3', 'v4']
+
+        This example verifies that the face is on the correct side of the hourglass.
+            
+            sage: v1 = Vertex('v1', 0, 0, False)
+            sage: v2 = Vertex('v2', 0, 1, False)
+            sage: v3 = Vertex('v3', 1, 1, False)
+            sage: v4 = Vertex('v4', 1, 0, False)
+            sage: v5 = Vertex('v5', 2, 0, False)
+            sage: Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: Vertex.create_hourglass_between(v3, v4, 1)
+            sage: Vertex.create_hourglass_between(v4, v5, 1)
+            sage: hh = Vertex.create_hourglass_between(v4, v1, 1)
+            sage: face = Face('face', hh)
+            sage: [hh.v_to().id for hh in face]
+            ['v1', 'v2', 'v3', 'v4']
+
+        .. NOTE::
+
+            Constructing a Face does not actually construct any of its vertices or edges; instead, these
+            are already assumed to exist. The Face simply allows you to unify them.
         """
         self.id = id
         self.label = label
@@ -59,13 +82,50 @@ class Face:
 
     def __repr__(self):
         r"""
+        Returns a String representation of this Face, providing its ID.
+
+        OUTPUT: str
+
+        EXAMPLES:
+            sage: v1 = Vertex('v1', 0, -1, True)
+            sage: v2 = Vertex('v2', 1, 0, False)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: f = Face('face', hh)
+            sage: f.__repr__()
+            'Face face'
         """
+        return "Face " + str(self.id)
 
     def initialize_half_hourglasses(self, hh):
         r"""
-        Sets this face up as the face for hh and all other half hourglasses in the same rightward loop,
-        as well as the twin hourglasses in the reverse direction.
-        hh: a HalfHourglass adjacent to this face with this face on its right.
+        Sets this face as the right face for hh and all other half hourglasses in the 
+        same rightward loop, as well as the left face for all twin hourglasses in the 
+        reverse direction.
+
+        INPUT:
+        
+        - `hh` -- HalfHourglass; a HalfHourglass with this face on its right.
+
+        EXAMPLES:
+
+        Note that initialize_half_hourglasses is called internally by the constructor.
+        This example demonstrates how initialize_half_hourglasses can be used when
+        modifying the edges of a face.
+
+            sage: v1 = Vertex('v1', 0, 0, False)
+            sage: v2 = Vertex('v2', 0, 1, False)
+            sage: v3 = Vertex('v3', 1, 1, False)
+            sage: v4 = Vertex('v4', 1, 0, False)
+            sage: Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: hh = Vertex.create_hourglass_between(v3, v1, 1)
+            sage: face = Face('face', hh)
+            sage: Vertex.remove_hourglass_between(v3, v1)
+            sage: Vertex.create_hourglass_between(v3, v4, 1)
+            sage: hh = Vertex.create_hourglass_between(v4, v1, 1)
+            sage: face.initialize_half_hourglasses(hh)
+            sage: [hh.v_to().id for hh in face]
+            ['v1', 'v2', 'v3', 'v4']
         """
         self._half_hourglasses_head = hh
         self.boundary = False
@@ -80,10 +140,59 @@ class Face:
 
     def is_square_move_valid(self, r=4):
         r"""
-        Verifies that this face can perform a square move. The face should have 4 vertices,
-        alternating filled/unfilled status. The sum of the multiplicities of connecting hourglasses should equal r.
-        In a square move, vertices with one outgoing edge are contracted, while vertices with two outgoing edges
-        are split into two vertices connected by an hourglass of sufficient multiplicity.
+        Verifies that this face can perform a square move.
+        
+        In order to perform a square move, the face should have 4 vertices, alternating 
+        filled/unfilled status. The sum of the multiplicities of the hourglasses of this 
+        face should equal r.
+        In a square move, vertices with one outgoing edge are contracted, while vertices
+        with two outgoing edges are split into two vertices connected by an hourglass of
+        sufficient multiplicity to maintain r-valence.
+
+        INPUT:
+
+        - ``r`` -- positive integer (default: 4); the valence of the graph. Assumed to be an integer `\geq 1`.
+
+        OUTPUT: Boolean; whether the face can perform a square move.
+
+        EXAMPLES:
+
+        This example constructs a face where a square move is valid.
+
+            sage: v1 = Vertex(1, 0, 0, True)
+            sage: v2 = Vertex(2, 1, 0, False)
+            sage: v3 = Vertex(3, 1, 1, True)
+            sage: v4 = Vertex(4, 0, 1, False)
+            sage: extras = [Vertex(5, -1, -1, False), Vertex(6, 2, -1, True), Vertex(7, 2, 1, False), Vertex(8, 1, 2, False), Vertex(9, 0, 2, True), Vertex(10, -1, 1, True), Vertex(11, -2, -1, True), Vertex(12, -1, -2, True), Vertex(13, 2, -2, False), Vertex(14, 3, -1, False)]
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: Vertex.create_hourglass_between(v3, v4, 1)
+            sage: Vertex.create_hourglass_between(v4, v1, 1)
+            sage: Vertex.create_hourglass_between(v1, extras[0], 2)
+            sage: Vertex.create_hourglass_between(v2, extras[1], 2)
+            sage: Vertex.create_hourglass_between(v3, extras[2], 1)
+            sage: Vertex.create_hourglass_between(v3, extras[3], 1)
+            sage: Vertex.create_hourglass_between(v4, extras[4], 1)
+            sage: Vertex.create_hourglass_between(v4, extras[5], 1)
+            sage: Vertex.create_hourglass_between(extras[0], extras[6], 1)
+            sage: Vertex.create_hourglass_between(extras[0], extras[7], 1)
+            sage: Vertex.create_hourglass_between(extras[1], extras[8], 1)
+            sage: Vertex.create_hourglass_between(extras[1], extras[9], 1)
+            sage: face = Face('face', hh.twin())
+            sage: face.is_square_move_valid()
+            True
+
+        This is an example of a face which clearly cannot perform a square move.
+
+            sage: v1 = Vertex(1, 0, 0, True)
+            sage: v2 = Vertex(2, 0, 1, False)
+            sage: v3 = Vertex(3, 1, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: Vertex.create_hourglass_between(v3, v1, 1)
+            sage: face = Face('face', hh)
+            sage: face.is_square_move_valid()
+            False
         """
         count = 0
         multiplicity_sum = 0
@@ -100,9 +209,56 @@ class Face:
 
     def square_move(self, r=4):
         r"""
-        Performs a square move on this face. Vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
-        To verify that this move will be valid, call is_square_move_valid().
+        Performs a square move on this face.
+        In a square move, vertices with one outgoing edge are contracted, while vertices
+        with two outgoing edges are split into two vertices connected by an hourglass of
+        sufficient multiplicity to maintain r-valence.
+
+        INPUT:
+
+        - ``r`` -- positive integer (default: 4); the valence of the graph. Assumed to be an integer `\geq 1`.
+        
         OUTPUT: A tuple of arrays: the first is of created vertices that result from this move, the second is of all removed vertices.
+
+        EXAMPLES:
+
+        This example constructs a face and performs a square move on it.
+
+            sage: ID.reset_id()
+            sage: v1 = Vertex(1, 0, 0, True)
+            sage: v2 = Vertex(2, 1, 0, False)
+            sage: v3 = Vertex(3, 1, 1, True)
+            sage: v4 = Vertex(4, 0, 1, False)
+            sage: extras = [Vertex(5, -1, -1, False), Vertex(6, 2, -1, True), Vertex(7, 2, 1, False), Vertex(8, 1, 2, False), Vertex(9, 0, 2, True), Vertex(10, -1, 1, True), Vertex(11, -2, -1, True), Vertex(12, -1, -2, True), Vertex(13, 2, -2, False), Vertex(14, 3, -1, False)]
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: Vertex.create_hourglass_between(v3, v4, 1)
+            sage: Vertex.create_hourglass_between(v4, v1, 1)
+            sage: Vertex.create_hourglass_between(v1, extras[0], 2)
+            sage: Vertex.create_hourglass_between(v2, extras[1], 2)
+            sage: Vertex.create_hourglass_between(v3, extras[2], 1)
+            sage: Vertex.create_hourglass_between(v3, extras[3], 1)
+            sage: Vertex.create_hourglass_between(v4, extras[4], 1)
+            sage: Vertex.create_hourglass_between(v4, extras[5], 1)
+            sage: Vertex.create_hourglass_between(extras[0], extras[6], 1)
+            sage: Vertex.create_hourglass_between(extras[0], extras[7], 1)
+            sage: Vertex.create_hourglass_between(extras[1], extras[8], 1)
+            sage: Vertex.create_hourglass_between(extras[1], extras[9], 1)
+            sage: face = Face('face', hh.twin())
+            sage: face.square_move()
+            sage: [hh.v_from().id for hh in face]
+            [6, 5, 'v16', 'v19']
+
+        .. WARNING::
+
+            This function may crash or otherwise corrupt the graph if a square move is 
+            not valid. Use `is_square_move_valid` before to ensure this is possible.
+
+        .. SEEALSO::
+
+            :meth:`Face.is_square_move_valid`
+            :meth:`Vertex.square_move_expand`
+            :meth:`Vertex.square_move_contract`
         """
         new_vertices = []
         removed_vertices = []

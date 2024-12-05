@@ -72,8 +72,8 @@ class Vertex:
         EXAMPLES:
 
             sage: v = Vertex('v', 0, 0, True)
-            sage: v
-            Vertex v at (0, 0), filled
+            sage: v.__repr__()
+            'Vertex v at (0, 0), filled'
         """
         return "Vertex " + str(self.id) + " at (" + str(self.x) + ", " + str(self.y) + "), " + ("filled" if self.filled else "unfilled")
 
