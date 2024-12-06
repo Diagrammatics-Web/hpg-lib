@@ -31,7 +31,7 @@ class Face:
         INPUT:
 
         - `id` -- an object, assumed unique, should be hashable
-        
+
         - `half_hourglass` -- HalfHourglass; a HalfHourglass adjacent to this face with this face on its right.
 
         - `label` -- object (default: '')
@@ -39,7 +39,7 @@ class Face:
         OUTPUT: Face; the constructed Face
 
         EXAMPLES:
-        
+
             sage: v1 = Vertex('v1', 0, 0, False)
             sage: v2 = Vertex('v2', 0, 1, False)
             sage: v3 = Vertex('v3', 1, 1, False)
@@ -53,7 +53,7 @@ class Face:
             ['v1', 'v2', 'v3', 'v4']
 
         This example verifies that the face is on the correct side of the hourglass.
-            
+
             sage: v1 = Vertex('v1', 0, 0, False)
             sage: v2 = Vertex('v2', 0, 1, False)
             sage: v3 = Vertex('v3', 1, 1, False)
@@ -98,12 +98,12 @@ class Face:
 
     def initialize_half_hourglasses(self, hh):
         r"""
-        Sets this face as the right face for hh and all other half hourglasses in the 
-        same rightward loop, as well as the left face for all twin hourglasses in the 
+        Sets this face as the right face for hh and all other half hourglasses in the
+        same rightward loop, as well as the left face for all twin hourglasses in the
         reverse direction.
 
         INPUT:
-        
+
         - `hh` -- HalfHourglass; a HalfHourglass with this face on its right.
 
         EXAMPLES:
@@ -141,9 +141,9 @@ class Face:
     def is_square_move_valid(self, r=4):
         r"""
         Verifies that this face can perform a square move.
-        
-        In order to perform a square move, the face should have 4 vertices, alternating 
-        filled/unfilled status. The sum of the multiplicities of the hourglasses of this 
+
+        In order to perform a square move, the face should have 4 vertices, alternating
+        filled/unfilled status. The sum of the multiplicities of the hourglasses of this
         face should equal r.
         In a square move, vertices with one outgoing edge are contracted, while vertices
         with two outgoing edges are split into two vertices connected by an hourglass of
@@ -217,7 +217,7 @@ class Face:
         INPUT:
 
         - ``r`` -- positive integer (default: 4); the valence of the graph. Assumed to be an integer `\geq 1`.
-        
+
         OUTPUT: Array Tuple; the first is of created vertices that result from this move, the second is of all removed vertices.
 
         EXAMPLES:
@@ -251,7 +251,7 @@ class Face:
 
         .. WARNING::
 
-            This function may crash or otherwise corrupt the graph if a square move is 
+            This function may crash or otherwise corrupt the graph if a square move is
             not valid. Use `is_square_move_valid` before to ensure this is possible.
 
         .. SEEALSO::
@@ -285,8 +285,8 @@ class Face:
     def is_square_move4_valid(self):
         r"""
         Verifies that this face can perform a square move in SL4.
-        
-        In order to perform a square move, the face should have 4 vertices, alternating 
+
+        In order to perform a square move, the face should have 4 vertices, alternating
         filled/unfilled status. Each hourglass in this face should have multiplicity 1.
         In a square move, vertices with one outgoing edge are contracted, while vertices
         with two outgoing edges are split into two vertices.
@@ -353,7 +353,7 @@ class Face:
         Performs a square move on this face, assuming the graph is in SL4.
         In a square move, vertices with one outgoing edge are contracted, while vertices
         with two outgoing edges are split into two vertices.
-        
+
         OUTPUT: Array Tuple; the first is of created vertices that result from this move, the second is of all removed vertices.
 
         EXAMPLES:
@@ -387,7 +387,7 @@ class Face:
 
         .. WARNING::
 
-            This function may crash or otherwise corrupt the graph if a square move is 
+            This function may crash or otherwise corrupt the graph if a square move is
             not valid. Use `is_square_move4_valid` before to ensure this is possible.
 
         .. SEEALSO::
@@ -412,13 +412,13 @@ class Face:
 
     def is_cycle_valid(self, start_hh):
         r"""
-        Verifies that this face can perform a cycle move. 
+        Verifies that this face can perform a cycle move.
         This requires the face to have an even number of vertices, with alternating filled/unfilled
         status. Each other hourglass starting from start_hh should have a multiplicity greater than 1.
         In a cycle move, hourglasses starting from start_hh are alternatively thinned and thickened.
 
         INPUT:
-        
+
         - `start_hh` -- HalfHourglass; An hourglass in this face. This hourglass will be thinned.
 
         OUTPUT: Boolean, whether a cycle can be performed on this face.
@@ -464,13 +464,13 @@ class Face:
         r"""
         Performs a cycle move on this face. Its edges are alternatingly thinned and thickened,
         starting from start_hh.
-        
+
         INPUT:
-        
-        - `start_hh` -- HalfHourglass; An hourglass in this face. This hourglass will be thinned.        
-        
+
+        - `start_hh` -- HalfHourglass; An hourglass in this face. This hourglass will be thinned.
+
         EXAMPLES:
-        
+
         This example constructs a face for which a cycle move is valid.
 
             sage: v1 = Vertex(1, 0, 0, True)
@@ -490,10 +490,10 @@ class Face:
             sage: face.cycle(hh)
             sage: (prev_mults, [hh.multiplicity() for hh in face])
             ([2, 1, 2, 1, 2, 1], [1, 2, 1, 2, 1, 2])
-        
+
         .. WARNING::
 
-            This function may crash or otherwise corrupt the graph if a cycle is 
+            This function may crash or otherwise corrupt the graph if a cycle is
             not valid. Use `is_cycle_valid` before to ensure this is possible.
 
         .. SEEALSO::
@@ -512,12 +512,12 @@ class Face:
 
     def is_benzene_move_valid(self):
         r"""
-        Verifies that this face can perform a benzene move. 
-        This requires the face to have an even number of vertices, with alternating 
+        Verifies that this face can perform a benzene move.
+        This requires the face to have an even number of vertices, with alternating
         filled/unfilled status, and with edges of alternating 1 or 2 multiplicity in between.
         In a benzene move, the multiplicities of consecutive edges are swapped.
 
-        OUTPUT: Boolean; whether this face can perform a benzene move.        
+        OUTPUT: Boolean; whether this face can perform a benzene move.
 
         EXAMPLES:
 
@@ -564,11 +564,11 @@ class Face:
 
     def benzene_move(self):
         r"""
-        Performs a benzene move on this face. 
-        The multiplicities of its edges are swapped between 1 and 2.   
-        
+        Performs a benzene move on this face.
+        The multiplicities of its edges are swapped between 1 and 2.
+
         EXAMPLES:
-        
+
         This example constructs a face for which a benzene move is valid.
 
             sage: v1 = Vertex(1, 0, 0, True)
@@ -588,7 +588,7 @@ class Face:
             sage: face.benzene_move()
             sage: (prev_mults, [hh.multiplicity() for hh in face])
             ([2, 1, 2, 1, 2, 1], [1, 2, 1, 2, 1, 2])
-            
+
         .. NOTE::
 
             A benzene move is a special case of a cycle. This should be equivalent to
@@ -597,7 +597,7 @@ class Face:
 
         .. WARNING::
 
-            This function may crash or otherwise corrupt the graph if a benzene move is 
+            This function may crash or otherwise corrupt the graph if a benzene move is
             not valid. Use `is_benzene_move_valid` before to ensure this is possible.
 
         .. SEEALSO::
@@ -635,7 +635,7 @@ class Face:
             sage: hh = Vertex.create_hourglass_between(v1, v6, 2)
             sage: face = Face("face", hh)
             sage: [hh.v_to().id for hh in face]
-            [6, 5, 4, 3, 2, 1]        
+            [6, 5, 4, 3, 2, 1]
         """
         return self._half_hourglasses_head.iterate_right_turns()
 

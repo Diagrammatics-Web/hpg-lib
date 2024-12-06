@@ -60,11 +60,11 @@ class HourglassPlabicGraph:
         if n > 0: self.construct_boundary(n, filling, r)
 
     def __eq__(self, other):
-        '''
+        r"""
         Equality on HourglassPlabicGraphs is considered to be
         (embedded planar) graph isomorphism. Currently breaks
         if there are components not connected to the boundary.
-        '''
+        """
         return isinstance(other, HourglassPlabicGraph) and self.is_isomorphic(other)
 
     def __neq__(self, other):
