@@ -404,6 +404,18 @@ def hourglass_plabic_graph_tests():
     trip_perms2 = HPG.get_trip_perms()
     assert trip_perms1 == trip_perms2, "Trip permutations should be unchanged after performing a square move."
 
+    # Isomorphism tests
+
+    HPG1 = HourglassPlabicGraph.from_dict(Examples.example_ASM)
+    HPG2 = HourglassPlabicGraph.from_dict(Examples.example_ASM)
+    HPG3 = HourglassPlabicGraph.from_dict(Examples.example_5_by_2)
+    HPG4 = HourglassPlabicGraph.from_dict(Examples.example_5_by_2)
+    assert HPG1.is_isomorphic(HPG2), "HPG1 should be isomorphic to HPG2."
+    assert HPG3.is_isomorphic(HPG4), "HPG3 should be isomorphic to HPG4."
+    assert not HPG1.is_isomorphic(HPG3), "HPG1 should not be isomorphic to HPG3."
+    HPG.square_move("face12")
+    assert HPG1.is_isomorphic(HPG), "HPG1 should be isomorphic to HPG, even after two square moves."  
+
     print("HourglassPlabicGraph test complete.\n")
 
 # TESTS FOR EXTENDED HOURGLASS PLABIC GRAPH FUNCTIONALITY
