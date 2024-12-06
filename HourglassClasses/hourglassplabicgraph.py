@@ -68,9 +68,13 @@ class HourglassPlabicGraph:
         return isinstance(other, HourglassPlabicGraph) and self.is_isomorphic(other)
 
     def __neq__(self, other):
+        r"""
+        """
         return not self.__eq__(other)
 
     def traverse(self):
+        r"""
+        """
         if len(self._boundary_vertices) <= 1: return (None, None)
 
         # Find edge into the graph; this is assumed to be the first hourglass from the
@@ -106,12 +110,16 @@ class HourglassPlabicGraph:
         return half_hourglasses_visited, half_hourglass_history, vertices_visited, vertex_history
 
     def __hash__(self):
+        r"""
+        """
         hh_visited, hh_history, v_visited, v_history = self.traverse()
         hh_hash = tuple((hh_visited.index(hh), hh.multiplicity()) for hh in hh_history)
         v_hash = tuple((v_visited.index(v), v.filled) for v in v_history)
         return hash((hh_hash, v_hash))
 
     def is_isomorphic(self, other):
+        r"""
+        """
         self_hh_visited, self_hh_history, self_v_visited, self_v_history = self.traverse()
         other_hh_visited, other_hh_history, other_v_visited, other_v_history = other.traverse()
 
@@ -249,10 +257,14 @@ class HourglassPlabicGraph:
         return vertex
 
     def remove_vertex_by_id(self, v_id):
+        r"""
+        """
         del_vertex = self._get_vertex(v_id)
         self.remove_vertex(del_vertex)
 
     def remove_vertex(self, del_vertex):
+        r"""
+        """
         # Store hourglasses in a list to avoid issues with removing
         # elements while iterating over dihedral element
         del_hourglasses = del_vertex.get_hourglasses_as_list()
@@ -263,12 +275,16 @@ class HourglassPlabicGraph:
         else: del self._boundary_vertices[del_vertex.id]
 
     def create_hourglass_by_id(self, v1_id, v2_id, multiplicity=1):
+        r"""
+        """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
 
         return self.create_hourglass(v1, v2, multiplicity)
 
     def create_hourglass(self, v1, v2, multiplicity=1):
+        r"""
+        """
         new_hh = Vertex.create_hourglass_between(v1, v2, multiplicity)
 
         # Create faces
@@ -299,14 +315,20 @@ class HourglassPlabicGraph:
         return new_hh
 
     def remove_hourglass_by_id(self, v1_id, v2_id):
+        r"""
+        """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
         self.remove_hourglass(v1, v2)
 
     def remove_hourglass(self, v1, v2):
+        r"""
+        """
         self._remove_hourglass_internal(self._get_hourglass(v1, v2), v1, v2)
 
     def _remove_hourglass_internal(self, del_hh, v1, v2):
+        r"""
+        """
         face1 = None
         hh1 = None
         face2 = None
@@ -340,31 +362,43 @@ class HourglassPlabicGraph:
             del self._faces[del_hh.right_face().id]
 
     def thicken_hourglass_by_id(self, v1_id, v2_id):
+        r"""
+        """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
         self.thicken_hourglass(v1, v2)
     add_strand_by_id = thicken_hourglass_by_id # alias
 
     def thicken_hourglass(self, v1, v2):
+        r"""
+        """
         self._get_hourglass(v1, v2).thicken()
     add_strand = thicken_hourglass # alias
 
     def thin_hourglass_by_id(self, v1_id, v2_id):
+        r"""
+        """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
         self.thin_hourglass(v1, v2)
     remove_strand_by_id = thin_hourglass_by_id # alias
 
     def thin_hourglass(self, v1, v2):
+        r"""
+        """
         self._get_hourglass(v1, v2).thin()
     remove_strand = thin_hourglass # alias
 
     # Moves
 
     def is_square_move_valid(self, face_id, r=4):
+        r"""
+        """
         return self._get_face(face_id).is_square_move_valid(r)
 
     def square_move(self, face_id, r=4):
+        r"""
+        """
         face = self._get_face(face_id)
 
         new_vertices, removed_vertices = face.square_move(r)
@@ -381,22 +415,32 @@ class HourglassPlabicGraph:
             hh.left_face().initialize_half_hourglasses(hh.twin())
 
     def is_cycle_valid(self, face_id, v1_id, v2_id):
+        r"""
+        """
         return self._get_face(face_id).is_cycle_valid(self._get_hourglass_by_id(v1_id, v2_id))
 
     def cycle(self, face_id, v1_id, v2_id):
+        r"""
+        """
         self._get_face(face_id).cycle(self._get_hourglass_by_id(v1_id, v2_id))
 
     def is_benzene_move_valid(self, face_id):
+        r"""
+        """
         return self._get_face(face_id).is_benzene_move_valid()
     move_square = square_move # alias
 
     def benzene_move(self, face_id):
+        r"""
+        """
         self._get_face(face_id).benzene_move()
     move_benzene = benzene_move # alias
 
     # Checks
 
     def is_r_valent(self, r=4, verbose=False):
+        r"""
+        """
         for v in self._inner_vertices.values():
             if v.total_degree() != r:
                 if verbose: print("Graph is not r-valent. Vertex " + str(v.id) + " does not have degree " + str(r) + ". Instead, degree is " + str(v.total_degree()) + ".")
@@ -404,7 +448,7 @@ class HourglassPlabicGraph:
         return True
 
     def is_fully_reduced(self, r=4, verbose=False):
-        '''
+        r"""
         The conditions for being fully reduced:
         - r-valent
         - All trips should have no self-intersections, including nontrivial isolated trips
@@ -413,8 +457,7 @@ class HourglassPlabicGraph:
         It is trivial if it loops within the same hourglass.
         An essential double crossing occurs when two paths intersect (cross rather than reflect) twice
         while traveling in the same direction, ignoring consecutive intersections.
-        '''
-
+        """
         # Verify r-valence
         if (not self.is_r_valent(r, verbose)): return False
 
@@ -559,6 +602,8 @@ class HourglassPlabicGraph:
     # Layout functions
 
     def make_circular(self, r=10):
+        r"""
+        """
         n = len(self._boundary_vertices.values())
         for i,v in self._boundary_vertices:
             v.x = r*math.sin((i+0.5)*2*math.pi/n)
@@ -568,7 +613,9 @@ class HourglassPlabicGraph:
         self.layout = "circular"
 
     def tutte_layout(self, error=0.01, max_iter = 1000):
-        '''from https://cs.brown.edu/people/rtamassi/gdhandbook/chapters/force-directed.pdf.'''
+        r"""
+        from https://cs.brown.edu/people/rtamassi/gdhandbook/chapters/force-directed.pdf.
+        """
         for i in range(max_iter):
             err = 0
             for v in self._inner_vertices:
@@ -583,18 +630,22 @@ class HourglassPlabicGraph:
     # Trip functions
 
     def get_trip(self, vertex, i, output='half_strands'):
-        ''' vertex: the initial boundary Vertex; assumes multiplicity 1
-            i: computes trip_i by taking the ith left at unfilled/ith right at filled
-            output: if output = 'half_strands', returns an array of HalfStrands. Otherwise, returns HalfHourglasses.
+        r"""
+        vertex: the initial boundary Vertex; assumes multiplicity 1
+        i: computes trip_i by taking the ith left at unfilled/ith right at filled
+        output: if output = 'half_strands', returns an array of HalfStrands. Otherwise, returns HalfHourglasses.
 
-            Returns the list of HalfHourglasses/HalfStrands the trip visits in order.'''
+        Returns the list of HalfHourglasses/HalfStrands the trip visits in order.
+        """
 
         return vertex.get_trip(i, output)
 
     def get_trip_perm(self, i, output='half_strands'):
-        ''' Computes the ith trip permutation.
-            The trip i permutation is generated by finding where trip i sends each boundary vertex to.
-            Boundary vertices are assumed to be numbered 1, 2, ..., n CW starting slightly east of due north.'''
+        r"""
+        Computes the ith trip permutation.
+        The trip i permutation is generated by finding where trip i sends each boundary vertex to.
+        Boundary vertices are assumed to be numbered 1, 2, ..., n CW starting slightly east of due north.
+        """
         perm = []
         for vertex in self._boundary_vertices.values():
             trip = vertex.get_trip(i, output)
@@ -603,20 +654,26 @@ class HourglassPlabicGraph:
         return perm
 
     def get_trip_perms(self, output='half_strands'):
-        '''Returns a list [t_1, ..., t_{r-1}] where t_i is the ith trip permutation
-           and r is the maximum degree of an internal vertex.'''
+        r"""
+        Returns a list [t_1, ..., t_{r-1}] where t_i is the ith trip permutation
+        and r is the maximum degree of an internal vertex.
+        """
         r = max(v.total_degree() for v in self._inner_vertices.values()) # This is quite inefficient, could be a cached value provided by user?
         return [self.get_trip_perm(i, output) for i in range(1, r)]
 
     # Internal accessors
 
     def _get_face(self, f_id):
+        r"""
+        """
         face = self._faces.get(f_id)
         if face is None: raise ValueError("id " + str(f_id) + " does not correspond to any face.")
         return face
 
     def _get_vertex(self, v_id):
-        ''' Internal helper function that gets the vertex with the given id from either _inner_vertices or _boundary_vertices, and throws if the id is not found.'''
+        r"""
+        Internal helper function that gets the vertex with the given id from either _inner_vertices or _boundary_vertices, and throws if the id is not found.
+        """
         v = self._inner_vertices.get(v_id)
         if v is None:
             v = self._boundary_vertices.get(v_id)
@@ -624,11 +681,15 @@ class HourglassPlabicGraph:
         return v
 
     def _get_hourglass_by_id(self, v1_id, v2_id):
+        r"""
+        """
         return self._get_hourglass(self._get_vertex(v1_id), self._get_vertex(v2_id))
     def _get_hourglass(self, v1, v2):
         return v1.get_hourglass_to(v2)
 
     def _get_interior_hourglasses(self):
+        r"""
+        """
         hourglasses = set()
         for vertex in self._inner_vertices.values():
             for hh in vertex:
@@ -637,19 +698,17 @@ class HourglassPlabicGraph:
         return hourglasses
 
     def order(self):
-        ''' The number of vertices in this graph.'''
+        r"""
+        The number of vertices in this graph.
+        """
         return len(self._inner_vertices) + len(self._boundary_vertices)
-
-    # TESTING
-    def print_faces(self):
-        for f in self._faces.values():
-            print(f.id + ":")
-            f.print_vertices()
 
     # Serialization/Data Conversion
 
     def to_graph(self, hourglass_labels=False): # TODO: VERIFY/TEST
-        '''Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.'''
+        r"""
+        Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.
+        """
         vertex_refs = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
         edge_refs = set()
         for v in vertex_refs:
@@ -665,14 +724,18 @@ class HourglassPlabicGraph:
 
     # Update with **kwds argument?
     def plot(self):
+        r"""
+        """
         vertex_refs = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
         vertex_colors = {"gray":[v.id for v in vertex_refs if v.filled],  "white":[v.id for v in vertex_refs if not v.filled]}
         return self.to_graph().plot(vertex_colors=vertex_colors, edge_labels=True)
 
     @classmethod
     def from_dict(cls, data):
-        '''Constructs a new hourglass plabic graph from a dictionary representing
-        a JSON encoding of the graph.'''
+        r"""
+        Constructs a new hourglass plabic graph from a dictionary representing
+        a JSON encoding of the graph.
+        """
         HPG = cls()
 
         if 'layout' in data: HPG.layout = data['layout']
@@ -702,8 +765,10 @@ class HourglassPlabicGraph:
         return HPG
 
     def to_dict(self):
-        '''Encode this HourglassPlabicGraph as a dictionary representing
-           a JSON encoding of the graph.'''
+        r"""
+        Encode this HourglassPlabicGraph as a dictionary representing
+        a JSON encoding of the graph.
+        """
         vertices = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
         edges = set()
         for v in vertices:
@@ -730,3 +795,9 @@ class HourglassPlabicGraph:
             'layout': self.layout,
         }
         return d
+
+    # TESTING
+    def print_faces(self):
+        for f in self._faces.values():
+            print(f.id + ":")
+            f.print_vertices()
