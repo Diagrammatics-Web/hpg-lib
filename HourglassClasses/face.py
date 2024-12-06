@@ -218,7 +218,7 @@ class Face:
 
         - ``r`` -- positive integer (default: 4); the valence of the graph. Assumed to be an integer `\geq 1`.
         
-        OUTPUT: A tuple of arrays: the first is of created vertices that result from this move, the second is of all removed vertices.
+        OUTPUT: Array Tuple; the first is of created vertices that result from this move, the second is of all removed vertices.
 
         EXAMPLES:
 
@@ -284,9 +284,57 @@ class Face:
 
     def is_square_move4_valid(self):
         r"""
-        Verifies that this face can perform a square move. In SL4, this requires the face to be made of 4 vertices,
-        alternating filled/unfilled status, with multiplicity 1 edges in between.
-        In a square move, vertices with one outgoing edge are contracted, while vertices with two outgoing edges are split into two vertices.
+        Verifies that this face can perform a square move in SL4.
+        
+        In order to perform a square move, the face should have 4 vertices, alternating 
+        filled/unfilled status. Each hourglass in this face should have multiplicity 1.
+        In a square move, vertices with one outgoing edge are contracted, while vertices
+        with two outgoing edges are split into two vertices.
+
+        OUTPUT: Boolean; whether the face can perform a square move.
+
+        EXAMPLES:
+
+        This example constructs a face where a square move is valid.
+
+            sage: v1 = Vertex(1, 0, 0, True)
+            sage: v2 = Vertex(2, 1, 0, False)
+            sage: v3 = Vertex(3, 1, 1, True)
+            sage: v4 = Vertex(4, 0, 1, False)
+            sage: extras = [Vertex(5, -1, -1, False), Vertex(6, 2, -1, True), Vertex(7, 2, 1, False), Vertex(8, 1, 2, False), Vertex(9, 0, 2, True), Vertex(10, -1, 1, True), Vertex(11, -2, -1, True), Vertex(12, -1, -2, True), Vertex(13, 2, -2, False), Vertex(14, 3, -1, False)]
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: Vertex.create_hourglass_between(v3, v4, 1)
+            sage: Vertex.create_hourglass_between(v4, v1, 1)
+            sage: Vertex.create_hourglass_between(v1, extras[0], 2)
+            sage: Vertex.create_hourglass_between(v2, extras[1], 2)
+            sage: Vertex.create_hourglass_between(v3, extras[2], 1)
+            sage: Vertex.create_hourglass_between(v3, extras[3], 1)
+            sage: Vertex.create_hourglass_between(v4, extras[4], 1)
+            sage: Vertex.create_hourglass_between(v4, extras[5], 1)
+            sage: Vertex.create_hourglass_between(extras[0], extras[6], 1)
+            sage: Vertex.create_hourglass_between(extras[0], extras[7], 1)
+            sage: Vertex.create_hourglass_between(extras[1], extras[8], 1)
+            sage: Vertex.create_hourglass_between(extras[1], extras[9], 1)
+            sage: face = Face('face', hh.twin())
+            sage: face.is_square_move4_valid()
+            True
+
+        This is an example of a face which clearly cannot perform a square move.
+
+            sage: v1 = Vertex(1, 0, 0, True)
+            sage: v2 = Vertex(2, 0, 1, False)
+            sage: v3 = Vertex(3, 1, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: Vertex.create_hourglass_between(v3, v1, 1)
+            sage: face = Face('face', hh)
+            sage: face.is_square_move4_valid()
+            False
+
+        .. NOTE::
+
+            The output of this function should be identical to Face.square_move(r=4).
         """
         count = 0
         should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
@@ -302,10 +350,51 @@ class Face:
 
     def square_move4(self):
         r"""
-        Performs a square move on this face, assuming the graph is in SL4. Vertices with one outgoing edge are contracted,
-        while vertices with two outgoing edges are split into two vertices.
-        To verify that this move will be valid, call is_square_move4_valid().
-        OUTPUT: A tuple of arrays: the first is of created vertices that result from this move, the second is of all removed vertices.
+        Performs a square move on this face, assuming the graph is in SL4.
+        In a square move, vertices with one outgoing edge are contracted, while vertices
+        with two outgoing edges are split into two vertices.
+        
+        OUTPUT: Array Tuple; the first is of created vertices that result from this move, the second is of all removed vertices.
+
+        EXAMPLES:
+
+        This example constructs a face and performs a square move on it.
+
+            sage: ID.reset_id()
+            sage: v1 = Vertex(1, 0, 0, True)
+            sage: v2 = Vertex(2, 1, 0, False)
+            sage: v3 = Vertex(3, 1, 1, True)
+            sage: v4 = Vertex(4, 0, 1, False)
+            sage: extras = [Vertex(5, -1, -1, False), Vertex(6, 2, -1, True), Vertex(7, 2, 1, False), Vertex(8, 1, 2, False), Vertex(9, 0, 2, True), Vertex(10, -1, 1, True), Vertex(11, -2, -1, True), Vertex(12, -1, -2, True), Vertex(13, 2, -2, False), Vertex(14, 3, -1, False)]
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: Vertex.create_hourglass_between(v2, v3, 1)
+            sage: Vertex.create_hourglass_between(v3, v4, 1)
+            sage: Vertex.create_hourglass_between(v4, v1, 1)
+            sage: Vertex.create_hourglass_between(v1, extras[0], 2)
+            sage: Vertex.create_hourglass_between(v2, extras[1], 2)
+            sage: Vertex.create_hourglass_between(v3, extras[2], 1)
+            sage: Vertex.create_hourglass_between(v3, extras[3], 1)
+            sage: Vertex.create_hourglass_between(v4, extras[4], 1)
+            sage: Vertex.create_hourglass_between(v4, extras[5], 1)
+            sage: Vertex.create_hourglass_between(extras[0], extras[6], 1)
+            sage: Vertex.create_hourglass_between(extras[0], extras[7], 1)
+            sage: Vertex.create_hourglass_between(extras[1], extras[8], 1)
+            sage: Vertex.create_hourglass_between(extras[1], extras[9], 1)
+            sage: face = Face('face', hh.twin())
+            sage: face.square_move4()
+            sage: [hh.v_from().id for hh in face]
+            [6, 5, 'v16', 'v19']
+
+        .. WARNING::
+
+            This function may crash or otherwise corrupt the graph if a square move is 
+            not valid. Use `is_square_move4_valid` before to ensure this is possible.
+
+        .. SEEALSO::
+
+            :meth:`Face.is_square_move4_valid`
+            :meth:`Vertex.square_move_expand`
+            :meth:`Vertex.square_move_contract`
         """
         new_vertices = []
         removed_vertices = []
@@ -323,11 +412,36 @@ class Face:
 
     def is_cycle_valid(self, start_hh):
         r"""
-        Verifies that this face can perform a cycle move. This requires the face to have an even number of
-        vertices, with alternating filled/unfilled status. Each other hourglass starting from start_hh should have
-        a multiplicity greater than 1.
-        In a cycle move, hourglasses starting from start_hh are alternatively thickened and thinned.
-        start_hh: The starting hourglass in this face.
+        Verifies that this face can perform a cycle move. 
+        This requires the face to have an even number of vertices, with alternating filled/unfilled
+        status. Each other hourglass starting from start_hh should have a multiplicity greater than 1.
+        In a cycle move, hourglasses starting from start_hh are alternatively thinned and thickened.
+
+        INPUT:
+        
+        - `start_hh` -- HalfHourglass; An hourglass in this face. This hourglass will be thinned.
+
+        OUTPUT: Boolean, whether a cycle can be performed on this face.
+
+        EXAMPLES:
+
+        This example constructs a face for which a cycle move is valid.
+
+            sage: v1 = Vertex(1, 0, 0, True)
+            sage: v2 = Vertex(2, 1, 0, False)
+            sage: v3 = Vertex(3, 2, 1, True)
+            sage: v4 = Vertex(4, 1, 2, False)
+            sage: v5 = Vertex(5, 0, 2, True)
+            sage: v6 = Vertex(6, -1, 1, False)
+            sage: Vertex.create_hourglass_between(v2, v1, 1)
+            sage: Vertex.create_hourglass_between(v3, v2, 2)
+            sage: Vertex.create_hourglass_between(v4, v3, 1)
+            sage: Vertex.create_hourglass_between(v5, v4, 2)
+            sage: Vertex.create_hourglass_between(v6, v5, 1)
+            sage: hh = Vertex.create_hourglass_between(v1, v6, 2)
+            sage: face = Face("face", hh)
+            sage: face.is_cycle_valid(hh)
+            True
         """
         if start_hh.right_face() is not self:
             if start_hh.left_face() is self: start_hh = start_hh.twin()
@@ -350,7 +464,41 @@ class Face:
         r"""
         Performs a cycle move on this face. Its edges are alternatingly thinned and thickened,
         starting from start_hh.
-        To verify that this move will be valid, call is_cycle_valid(start_hh).
+        
+        INPUT:
+        
+        - `start_hh` -- HalfHourglass; An hourglass in this face. This hourglass will be thinned.        
+        
+        EXAMPLES:
+        
+        This example constructs a face for which a cycle move is valid.
+
+            sage: v1 = Vertex(1, 0, 0, True)
+            sage: v2 = Vertex(2, 1, 0, False)
+            sage: v3 = Vertex(3, 2, 1, True)
+            sage: v4 = Vertex(4, 1, 2, False)
+            sage: v5 = Vertex(5, 0, 2, True)
+            sage: v6 = Vertex(6, -1, 1, False)
+            sage: Vertex.create_hourglass_between(v2, v1, 1)
+            sage: Vertex.create_hourglass_between(v3, v2, 2)
+            sage: Vertex.create_hourglass_between(v4, v3, 1)
+            sage: Vertex.create_hourglass_between(v5, v4, 2)
+            sage: Vertex.create_hourglass_between(v6, v5, 1)
+            sage: hh = Vertex.create_hourglass_between(v1, v6, 2)
+            sage: face = Face("face", hh)
+            sage: prev_mults = [hh.multiplicity() for hh in face]
+            sage: face.cycle(hh)
+            sage: (prev_mults, [hh.multiplicity() for hh in face])
+            ([2, 1, 2, 1, 2, 1], [1, 2, 1, 2, 1, 2])
+        
+        .. WARNING::
+
+            This function may crash or otherwise corrupt the graph if a cycle is 
+            not valid. Use `is_cycle_valid` before to ensure this is possible.
+
+        .. SEEALSO::
+
+            :meth:`Face.is_cycle_valid`
         """
         if start_hh.right_face() is not self: start_hh = start_hh.twin()
 
@@ -364,9 +512,42 @@ class Face:
 
     def is_benzene_move_valid(self):
         r"""
-        Verifies that this face can perform a square move. This requires the face to have an even number of
-        vertices, with alternating filled/unfilled status, and with edges of alternating 1 or 2 multiplicity in between.
-        In a benzene move, the multiplicities of the edges are swapped.
+        Verifies that this face can perform a benzene move. 
+        This requires the face to have an even number of vertices, with alternating 
+        filled/unfilled status, and with edges of alternating 1 or 2 multiplicity in between.
+        In a benzene move, the multiplicities of consecutive edges are swapped.
+
+        OUTPUT: Boolean; whether this face can perform a benzene move.        
+
+        EXAMPLES:
+
+        This example constructs a face for which a benzene move is valid.
+
+            sage: v1 = Vertex(1, 0, 0, True)
+            sage: v2 = Vertex(2, 1, 0, False)
+            sage: v3 = Vertex(3, 2, 1, True)
+            sage: v4 = Vertex(4, 1, 2, False)
+            sage: v5 = Vertex(5, 0, 2, True)
+            sage: v6 = Vertex(6, -1, 1, False)
+            sage: Vertex.create_hourglass_between(v2, v1, 1)
+            sage: Vertex.create_hourglass_between(v3, v2, 2)
+            sage: Vertex.create_hourglass_between(v4, v3, 1)
+            sage: Vertex.create_hourglass_between(v5, v4, 2)
+            sage: Vertex.create_hourglass_between(v6, v5, 1)
+            sage: hh = Vertex.create_hourglass_between(v1, v6, 2)
+            sage: face = Face("face", hh)
+            sage: face.is_benzene_move_valid()
+            True
+
+        .. NOTE::
+
+            A benzene move is a special case of a cycle. This should be equivalent to
+            calling is_cycle_valid(hh), where hh is a multiplicity 2 edge, and the face
+            meets all listed criteria for a benzene move.
+
+        .. SEEALSO::
+
+            :meth:`Face.is_cycle_valid`
         """
         count = 0
         should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
@@ -383,8 +564,46 @@ class Face:
 
     def benzene_move(self):
         r"""
-        Performs a benzene move on this face. The multiplicities of its edges are swapped between 1 and 2.
-        To verify that this move will be valid, call is_benzene_move_valid().
+        Performs a benzene move on this face. 
+        The multiplicities of its edges are swapped between 1 and 2.   
+        
+        EXAMPLES:
+        
+        This example constructs a face for which a benzene move is valid.
+
+            sage: v1 = Vertex(1, 0, 0, True)
+            sage: v2 = Vertex(2, 1, 0, False)
+            sage: v3 = Vertex(3, 2, 1, True)
+            sage: v4 = Vertex(4, 1, 2, False)
+            sage: v5 = Vertex(5, 0, 2, True)
+            sage: v6 = Vertex(6, -1, 1, False)
+            sage: Vertex.create_hourglass_between(v2, v1, 1)
+            sage: Vertex.create_hourglass_between(v3, v2, 2)
+            sage: Vertex.create_hourglass_between(v4, v3, 1)
+            sage: Vertex.create_hourglass_between(v5, v4, 2)
+            sage: Vertex.create_hourglass_between(v6, v5, 1)
+            sage: hh = Vertex.create_hourglass_between(v1, v6, 2)
+            sage: face = Face("face", hh)
+            sage: prev_mults = [hh.multiplicity() for hh in face]
+            sage: face.benzene_move()
+            sage: (prev_mults, [hh.multiplicity() for hh in face])
+            ([2, 1, 2, 1, 2, 1], [1, 2, 1, 2, 1, 2])
+            
+        .. NOTE::
+
+            A benzene move is a special case of a cycle. This should be equivalent to
+            calling cycle(hh), where hh is a multiplicity 2 edge, and the face
+            meets all listed criteria for a benzene move.
+
+        .. WARNING::
+
+            This function may crash or otherwise corrupt the graph if a benzene move is 
+            not valid. Use `is_benzene_move_valid` before to ensure this is possible.
+
+        .. SEEALSO::
+
+            :meth:`Face.is_benzene_move_valid`
+            :meth:`Face.cycle`
         """
         thicken = self._half_hourglasses_head.strand_count() == 1
         for hh in self:
@@ -394,7 +613,29 @@ class Face:
 
     def __iter__(self):
         r"""
-        Returns a HalfHourglass._TurnIterator. Iteration occurs beginning from face._half_hourglasses_head and continues clockwise.
+        Iterates over the hourglasses in this face. Iteration occurs beginning from face._half_hourglasses_head and continues clockwise.
+
+        OUTPUT: HalfHourglass._TurnIterator; set to iterate right turns.
+
+        EXAMPLES:
+
+        This can be used to iterate over the vertices of this face.
+
+            sage: v1 = Vertex(1, 0, 0, True)
+            sage: v2 = Vertex(2, 1, 0, False)
+            sage: v3 = Vertex(3, 2, 1, True)
+            sage: v4 = Vertex(4, 1, 2, False)
+            sage: v5 = Vertex(5, 0, 2, True)
+            sage: v6 = Vertex(6, -1, 1, False)
+            sage: Vertex.create_hourglass_between(v2, v1, 1)
+            sage: Vertex.create_hourglass_between(v3, v2, 2)
+            sage: Vertex.create_hourglass_between(v4, v3, 1)
+            sage: Vertex.create_hourglass_between(v5, v4, 2)
+            sage: Vertex.create_hourglass_between(v6, v5, 1)
+            sage: hh = Vertex.create_hourglass_between(v1, v6, 2)
+            sage: face = Face("face", hh)
+            sage: [hh.v_to().id for hh in face]
+            [6, 5, 4, 3, 2, 1]        
         """
         return self._half_hourglasses_head.iterate_right_turns()
 
