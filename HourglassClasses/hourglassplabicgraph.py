@@ -24,7 +24,15 @@ from .face import Face
 from .idgenerator import ID
 
 class HourglassPlabicGraph:
-    '''Represents an hourglass plabic graph.'''
+    r"""
+    Represents an hourglass plabic graph (HPG).
+    An hourglass plabic graph has filled or unfilled vertices.
+    It has weights (multiplicities) on its edges (hourglasses), represented by strands.
+    Hourglass plabic graphs can be traversed. To traverse, choose a trip number i and
+    start at some strand. Traverse the strand, which is mirrored to the other side as
+    it moves from one vertex to another. Take the ith right at a filled vertex, and the
+    ith left at an unfilled vertex. Continue until the boundary is reached.
+    """
     def __init__(self, n=0, filling=True, r=10):
         r"""
         Constructs an Hourglass Plabic Graph.
@@ -61,19 +69,87 @@ class HourglassPlabicGraph:
 
     def __eq__(self, other):
         r"""
-        Equality on HourglassPlabicGraphs is considered to be
-        (embedded planar) graph isomorphism. Currently breaks
-        if there are components not connected to the boundary.
+        Tests for equality between two HPGs.
+        Equality is considered to be an embedded planar graph isomorphism.
+
+        INPUT:
+        
+        - `other` -- object; The object to test against.
+
+        OUTPUT: Boolean; returns True if and only if `other` is an HPG and is isomorphic to this HPG.
+
+        EXAMPLES:
+
+        This example constructs two isomorphic HPGs and tests equality.
+        
+            hpg1 = HourglassPlabicGraph()
+            hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
+            hpg2 = HourglassPlabicGraph()
+            hpg2.construct_face(6, [2, 1, 2, 1, 2, 1])
+            hpg1.__eq__(hpg2)
+            True
+
+        This example demonstrates that edge multiplicities are relevant to isomorphism.
+        See the WARNING for issues with testing otherwise isomorphic graphs with different orientations.
+        
+            hpg1 = HourglassPlabicGraph()
+            hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
+            hpg2 = HourglassPlabicGraph()
+            hpg2.construct_face(6, [1, 2, 1, 2, 1, 2])
+            hpg1.__eq__(hpg2)
+            False
+
+        This example uses two clearly non-isomorphic graphs.
+            
+            hpg1 = HourglassPlabicGraph()
+            hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
+            hpg2 = HourglassPlabicGraph()
+            hpg2.construct_face(4, [2, 1, 2, 1])
+            hpg1.__eq__(hpg2)
+            False
+
+        .. WARNING::
+        
+            The test for isomorphism assumes graphs are also "oriented" the same way; that is,
+            their ID 0 boundary vertex is in the same place.
+
+            This test also fails if there are isolated components.
+
+            This function is not intended to be used on non "properly formed" HPGs, and may fail or crash.
+
+        .. SEEALSO::
+
+            :meth:`HourglassPlabicGraph.is_isomorphic`
         """
         return isinstance(other, HourglassPlabicGraph) and self.is_isomorphic(other)
 
     def __neq__(self, other):
         r"""
+        Tests for inequality between two HPGs.
+        Equality is considered to be an embedded planar graph isomorphism.
+
+        INPUT:
+        
+        - `other` -- object; The object to test against.
+
+        OUTPUT: Boolean; returns True if and only if `other` is not an HPG or is non-isomorphic to this HPG.
+
+        .. SEEALSO::
+
+            :meth:`HourglassPlabicGraph.__eq__`
         """
         return not self.__eq__(other)
 
     def traverse(self):
         r"""
+        Traverses this HPG through a breadth-first search beginning from the first boundary vertex.
+        (Is this actually BFS?)
+
+        OUTPUT: A tuple; 
+            The first element is an array of visited HalfHourglasses (including twins) in BFS order.
+            The second element is an array of visited HalfHourglasses with repetitions as they are revisited.
+            The third element is an array of visited Vertices in BFS order.
+            The fourth element is an array of visited Vertices with repetitions as they are revisited.
         """
         if len(self._boundary_vertices) <= 1: return (None, None)
 
@@ -86,7 +162,7 @@ class HourglassPlabicGraph:
         vertices_visited = []
         vertex_history = []
 
-        # Perform depth-first search to traverse the graph
+        # Perform breadth-first search to traverse the graph
         i = 0
         while i < len(half_hourglasses_visited):
             hh = half_hourglasses_visited[i]
@@ -111,6 +187,22 @@ class HourglassPlabicGraph:
 
     def __hash__(self):
         r"""
+        Computes the hash value of this object.
+    
+        OUTPUT: Integer; the hash value of the object.
+    
+        EXAMPLES:
+    
+            sage: hpg = HourglassPlabicGraph(8)
+            sage: hpg.__hash__()
+            2932925276731088263
+    
+        Ensure the hash value does not change for equal objects:
+            
+            sage: hpg1 = HourglassPlabicGraph(6)
+            sage: hpg2 = HourglassPlabicGraph(6)
+            sage: hpg1.__hash__() == hpg2.__hash__()
+            True
         """
         hh_visited, hh_history, v_visited, v_history = self.traverse()
         hh_hash = tuple((hh_visited.index(hh), hh.multiplicity()) for hh in hh_history)
