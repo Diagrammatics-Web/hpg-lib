@@ -240,7 +240,7 @@ class HourglassPlabicGraph:
     def construct_boundary(self, n, filling=True, r=10):
         r"""
         Creates n boundary vertices, labeled from 0 to n-1, and connects them with phantom edges.
-        The vertices will be set to filling, unless. This function can only be called on an empty graph.
+        The vertices will be set to filling. This function can only be called on an empty graph.
 
         INPUT:
 
@@ -752,6 +752,44 @@ class HourglassPlabicGraph:
         """
         r = max(v.total_degree() for v in self._inner_vertices.values()) # This is quite inefficient, could be a cached value provided by user?
         return [self.get_trip_perm(i, output) for i in range(1, r)]
+
+    def separation_labeling(self, base_face, r):
+        r"""
+        """
+        # Requisite data structures:
+        # - Grid of faces and trips (dict of tuple trip, face to boolean)
+        # - Dict from (oriented) strands to tuple of trips through strand
+        separating_trips = dict()
+        strand_to_trips = dict()
+    
+        # Get all trips by strand
+        # trips[i] are all trip is
+        trips = [[self.get_trip(v, i) for v in self._boundary_vertices.values()] for i in range(1, r)]
+
+        # Populate strand_to_trips and separating_trips dicts
+        for i in range(1, r-1):
+            trip_is = trips[i]
+            for trip in trip_is:
+                for strand in trip:
+                    # Only consider strands based at white (unfilled)
+                    if strand.v_from().filled: continue
+
+                    # Initialize if necessary
+                    if strand not in strand_to_trips:
+                        strand_to_trips[strand] = [None] * (r-1)
+                    
+                    strand_to_trips[strand][i] = trip
+
+                # Figure out separations for trips
+                    #BFS on vertices starting on trip and boundary, “visited” set initialized with trip vertices, set for faces.
+                        # On explore: ignore if in visited set, add adjacent faces to faces set
+                    # Determine which side of the trip the base_face is on, mark the rest as unseparated or separated
+
+        # For each hourglass:
+            # Orient with white vertex at the base
+            # for each strand:
+                # label is 1 + # separating trips
+            # Sort strand labels, then zip with (1, 2, ...) tuple    
 
     # Internal accessors
 
