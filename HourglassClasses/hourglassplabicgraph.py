@@ -781,15 +781,49 @@ class HourglassPlabicGraph:
                     strand_to_trips[strand][i] = trip
 
                 # Figure out separations for trips
-                    #BFS on vertices starting on trip and boundary, “visited” set initialized with trip vertices, set for faces.
-                        # On explore: ignore if in visited set, add adjacent faces to faces set
-                    # Determine which side of the trip the base_face is on, mark the rest as unseparated or separated
+                # Perform a BFS on vertices between the trip's path and the boundary to the right
+                # Keep track of visited vertices and found faces
+                visited_vertices = set([trip[0].v_from()])
+                explore_queue = list()
+                visited_faces = set()
+                for strand in trip: 
+                    visited_vertices.add(strand.v_to())
+                    # Begin queueing vertices to the rightward interior
+                    potential_vertex = strand.hourglass().cw_next().v_to()
+                    if potential_vertex not in visited_vertices and not potential_vertex.boundary:
+                        visited_vertices.add(potential_vertex)
+                        explore_queue.append(potential_vertex)
 
-        # For each hourglass:
-            # Orient with white vertex at the base
-            # for each strand:
-                # label is 1 + # separating trips
-            # Sort strand labels, then zip with (1, 2, ...) tuple    
+                # Perform BFS
+                exp_ind = 0
+                is_base_face_on_right = False
+                while exp_ind < len(explore_queue)
+                    vertex = explore_queue[exp_ind]
+                    for hh in vertex:
+                        visited_faces.add(hh.right_face())
+                        if hh.right_face() is base_face: is_base_face_on_right = True
+                        potential_vertex = hh.v_to()
+                        if potential_vertex not in visited_vertices and not potential_vertex.boundary:
+                            visited_vertices.add(potential_vertex)
+                            explore_queue.append(potential_vertex)
+                    exp_ind += 1
+
+                # Value stored for this tuple is equal to whether the base face and this face are on
+                # different sides of the trip, ie the trip is separating
+                for face in self._faces.values():
+                    separating_trips[(trip, face)] = (is_base_face_on_right != (face in visited_faces))
+
+            hourglasses = self._get_interior_hourglasses()
+            for hh in hourglasses:
+                labels = list()
+                # Ensure we are rooted at white (unfilled)
+                if hh.v_from().filled: hh = hh.twin()
+                l_face = hh.left_face() # Left face has "white on right" for hourglass rooted at white
+                # for each strand: label is 1 + # separating trips  
+                for strand in hh.iterate_strands():
+                    labels.append(1 + sum(((t is not None) and separating_trips[(t, l_face)]) for t in strand_to_trips[strand]))
+                # Sort strand labels, then zip with (1, 2, ...) tuple 
+                labels = [x + y for (x, y) in zip(sorted(labels), range(1, hh.multiplicity()))]
 
     # Internal accessors
 
