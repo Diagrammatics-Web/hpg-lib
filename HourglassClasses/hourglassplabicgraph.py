@@ -73,7 +73,7 @@ class HourglassPlabicGraph:
         Equality is considered to be an embedded planar graph isomorphism.
 
         INPUT:
-        
+
         - `other` -- object; The object to test against.
 
         OUTPUT: Boolean; returns True if and only if `other` is an HPG and is isomorphic to this HPG.
@@ -81,7 +81,7 @@ class HourglassPlabicGraph:
         EXAMPLES:
 
         This example constructs two isomorphic HPGs and tests equality.
-        
+
             hpg1 = HourglassPlabicGraph()
             hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
             hpg2 = HourglassPlabicGraph()
@@ -91,7 +91,7 @@ class HourglassPlabicGraph:
 
         This example demonstrates that edge multiplicities are relevant to isomorphism.
         See the WARNING for issues with testing otherwise isomorphic graphs with different orientations.
-        
+
             hpg1 = HourglassPlabicGraph()
             hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
             hpg2 = HourglassPlabicGraph()
@@ -100,7 +100,7 @@ class HourglassPlabicGraph:
             False
 
         This example uses two clearly non-isomorphic graphs.
-            
+
             hpg1 = HourglassPlabicGraph()
             hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
             hpg2 = HourglassPlabicGraph()
@@ -109,7 +109,7 @@ class HourglassPlabicGraph:
             False
 
         .. WARNING::
-        
+
             The test for isomorphism assumes graphs are also "oriented" the same way; that is,
             their ID 0 boundary vertex is in the same place.
 
@@ -129,7 +129,7 @@ class HourglassPlabicGraph:
         Equality is considered to be an embedded planar graph isomorphism.
 
         INPUT:
-        
+
         - `other` -- object; The object to test against.
 
         OUTPUT: Boolean; returns True if and only if `other` is not an HPG or is non-isomorphic to this HPG.
@@ -145,7 +145,7 @@ class HourglassPlabicGraph:
         Traverses this HPG through a breadth-first search beginning from the first boundary vertex.
         (Is this actually BFS?)
 
-        OUTPUT: A tuple; 
+        OUTPUT: A tuple;
             The first element is an array of visited HalfHourglasses (including twins) in BFS order.
             The second element is an array of visited HalfHourglasses with repetitions as they are revisited.
             The third element is an array of visited Vertices in BFS order.
@@ -188,17 +188,17 @@ class HourglassPlabicGraph:
     def __hash__(self):
         r"""
         Computes the hash value of this object.
-    
+
         OUTPUT: Integer; the hash value of the object.
-    
+
         EXAMPLES:
-    
+
             sage: hpg = HourglassPlabicGraph(8)
             sage: hpg.__hash__()
             2932925276731088263
-    
+
         Ensure the hash value does not change for equal objects:
-            
+
             sage: hpg1 = HourglassPlabicGraph(6)
             sage: hpg2 = HourglassPlabicGraph(6)
             sage: hpg1.__hash__() == hpg2.__hash__()
@@ -761,7 +761,7 @@ class HourglassPlabicGraph:
         # - Dict from (oriented) strands to tuple of trips through strand
         separating_trips = dict()
         strand_to_trips = dict()
-    
+
         # Get all trips by strand
         # trips[i] are all trip is
         trips = [[self.get_trip(v, i) for v in self._boundary_vertices.values()] for i in range(1, r)]
@@ -777,7 +777,7 @@ class HourglassPlabicGraph:
                     # Initialize if necessary
                     if strand not in strand_to_trips:
                         strand_to_trips[strand] = [None] * (r-1)
-                    
+
                     strand_to_trips[strand][i] = trip
 
                 # Figure out separations for trips
@@ -786,7 +786,7 @@ class HourglassPlabicGraph:
                 visited_vertices = set([trip[0].v_from()])
                 explore_queue = list()
                 visited_faces = set()
-                for strand in trip: 
+                for strand in trip:
                     visited_vertices.add(strand.v_to())
                     # Begin queueing vertices to the rightward interior
                     potential_vertex = strand.hourglass().cw_next().v_to()
@@ -815,15 +815,15 @@ class HourglassPlabicGraph:
 
             hourglasses = self._get_interior_hourglasses()
             for hh in hourglasses:
-                labels = list()
+                hh.label = list()
                 # Ensure we are rooted at white (unfilled)
                 if hh.v_from().filled: hh = hh.twin()
                 l_face = hh.left_face() # Left face has "white on right" for hourglass rooted at white
-                # for each strand: label is 1 + # separating trips  
+                # for each strand: label is 1 + # separating trips
                 for strand in hh.iterate_strands():
-                    labels.append(1 + sum(((t is not None) and separating_trips[(t, l_face)]) for t in strand_to_trips[strand]))
-                # Sort strand labels, then zip with (1, 2, ...) tuple 
-                labels = [x + y for (x, y) in zip(sorted(labels), range(1, hh.multiplicity()))]
+                    hh.label.append(1 + sum(((t is not None) and separating_trips[(t, l_face)]) for t in strand_to_trips[strand]))
+                # Sort strand labels, then zip with (1, 2, ...) tuple
+                hh.label = [x + y for (x, y) in zip(sorted(hh.label), range(1, hh.multiplicity()))]
 
     # Internal accessors
 

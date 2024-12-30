@@ -33,6 +33,7 @@ def all_tests():
     move_tests()
     serialization_tests()
     reduced_tests()
+    separation_tests()
 
 # TESTS FOR BASE CLASS FUNCTIONALITY
 
@@ -525,6 +526,9 @@ def reduced_tests():
         #test_reducedness(Examples.example_contractable, "example_contractable", 5, None)
 
     print("is_fully_reduced tests complete.\n")
+
+def separation_tests():
+    
 
 def create_test_HPG():
     '''
