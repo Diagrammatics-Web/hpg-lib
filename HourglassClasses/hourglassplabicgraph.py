@@ -575,8 +575,8 @@ class HourglassPlabicGraph:
             return True
 
         # Verify no self-intersections
-        for i in range(0, len(trips)):
-            for trip in trips[i]:
+        for i, trip_is in enumerate(trips):
+            for trip in trip_is:
                 if not validate_no_self_intersections(trip):
                     if verbose: print("trip" + str(i+1) + " from vertex " + str(trip[0].v_from().id) + " self-intersects.")
                     return False
@@ -677,8 +677,7 @@ class HourglassPlabicGraph:
             return (final_inds is not None)
 
         # Validate no double crossings
-        for i in range(0, len(trips)):
-            trip_is = trips[i]
+        for i, trip_is in enumerate(trips):
             all_compare_trips = trips[i] + (trips[i+1] if i < len(trips)-1 else [])
             for a in range(0, len(trip_is)):
                 trip1 = trip_is[a]
@@ -759,16 +758,21 @@ class HourglassPlabicGraph:
         # Requisite data structures:
         # - Grid of faces and trips (dict of tuple trip, face to boolean)
         # - Dict from (oriented) strands to tuple of trips through strand
+        # However, trips (arrays) are not hashable, so instead we simply
+        # store the starting vertex id and use that plus the i to uniquely
+        # identify trips. This means we also must use the same scheme to
+        # identify trips for the separating_trips dict.
         separating_trips = dict()
         strand_to_trips = dict()
+
+        tripid = lambda trip, i : (trip[0].v_from().id, i)
 
         # Get all trips by strand
         # trips[i] are all trip is
         trips = [[self.get_trip(v, i) for v in self._boundary_vertices.values()] for i in range(1, r)]
 
         # Populate strand_to_trips and separating_trips dicts
-        for i in range(1, r-1):
-            trip_is = trips[i]
+        for i, trip_is in enumerate(trips):
             for trip in trip_is:
                 for strand in trip:
                     # Only consider strands based at white (unfilled)
@@ -778,7 +782,8 @@ class HourglassPlabicGraph:
                     if strand not in strand_to_trips:
                         strand_to_trips[strand] = [None] * (r-1)
 
-                    strand_to_trips[strand][i] = trip
+                    # Use uniquely identifying tuple instead of array itself
+                    strand_to_trips[strand][i] = tripid(trip, i)
 
                 # Figure out separations for trips
                 # Perform a BFS on vertices between the trip's path and the boundary to the right
@@ -797,7 +802,7 @@ class HourglassPlabicGraph:
                 # Perform BFS
                 exp_ind = 0
                 is_base_face_on_right = False
-                while exp_ind < len(explore_queue)
+                while exp_ind < len(explore_queue):
                     vertex = explore_queue[exp_ind]
                     for hh in vertex:
                         visited_faces.add(hh.right_face())
@@ -811,19 +816,19 @@ class HourglassPlabicGraph:
                 # Value stored for this tuple is equal to whether the base face and this face are on
                 # different sides of the trip, ie the trip is separating
                 for face in self._faces.values():
-                    separating_trips[(trip, face)] = (is_base_face_on_right != (face in visited_faces))
+                    separating_trips[(tripid(trip, i), face)] = (is_base_face_on_right != (face in visited_faces))
 
-            hourglasses = self._get_interior_hourglasses()
-            for hh in hourglasses:
-                hh.label = list()
-                # Ensure we are rooted at white (unfilled)
-                if hh.v_from().filled: hh = hh.twin()
-                l_face = hh.left_face() # Left face has "white on right" for hourglass rooted at white
-                # for each strand: label is 1 + # separating trips
-                for strand in hh.iterate_strands():
-                    hh.label.append(1 + sum(((t is not None) and separating_trips[(t, l_face)]) for t in strand_to_trips[strand]))
-                # Sort strand labels, then zip with (1, 2, ...) tuple
-                hh.label = [x + y for (x, y) in zip(sorted(hh.label), range(1, hh.multiplicity()))]
+        hourglasses = self._get_interior_hourglasses()
+        for hh in hourglasses:
+            hh.label = list()
+            # Ensure we are rooted at white (unfilled)
+            if hh.v_from().filled: hh = hh.twin()
+            l_face = hh.left_face() # Left face has "white on right" for hourglass rooted at white
+            # for each strand: label is 1 + # separating trips
+            for strand in hh.iterate_strands():
+                hh.label.append(1 + sum(((t is not None) and separating_trips[(t, l_face)]) for t in strand_to_trips[strand]))
+            # Sort strand labels, then zip with (1, 2, ...) tuple
+            hh.label = [x + y for (x, y) in zip(sorted(hh.label), range(1, hh.multiplicity()))]
 
     # Internal accessors
 

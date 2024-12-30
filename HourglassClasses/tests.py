@@ -528,7 +528,9 @@ def reduced_tests():
     print("is_fully_reduced tests complete.\n")
 
 def separation_tests():
-    
+    ID.reset_id()
+    HPG = HourglassPlabicGraph.from_dict(Examples.example_ASM)
+    HPG.separation_labeling(HPG._get_face('face2'), 4)
 
 def create_test_HPG():
     '''

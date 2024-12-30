@@ -30,7 +30,7 @@ class HalfHourglass(DihedralElement):
 
     A HalfHourglass is always assumed to be between two Vertices and be linked to adjacent HalfHourglasses for v_from.
     """
-    def __init__(self, id, v_from, v_to, multiplicity, label='', twin=None):
+    def __init__(self, id, v_from, v_to, multiplicity, label=None, twin=None):
         r"""
         Constructs a HalfHourglass with the given ID, between vertices v_from and v_to, and constructs `multiplicity` strands.
         Also contsructs its own twin.
@@ -41,7 +41,7 @@ class HalfHourglass(DihedralElement):
 
         - `multiplicity` -- nonnegative integer; number of strands between from and to. if 0, this is an edge boundary. Assumed to be an integer `\geq 1`.
 
-        - `label` -- object (default: '')
+        - `label` -- object (default: None)
 
         - `twin` -- HalfHourglass (default: None); this parameter should be left blank. It is used internally to automatically construct this strand's twin.
 
