@@ -211,6 +211,52 @@ class HourglassPlabicGraph:
 
     def is_isomorphic(self, other):
         r"""
+        Tests for a planar graph isomorphism between this graph and other.
+
+        INPUT:
+
+        - `other` -- HourglassPlabicGraph; The graph to test against.
+
+        OUTPUT: Boolean; returns True if and only if `other` is isomorphic to this.
+
+        EXAMPLES:
+
+        This example constructs two isomorphic HPGs and tests equality.
+
+            hpg1 = HourglassPlabicGraph()
+            hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
+            hpg2 = HourglassPlabicGraph()
+            hpg2.construct_face(6, [2, 1, 2, 1, 2, 1])
+            hpg1.is_isomorphic(hpg2)
+            True
+
+        This example demonstrates that edge multiplicities are relevant to isomorphism.
+        See the WARNING for issues with testing otherwise isomorphic graphs with different orientations.
+
+            hpg1 = HourglassPlabicGraph()
+            hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
+            hpg2 = HourglassPlabicGraph()
+            hpg2.construct_face(6, [1, 2, 1, 2, 1, 2])
+            hpg1.is_isomorphic(hpg2)
+            False
+
+        This example uses two clearly non-isomorphic graphs.
+
+            hpg1 = HourglassPlabicGraph()
+            hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
+            hpg2 = HourglassPlabicGraph()
+            hpg2.construct_face(4, [2, 1, 2, 1])
+            hpg1.is_isomorphic(hpg2)
+            False
+
+        .. WARNING::
+
+            The test for isomorphism assumes graphs are also "oriented" the same way; that is,
+            their ID 0 boundary vertex is in the same place.
+
+            This test also fails if there are isolated components.
+
+            This function is not intended to be used on non "properly formed" HPGs, and may fail or crash.
         """
         self_hh_visited, self_hh_history, self_v_visited, self_v_history = self.traverse()
         other_hh_visited, other_hh_history, other_v_visited, other_v_history = other.traverse()
@@ -330,16 +376,26 @@ class HourglassPlabicGraph:
                     self.create_hourglass_by_id(v_id, first_id, multiplicities[i])
             last_id = v_id
 
-    def create_vertex(self, v_id, x, y, filled, boundary=False, label='', verify_id=False):
+    def create_vertex(self, v_id, x, y, filled, boundary=False, label=None, verify_id=False):
         r"""
         Adds a vertex to the graph and returns it.
-        v_id: The id given to the vertex. Should be unique.
-        label:
-        x: The x position of the vertex
-        y: The y position of the vertex
-        filled: Whether the vertex is to be filled or not.
-        boundary: Whether the vertex is on the boundary. Defaults to False.
-        verify_id: Check whether v_id is already in use. Defaults to False.
+
+        INPUT:
+        
+        - `v_id` -- hashable, unique object; The id given to the vertex.
+        
+        - ``x`` -- float; The x position of the vertex
+        
+        - ``y`` -- float; The y position of the vertex
+        
+        - `filled` -- Boolean; Whether the vertex is to be filled or not.
+        
+        - `boundary` -- Boolean (default: False); Whether the vertex is on the boundary.
+        
+        - `label` -- object (default: None)
+        
+        - `verify_id` -- Boolean (default: False); Check whether v_id is already in use.
+        
         """
         if verify_id and ((not boundary and v_id in self._inner_vertices) or (boundary and v_id in self._boundary_vertices)): raise ValueError("v_id already in use.")
 

@@ -34,7 +34,7 @@ class Vertex:
 
         INPUT:
 
-        - `id` -- an object, assumed unique, should be hashable
+        - `id` -- hashable, unique object
 
         - ``x`` -- float; the x-position of this Vertex
 
