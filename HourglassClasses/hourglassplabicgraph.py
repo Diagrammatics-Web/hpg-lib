@@ -786,37 +786,37 @@ class HourglassPlabicGraph:
                     strand_to_trips[strand][i] = tripid(trip, i)
 
                 # Figure out separations for trips
-                # Perform a BFS on vertices between the trip's path and the boundary to the right
-                # Keep track of visited vertices and found faces
-                visited_vertices = set([trip[0].v_from()])
-                explore_queue = list()
+                # Perform a DFS on faces between the trip's path and the boundary to the right
+                explore_stack = list()
                 visited_faces = set()
+                # Define boundary for DFS
+                trip_hourglasses = set()
                 for strand in trip:
-                    visited_vertices.add(strand.v_to())
-                    # Begin queueing vertices to the rightward interior
-                    potential_vertex = strand.hourglass().cw_next().v_to()
-                    if potential_vertex not in visited_vertices and not potential_vertex.boundary:
-                        visited_vertices.add(potential_vertex)
-                        explore_queue.append(potential_vertex)
+                    trip_hourglasses.add(strand.hourglass())
+                    r_face = strand.right_face()
+                    # Begin pushing faces on the rightward interior to the stack
+                    if r_face not in visited_faces:
+                        visited_faces.add(r_face)
+                        explore_stack.append(r_face)
 
-                # Perform BFS
-                exp_ind = 0
-                is_base_face_on_right = False
-                while exp_ind < len(explore_queue):
-                    vertex = explore_queue[exp_ind]
-                    for hh in vertex:
-                        visited_faces.add(hh.right_face())
-                        if hh.right_face() is base_face: is_base_face_on_right = True
-                        potential_vertex = hh.v_to()
-                        if potential_vertex not in visited_vertices and not potential_vertex.boundary:
-                            visited_vertices.add(potential_vertex)
-                            explore_queue.append(potential_vertex)
+                # Perform DFS
+                base_face_on_right = False
+                while not explore_stack.empty():
+                    face = explore_stack.pop()
+                    if face is base_face: base_face_on_right = True
+                    for hh in face:
+                        # Avoid traversing past the boundary
+                        if hh.is_boundary() or hh in trip_hourglasses or hh.twin() in trip_hourglasses: continue
+                        l_face = hh.left_face()
+                        if l_face not in visited_faces:
+                            visited_faces.add(l_face)
+                            explore_stack.append(l_face)
                     exp_ind += 1
 
                 # Value stored for this tuple is equal to whether the base face and this face are on
                 # different sides of the trip, ie the trip is separating
                 for face in self._faces.values():
-                    separating_trips[(tripid(trip, i), face)] = (is_base_face_on_right != (face in visited_faces))
+                    separating_trips[(tripid(trip, i), face)] = (base_face_on_right != (face in visited_faces))
 
         hourglasses = self._get_interior_hourglasses()
         for hh in hourglasses:
