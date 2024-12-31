@@ -778,7 +778,7 @@ class HourglassPlabicGraph:
         # Populate strand_to_trips and separating_trips dicts
         for i, trip_is in enumerate(trips):
             for trip in trip_is:
-                print("Found trip " + str(i) + " from vertex " + str(trip[0].v_from().id)) # TESTING #
+                print("Found trip " + str(i+1) + " from vertex " + str(trip[0].v_from().id)) # TESTING #
                 for strand in trip:
                     # Only consider strands based at white (unfilled)
                     if strand.v_from().filled: continue
@@ -801,6 +801,7 @@ class HourglassPlabicGraph:
                     trip_hourglasses.add(strand.hourglass())
                     r_face = strand.right_face()
                     # Begin pushing faces on the rightward interior to the stack
+                    # This could be avoided -- only one face is necessary to start with
                     if r_face not in visited_faces:
                         print(" Found face " + str(r_face.id) + " to the right of trip") # TESTING #
                         visited_faces.add(r_face)
@@ -822,7 +823,7 @@ class HourglassPlabicGraph:
                 # different sides of the trip, ie the trip is separating
                 
                 visited_base_face = base_face in visited_faces
-                print("base_face " + ("" if visited_base_face else "not") + " found to the right of trip") # TESTING #
+                print("base_face " + ("" if visited_base_face else "not ") + "found to the right of trip") # TESTING #
                 for face in self._faces.values():
                     separating_trips[(tripid(trip, i), face)] = (visited_base_face != (face in visited_faces))
 
