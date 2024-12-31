@@ -767,6 +767,10 @@ class HourglassPlabicGraph:
 
         tripid = lambda trip, i : (trip[0].v_from().id, i)
 
+        print("Performing separation_labeling with base_face " + str(base_face.id)) # TESTING #
+
+        print("Getting trips") # TESTING #
+
         # Get all trips by strand
         # trips[i] are all trip is
         trips = [[self.get_trip(v, i) for v in self._boundary_vertices.values()] for i in range(1, r)]
@@ -774,6 +778,7 @@ class HourglassPlabicGraph:
         # Populate strand_to_trips and separating_trips dicts
         for i, trip_is in enumerate(trips):
             for trip in trip_is:
+                print("Found trip " + str(i) + " from vertex " + str(trip[0].v_from().id)) # TESTING #
                 for strand in trip:
                     # Only consider strands based at white (unfilled)
                     if strand.v_from().filled: continue
@@ -785,7 +790,8 @@ class HourglassPlabicGraph:
                     # Use uniquely identifying tuple instead of array itself
                     strand_to_trips[strand][i] = tripid(trip, i)
 
-                # Figure out separations for trips
+                print("Performing DFS") # TESTING #
+                # Figure out separations for trip
                 # Perform a DFS on faces between the trip's path and the boundary to the right
                 explore_stack = list()
                 visited_faces = set()
@@ -796,27 +802,29 @@ class HourglassPlabicGraph:
                     r_face = strand.right_face()
                     # Begin pushing faces on the rightward interior to the stack
                     if r_face not in visited_faces:
+                        print(" Found face " + str(r_face.id) + " to the right of trip") # TESTING #
                         visited_faces.add(r_face)
                         explore_stack.append(r_face)
 
                 # Perform DFS
-                base_face_on_right = False
-                while not explore_stack.empty():
+                while explore_stack:
                     face = explore_stack.pop()
-                    if face is base_face: base_face_on_right = True
                     for hh in face:
                         # Avoid traversing past the boundary
                         if hh.is_boundary() or hh in trip_hourglasses or hh.twin() in trip_hourglasses: continue
                         l_face = hh.left_face()
                         if l_face not in visited_faces:
+                            print(" Found face " + str(l_face.id) + " to the right of trip") # TESTING #
                             visited_faces.add(l_face)
                             explore_stack.append(l_face)
-                    exp_ind += 1
 
                 # Value stored for this tuple is equal to whether the base face and this face are on
                 # different sides of the trip, ie the trip is separating
+                
+                visited_base_face = base_face in visited_faces
+                print("base_face " + ("" if visited_base_face else "not") + " found to the right of trip") # TESTING #
                 for face in self._faces.values():
-                    separating_trips[(tripid(trip, i), face)] = (base_face_on_right != (face in visited_faces))
+                    separating_trips[(tripid(trip, i), face)] = (visited_base_face != (face in visited_faces))
 
         hourglasses = self._get_interior_hourglasses()
         for hh in hourglasses:
