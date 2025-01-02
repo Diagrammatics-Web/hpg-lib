@@ -378,7 +378,7 @@ class HourglassPlabicGraph:
 
     def create_vertex(self, v_id, x, y, filled, boundary=False, label=None, verify_id=False):
         r"""
-        Adds a vertex to the graph and returns it.
+        Adds a vertex with the given parameters to the graph and returns it.
 
         INPUT:
         
@@ -390,12 +390,29 @@ class HourglassPlabicGraph:
         
         - `filled` -- Boolean; Whether the vertex is to be filled or not.
         
-        - `boundary` -- Boolean (default: False); Whether the vertex is on the boundary.
+        - `boundary` -- Boolean (default: `False`); Whether the vertex is on the boundary.
         
-        - `label` -- object (default: None)
+        - `label` -- object (default: `None`)
         
-        - `verify_id` -- Boolean (default: False); Check whether v_id is already in use.
-        
+        - `verify_id` -- Boolean (default: `False`); Check whether v_id is already in use.
+
+        OUTPUT: Vertex
+
+        EXAMPLES:
+
+            sage: HPG = HourglassPlabicGraph(6)
+            sage: HPG.create_vertex(6, 0, 0, True)
+            Vertex 6 at (0, 0), filled
+
+        It is problematic to create a vertex with an existing ID, but no error will be thrown unless `verify_id` is `True`.
+
+            sage: HPG.create_vertex(6, 0, 1, False, False, None, True)
+            ValueError: v_id already in use.
+
+        .. NOTE::
+
+            This function is intended primarily for creating interior vertices. To easily set up a boundary
+            with proper IDs, use `construct_boundary` or `construct_face`.
         """
         if verify_id and ((not boundary and v_id in self._inner_vertices) or (boundary and v_id in self._boundary_vertices)): raise ValueError("v_id already in use.")
 
@@ -406,24 +423,81 @@ class HourglassPlabicGraph:
 
     def remove_vertex_by_id(self, v_id):
         r"""
+        Removes the vertex with the given ID (and all connected hourglasses).
+
+        INPUT:
+
+        - `v_id` -- object; The ID of the vertex to remove.
+
+        EXAMPLES:
+
+            sage: HPG = HourglassPlabicGraph(6)
+            sage: HPG.remove_vertex_by_id(5)
+            sage: HPG.order()
+            5
+
+        It is an error to try to remove a vertex not in the graph.
+
+            sage: HPG.remove_vertex_by_id('nonexistent_id')
+            ValueError: id 5 does not correspond to any vertex.
+
+        .. NOTE::
+
+            This function internally looks up the vertex ID, then calls remove_vertex.
+            It is equivalent to calling HPG.remove_vertex(HPG._get_vertex(vid)).
         """
         del_vertex = self._get_vertex(v_id)
         self.remove_vertex(del_vertex)
 
     def remove_vertex(self, del_vertex):
         r"""
+        Removes the provided vertex (and all connected hourglasses).
+
+        INPUT:
+
+        - `v_id` -- object; The ID of the vertex to remove.
+
+        EXAMPLES:
+
+            sage: HPG = HourglassPlabicGraph(6)
+            sage: del_v = HPG._get_vertex(5)
+            sage: HPG.remove_vertex(del_v)
+            sage: HPG.order()
+            5
+
+        It is an error to try to remove a vertex not in the graph.
+
+            sage: HPG.remove_vertex_by_id('nonexistent_id')
+            ValueError: The provided vertex is not in the graph.
         """
         # Store hourglasses in a list to avoid issues with removing
         # elements while iterating over dihedral element
+        if del_vertex.id in self._inner_vertices: del self._inner_vertices[del_vertex.id]
+        else if del_vertex.id in self._boundary_vertices: del self._boundary_vertices[del_vertex.id]
+        else: raise ValueError("The provided vertex is not in the graph.")
+        
         del_hourglasses = del_vertex.get_hourglasses_as_list()
         for hh in del_hourglasses:
             self._remove_hourglass_internal(hh, del_vertex, hh.v_to())
 
-        if del_vertex.id in self._inner_vertices: del self._inner_vertices[del_vertex.id]
-        else: del self._boundary_vertices[del_vertex.id]
-
     def create_hourglass_by_id(self, v1_id, v2_id, multiplicity=1):
         r"""
+        Creates an hourglass (two HalfHourglasses) between the vertices
+        identified by `v1_id` and `v2_id`, and returns it.
+
+        INPUT:
+
+        - `v1_id` -- object; the ID of the first Vertex.
+        
+        - `v2_id` -- object; the ID of the second Vertex.
+        
+        - `multiplicity` -- nonnegative integer; multiplicity of the constructed hourglass.. Assumed to be an integer `\geq 1`.
+
+        OUTPUT: HalfHourglass; the HalfHourglass from `v1_id` to `v2_id`.
+
+        EXAMPLES:
+
+        
         """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
@@ -432,6 +506,8 @@ class HourglassPlabicGraph:
 
     def create_hourglass(self, v1, v2, multiplicity=1):
         r"""
+        Creates an hourglass (two HalfHourglasses) between v1 and v2, and returns it.
+        
         """
         new_hh = Vertex.create_hourglass_between(v1, v2, multiplicity)
 
