@@ -1,10 +1,11 @@
+from .idgenerator import ID
 from .dihedralelement import DihedralElement
 from .halfstrand import HalfStrand
 from .halfhourglass import HalfHourglass
 from .vertex import Vertex
 from .face import Face
 from .hourglassplabicgraph import HourglassPlabicGraph
-from .idgenerator import ID
+from hourglass2 import HourglassPlabicGraph as OldHourglassPlabicGraph
 
 import examples as Examples
 
@@ -529,11 +530,13 @@ def reduced_tests():
 
 def separation_labeling_tests():
     print("Testing separation_labeling.")
-    ID.reset_id()
-    
-    HPG = HourglassPlabicGraph.from_dict(Examples.example_ASM)
-    HPG.print_faces()
-    HPG.separation_labeling(HPG._get_face('face2'), 4)
+    def test_labeling(graphdict):
+        ID.reset_id()
+        HPG = HourglassPlabicGraph.from_dict(graphdict)
+        HPG.print_faces()
+        HPG.separation_labeling(HPG._get_face('face2'), 4)
+
+    test_labeling(Examples.example_ASM)
 
     print("separation_labeling tests not yet complete.\n")
 

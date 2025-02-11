@@ -312,7 +312,7 @@ class HourglassPlabicGraph:
         assert self.order() == 0, "Cannot call construct_boundary on a non-empty graph."
 
         for i in range(0, n):
-            self._boundary_vertices[i] = Vertex(i, r*math.sin((i+0.5)*2*math.pi/n), r*math.cos((i+0.5)*2*math.pi/n), filling if isinstance(filling, bool) else filling[i], True, str(i))
+            self._boundary_vertices[i] = Vertex(i, r*math.sin((i+0.5)*2*math.pi/n), r*math.cos((i+0.5)*2*math.pi/n), filling if isinstance(filling, bool) else filling[i], True)
 
         for i in range(0, n-1):
             Vertex.create_hourglass_between(self._boundary_vertices[i], self._boundary_vertices[i+1], 0)
@@ -471,7 +471,7 @@ class HourglassPlabicGraph:
         # Store hourglasses in a list to avoid issues with removing
         # elements while iterating over dihedral element
         if del_vertex.id in self._inner_vertices: del self._inner_vertices[del_vertex.id]
-        else if del_vertex.id in self._boundary_vertices: del self._boundary_vertices[del_vertex.id]
+        elif del_vertex.id in self._boundary_vertices: del self._boundary_vertices[del_vertex.id]
         else: raise ValueError("The provided vertex is not in the graph.")
         
         del_hourglasses = del_vertex.get_hourglasses_as_list()
@@ -880,7 +880,7 @@ class HourglassPlabicGraph:
         r = max(v.total_degree() for v in self._inner_vertices.values()) # This is quite inefficient, could be a cached value provided by user?
         return [self.get_trip_perm(i, output) for i in range(1, r)]
 
-    def separation_labeling(self, base_face, r):
+    def separation_labeling(self, base_face, r, verbose=False):
         r"""
         """
         # Requisite data structures:
@@ -895,9 +895,7 @@ class HourglassPlabicGraph:
 
         tripid = lambda trip, i : (trip[0].v_from().id, i)
 
-        print("Performing separation_labeling with base_face " + str(base_face.id)) # TESTING #
-
-        print("Getting trips") # TESTING #
+        if verbose: print(f"Performing separation_labeling with base_face {base_face.id}.")
 
         # Get all trips by strand
         # trips[i] are all trip is
@@ -906,7 +904,7 @@ class HourglassPlabicGraph:
         # Populate strand_to_trips and separating_trips dicts
         for i, trip_is in enumerate(trips):
             for trip in trip_is:
-                print("Found trip " + str(i+1) + " from vertex " + str(trip[0].v_from().id)) # TESTING #
+                if verbose: print(f"Found trip {i+1} from vertex {trip[0].v_from().id}.")
                 for strand in trip:
                     # Only consider strands based at white (unfilled)
                     if strand.v_from().filled: continue
@@ -918,7 +916,6 @@ class HourglassPlabicGraph:
                     # Use uniquely identifying tuple instead of array itself
                     strand_to_trips[strand][i] = tripid(trip, i)
 
-                print("Performing DFS") # TESTING #
                 # Figure out separations for trip
                 # Perform a DFS on faces between the trip's path and the boundary to the right
                 explore_stack = list()
@@ -931,7 +928,7 @@ class HourglassPlabicGraph:
                     # Begin pushing faces on the rightward interior to the stack
                     # This could be avoided -- only one face is necessary to start with
                     if r_face not in visited_faces:
-                        print(" Found face " + str(r_face.id) + " to the right of trip") # TESTING #
+                        if verbose: print(f" Found face {r_face.id} to the right of trip.")
                         visited_faces.add(r_face)
                         explore_stack.append(r_face)
 
@@ -943,7 +940,7 @@ class HourglassPlabicGraph:
                         if hh.is_boundary() or hh in trip_hourglasses or hh.twin() in trip_hourglasses: continue
                         l_face = hh.left_face()
                         if l_face not in visited_faces:
-                            print(" Found face " + str(l_face.id) + " to the right of trip") # TESTING #
+                            if verbose: print(f" Found face {l_face.id} to the right of trip.")
                             visited_faces.add(l_face)
                             explore_stack.append(l_face)
 
@@ -951,7 +948,7 @@ class HourglassPlabicGraph:
                 # different sides of the trip, ie the trip is separating
                 
                 visited_base_face = base_face in visited_faces
-                print("base_face " + ("" if visited_base_face else "not ") + "found to the right of trip") # TESTING #
+                if verbose: print(f"base_face{' ' if visited_base_face else ' not '}found to the right of trip.")
                 for face in self._faces.values():
                     separating_trips[(tripid(trip, i), face)] = (visited_base_face != (face in visited_faces))
 

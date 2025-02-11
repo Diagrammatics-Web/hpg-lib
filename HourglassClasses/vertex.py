@@ -282,7 +282,7 @@ class Vertex:
             :meth:`HalfStrand.get_trip`
         """
         # TODO: Fluctuating case and interior vertex algorithm
-        # assert self.boundary, "Vertex " + str(self.id) + " should be on the boundary." # Not necessarily! Revise this when integrating with analyzer
+        # assert self.boundary, f"Vertex {self.id} should be on the boundary." # Not necessarily! Revise this when integrating with analyzer
         if self.total_degree() != 1: raise NotImplementedError("Fluctuating case not yet implemented for HPG trips.")
 
         # find the hourglass to the graph interior
