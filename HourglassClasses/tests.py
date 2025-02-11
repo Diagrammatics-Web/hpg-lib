@@ -5,7 +5,7 @@ from .halfhourglass import HalfHourglass
 from .vertex import Vertex
 from .face import Face
 from .hourglassplabicgraph import HourglassPlabicGraph
-from hourglass2 import HourglassPlabicGraph as OldHourglassPlabicGraph
+from hourglass2 import HourglassPlabicGraph as HourglassPlabicGraphOld
 
 import examples as Examples
 
@@ -491,9 +491,8 @@ def serialization_tests():
 
 def reduced_tests():
     print("Testing is_fully_reduced.")
-    verbose = False
 
-    def test_reducedness(graphdict, name, r, expected):
+    def test_reducedness(graphdict, name, r, expected, verbose=False):
         if verbose: print(f"Testing {name} for reducedness.")
         if (expected is not None):
             assert HourglassPlabicGraph.from_dict(graphdict).is_fully_reduced(r, verbose) == expected, f"{name} should{' ' if expected else ' not '}be fully reduced."
@@ -530,13 +529,53 @@ def reduced_tests():
 
 def separation_labeling_tests():
     print("Testing separation_labeling.")
-    def test_labeling(graphdict):
+    
+    def test_labeling(graphdict, name, r, verbose=True):
+        if verbose: print(f"Testing separation labeling on {name}.")
         ID.reset_id()
         HPG = HourglassPlabicGraph.from_dict(graphdict)
-        HPG.print_faces()
-        HPG.separation_labeling(HPG._get_face('face2'), 4)
+        HPGOld = HourglassPlabicGraphOld.from_dict(graphdict)
+        # Test separation labeling for every face
+        for face in HPG._faces.values():
+            # Skip the boundary face
+            is_complete_boundary = True
+            for hh in face:
+                if not hh.is_boundary(): 
+                    is_complete_boundary = False
+                    break
+            if is_complete_boundary: continue
+            # We find corresponding face in the old graph
+            # IDs for vertices are shared as they are defined in the dictionary, thus they can be used as identifiers
+            oface = None
+            vertex_ids = set([hh.v_from().id for hh in face])
+            for f in HPGOld.faces.values(): 
+                if vertex_ids == set([v.id for v in f.vertices()]):
+                    oface = f
+                    break
+            assert oface is not None, f"Unable to find corresponding face for {face.id}."
+            HPG.separation_labeling(face, 4, verbose)
+            HPGOld.separation_labeling(oface, 4)
 
-    test_labeling(Examples.example_ASM)
+            # Compare all labels
+            # Remember, labels are applied to halfhourglasses rooted at white (unfilled)
+            for oh in HPGOld.hourglasses.values():
+                hh = None
+                if oh.v_from.filled: hh = HPG._get_hourglass_by_id(oh.v_to.id, oh.v_from.id)
+                else: hh = HPG._get_hourglass_by_id(oh.v_from.id, oh.v_to.id)
+                assert hh is not None, f"Unable to find hourglass between vertices {oh.v_from.id} and {oh.v_to.id}."
+                assert oh.label == hh.label, f"Labels do not agree on hourglass between vertices {hh.v_from().id} to {hh.v_to().id}. New label: {hh.label} Old label: {oh.label}."
+            if verbose: print(f"Separation labeling passed on {name}.")
+
+    test_labeling(Examples.example_ASM, "example_ASM", 4)
+    test_labeling(Examples.example_5_by_2, "example_5_by_2", 5)
+    test_labeling(Examples.example_5_by_3_ASM, "example_5_by_3_ASM", 5)
+    test_labeling(Examples.example_9_by_2, "example_9_by_2", 9)
+    test_labeling(Examples.example_2_column_running, "example_2_column_running", 7)
+    test_labeling(Examples.example_2_column_running_after_squaremove, "example_2_column_running_after_squaremove", 7)
+    test_labeling(Examples.example_2_column_running_ear_cut, "example_2_column_running_ear_cut", 7)
+    test_labeling(Examples.example_benzene, "example_benzene", 4)
+    test_labeling(Examples.example_double_crossing, "example_double_crossing", 4)
+    test_labeling(Examples.example_6_by_3, "example_6_by_3", 6)
 
     print("separation_labeling tests not yet complete.\n")
 
