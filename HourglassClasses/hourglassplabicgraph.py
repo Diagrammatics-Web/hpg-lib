@@ -73,7 +73,7 @@ class HourglassPlabicGraph:
         Equality is considered to be an embedded planar graph isomorphism.
 
         INPUT:
-        
+
         - `other` -- object; The object to test against.
 
         OUTPUT: Boolean; returns True if and only if `other` is an HPG and is isomorphic to this HPG.
@@ -81,7 +81,7 @@ class HourglassPlabicGraph:
         EXAMPLES:
 
         This example constructs two isomorphic HPGs and tests equality.
-        
+
             hpg1 = HourglassPlabicGraph()
             hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
             hpg2 = HourglassPlabicGraph()
@@ -91,7 +91,7 @@ class HourglassPlabicGraph:
 
         This example demonstrates that edge multiplicities are relevant to isomorphism.
         See the WARNING for issues with testing otherwise isomorphic graphs with different orientations.
-        
+
             hpg1 = HourglassPlabicGraph()
             hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
             hpg2 = HourglassPlabicGraph()
@@ -100,7 +100,7 @@ class HourglassPlabicGraph:
             False
 
         This example uses two clearly non-isomorphic graphs.
-            
+
             hpg1 = HourglassPlabicGraph()
             hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
             hpg2 = HourglassPlabicGraph()
@@ -109,7 +109,7 @@ class HourglassPlabicGraph:
             False
 
         .. WARNING::
-        
+
             The test for isomorphism assumes graphs are also "oriented" the same way; that is,
             their ID 0 boundary vertex is in the same place.
 
@@ -129,7 +129,7 @@ class HourglassPlabicGraph:
         Equality is considered to be an embedded planar graph isomorphism.
 
         INPUT:
-        
+
         - `other` -- object; The object to test against.
 
         OUTPUT: Boolean; returns True if and only if `other` is not an HPG or is non-isomorphic to this HPG.
@@ -145,7 +145,7 @@ class HourglassPlabicGraph:
         Traverses this HPG through a breadth-first search beginning from the first boundary vertex.
         (Is this actually BFS?)
 
-        OUTPUT: A tuple; 
+        OUTPUT: A tuple;
             The first element is an array of visited HalfHourglasses (including twins) in BFS order.
             The second element is an array of visited HalfHourglasses with repetitions as they are revisited.
             The third element is an array of visited Vertices in BFS order.
@@ -188,17 +188,17 @@ class HourglassPlabicGraph:
     def __hash__(self):
         r"""
         Computes the hash value of this object.
-    
+
         OUTPUT: Integer; the hash value of the object.
-    
+
         EXAMPLES:
-    
+
             sage: hpg = HourglassPlabicGraph(8)
             sage: hpg.__hash__()
             2932925276731088263
-    
+
         Ensure the hash value does not change for equal objects:
-            
+
             sage: hpg1 = HourglassPlabicGraph(6)
             sage: hpg2 = HourglassPlabicGraph(6)
             sage: hpg1.__hash__() == hpg2.__hash__()
@@ -211,6 +211,52 @@ class HourglassPlabicGraph:
 
     def is_isomorphic(self, other):
         r"""
+        Tests for a planar graph isomorphism between this graph and other.
+
+        INPUT:
+
+        - `other` -- HourglassPlabicGraph; The graph to test against.
+
+        OUTPUT: Boolean; returns True if and only if `other` is isomorphic to this.
+
+        EXAMPLES:
+
+        This example constructs two isomorphic HPGs and tests equality.
+
+            hpg1 = HourglassPlabicGraph()
+            hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
+            hpg2 = HourglassPlabicGraph()
+            hpg2.construct_face(6, [2, 1, 2, 1, 2, 1])
+            hpg1.is_isomorphic(hpg2)
+            True
+
+        This example demonstrates that edge multiplicities are relevant to isomorphism.
+        See the WARNING for issues with testing otherwise isomorphic graphs with different orientations.
+
+            hpg1 = HourglassPlabicGraph()
+            hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
+            hpg2 = HourglassPlabicGraph()
+            hpg2.construct_face(6, [1, 2, 1, 2, 1, 2])
+            hpg1.is_isomorphic(hpg2)
+            False
+
+        This example uses two clearly non-isomorphic graphs.
+
+            hpg1 = HourglassPlabicGraph()
+            hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
+            hpg2 = HourglassPlabicGraph()
+            hpg2.construct_face(4, [2, 1, 2, 1])
+            hpg1.is_isomorphic(hpg2)
+            False
+
+        .. WARNING::
+
+            The test for isomorphism assumes graphs are also "oriented" the same way; that is,
+            their ID 0 boundary vertex is in the same place.
+
+            This test also fails if there are isolated components.
+
+            This function is not intended to be used on non "properly formed" HPGs, and may fail or crash.
         """
         self_hh_visited, self_hh_history, self_v_visited, self_v_history = self.traverse()
         other_hh_visited, other_hh_history, other_v_visited, other_v_history = other.traverse()
@@ -240,7 +286,7 @@ class HourglassPlabicGraph:
     def construct_boundary(self, n, filling=True, r=10):
         r"""
         Creates n boundary vertices, labeled from 0 to n-1, and connects them with phantom edges.
-        The vertices will be set to filling, unless. This function can only be called on an empty graph.
+        The vertices will be set to filling. This function can only be called on an empty graph.
 
         INPUT:
 
@@ -330,16 +376,43 @@ class HourglassPlabicGraph:
                     self.create_hourglass_by_id(v_id, first_id, multiplicities[i])
             last_id = v_id
 
-    def create_vertex(self, v_id, x, y, filled, boundary=False, label='', verify_id=False):
+    def create_vertex(self, v_id, x, y, filled, boundary=False, label=None, verify_id=False):
         r"""
-        Adds a vertex to the graph and returns it.
-        v_id: The id given to the vertex. Should be unique.
-        label:
-        x: The x position of the vertex
-        y: The y position of the vertex
-        filled: Whether the vertex is to be filled or not.
-        boundary: Whether the vertex is on the boundary. Defaults to False.
-        verify_id: Check whether v_id is already in use. Defaults to False.
+        Adds a vertex with the given parameters to the graph and returns it.
+
+        INPUT:
+        
+        - `v_id` -- hashable, unique object; The id given to the vertex.
+        
+        - ``x`` -- float; The x position of the vertex
+        
+        - ``y`` -- float; The y position of the vertex
+        
+        - `filled` -- Boolean; Whether the vertex is to be filled or not.
+        
+        - `boundary` -- Boolean (default: `False`); Whether the vertex is on the boundary.
+        
+        - `label` -- object (default: `None`)
+        
+        - `verify_id` -- Boolean (default: `False`); Check whether v_id is already in use.
+
+        OUTPUT: Vertex
+
+        EXAMPLES:
+
+            sage: HPG = HourglassPlabicGraph(6)
+            sage: HPG.create_vertex(6, 0, 0, True)
+            Vertex 6 at (0, 0), filled
+
+        It is problematic to create a vertex with an existing ID, but no error will be thrown unless `verify_id` is `True`.
+
+            sage: HPG.create_vertex(6, 0, 1, False, False, None, True)
+            ValueError: v_id already in use.
+
+        .. NOTE::
+
+            This function is intended primarily for creating interior vertices. To easily set up a boundary
+            with proper IDs, use `construct_boundary` or `construct_face`.
         """
         if verify_id and ((not boundary and v_id in self._inner_vertices) or (boundary and v_id in self._boundary_vertices)): raise ValueError(f"v_id {v_id} already in use.")
 
@@ -350,24 +423,81 @@ class HourglassPlabicGraph:
 
     def remove_vertex_by_id(self, v_id):
         r"""
+        Removes the vertex with the given ID (and all connected hourglasses).
+
+        INPUT:
+
+        - `v_id` -- object; The ID of the vertex to remove.
+
+        EXAMPLES:
+
+            sage: HPG = HourglassPlabicGraph(6)
+            sage: HPG.remove_vertex_by_id(5)
+            sage: HPG.order()
+            5
+
+        It is an error to try to remove a vertex not in the graph.
+
+            sage: HPG.remove_vertex_by_id('nonexistent_id')
+            ValueError: id 5 does not correspond to any vertex.
+
+        .. NOTE::
+
+            This function internally looks up the vertex ID, then calls remove_vertex.
+            It is equivalent to calling HPG.remove_vertex(HPG._get_vertex(vid)).
         """
         del_vertex = self._get_vertex(v_id)
         self.remove_vertex(del_vertex)
 
     def remove_vertex(self, del_vertex):
         r"""
+        Removes the provided vertex (and all connected hourglasses).
+
+        INPUT:
+
+        - `v_id` -- object; The ID of the vertex to remove.
+
+        EXAMPLES:
+
+            sage: HPG = HourglassPlabicGraph(6)
+            sage: del_v = HPG._get_vertex(5)
+            sage: HPG.remove_vertex(del_v)
+            sage: HPG.order()
+            5
+
+        It is an error to try to remove a vertex not in the graph.
+
+            sage: HPG.remove_vertex_by_id('nonexistent_id')
+            ValueError: The provided vertex is not in the graph.
         """
         # Store hourglasses in a list to avoid issues with removing
         # elements while iterating over dihedral element
+        if del_vertex.id in self._inner_vertices: del self._inner_vertices[del_vertex.id]
+        else if del_vertex.id in self._boundary_vertices: del self._boundary_vertices[del_vertex.id]
+        else: raise ValueError("The provided vertex is not in the graph.")
+        
         del_hourglasses = del_vertex.get_hourglasses_as_list()
         for hh in del_hourglasses:
             self._remove_hourglass_internal(hh, del_vertex, hh.v_to())
 
-        if del_vertex.id in self._inner_vertices: del self._inner_vertices[del_vertex.id]
-        else: del self._boundary_vertices[del_vertex.id]
-
     def create_hourglass_by_id(self, v1_id, v2_id, multiplicity=1):
         r"""
+        Creates an hourglass (two HalfHourglasses) between the vertices
+        identified by `v1_id` and `v2_id`, and returns it.
+
+        INPUT:
+
+        - `v1_id` -- object; the ID of the first Vertex.
+        
+        - `v2_id` -- object; the ID of the second Vertex.
+        
+        - `multiplicity` -- nonnegative integer; multiplicity of the constructed hourglass.. Assumed to be an integer `\geq 1`.
+
+        OUTPUT: HalfHourglass; the HalfHourglass from `v1_id` to `v2_id`.
+
+        EXAMPLES:
+
+        
         """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
@@ -376,6 +506,8 @@ class HourglassPlabicGraph:
 
     def create_hourglass(self, v1, v2, multiplicity=1):
         r"""
+        Creates an hourglass (two HalfHourglasses) between v1 and v2, and returns it.
+        
         """
         new_hh = Vertex.create_hourglass_between(v1, v2, multiplicity)
 
@@ -575,8 +707,8 @@ class HourglassPlabicGraph:
             return True
 
         # Verify no self-intersections
-        for i in range(0, len(trips)):
-            for trip in trips[i]:
+        for i, trip_is in enumerate(trips):
+            for trip in trip_is:
                 if not validate_no_self_intersections(trip):
                     if verbose: print(f"trip{i+1} from vertex {trip[0].v_from().id} self-intersects.")
                     return False
@@ -677,8 +809,7 @@ class HourglassPlabicGraph:
             return (final_inds is not None)
 
         # Validate no double crossings
-        for i in range(0, len(trips)):
-            trip_is = trips[i]
+        for i, trip_is in enumerate(trips):
             all_compare_trips = trips[i] + (trips[i+1] if i < len(trips)-1 else [])
             for a in range(0, len(trip_is)):
                 trip1 = trip_is[a]
@@ -750,6 +881,93 @@ class HourglassPlabicGraph:
         """
         r = max(v.total_degree() for v in self._inner_vertices.values()) # This is quite inefficient, could be a cached value provided by user?
         return [self.get_trip_perm(i, output) for i in range(1, r)]
+
+    def separation_labeling(self, base_face, r):
+        r"""
+        """
+        # Requisite data structures:
+        # - Grid of faces and trips (dict of tuple trip, face to boolean)
+        # - Dict from (oriented) strands to tuple of trips through strand
+        # However, trips (arrays) are not hashable, so instead we simply
+        # store the starting vertex id and use that plus the i to uniquely
+        # identify trips. This means we also must use the same scheme to
+        # identify trips for the separating_trips dict.
+        separating_trips = dict()
+        strand_to_trips = dict()
+
+        tripid = lambda trip, i : (trip[0].v_from().id, i)
+
+        print("Performing separation_labeling with base_face " + str(base_face.id)) # TESTING #
+
+        print("Getting trips") # TESTING #
+
+        # Get all trips by strand
+        # trips[i] are all trip is
+        trips = [[self.get_trip(v, i) for v in self._boundary_vertices.values()] for i in range(1, r)]
+
+        # Populate strand_to_trips and separating_trips dicts
+        for i, trip_is in enumerate(trips):
+            for trip in trip_is:
+                print("Found trip " + str(i+1) + " from vertex " + str(trip[0].v_from().id)) # TESTING #
+                for strand in trip:
+                    # Only consider strands based at white (unfilled)
+                    if strand.v_from().filled: continue
+
+                    # Initialize if necessary
+                    if strand not in strand_to_trips:
+                        strand_to_trips[strand] = [None] * (r-1)
+
+                    # Use uniquely identifying tuple instead of array itself
+                    strand_to_trips[strand][i] = tripid(trip, i)
+
+                print("Performing DFS") # TESTING #
+                # Figure out separations for trip
+                # Perform a DFS on faces between the trip's path and the boundary to the right
+                explore_stack = list()
+                visited_faces = set()
+                # Define boundary for DFS
+                trip_hourglasses = set()
+                for strand in trip:
+                    trip_hourglasses.add(strand.hourglass())
+                    r_face = strand.right_face()
+                    # Begin pushing faces on the rightward interior to the stack
+                    # This could be avoided -- only one face is necessary to start with
+                    if r_face not in visited_faces:
+                        print(" Found face " + str(r_face.id) + " to the right of trip") # TESTING #
+                        visited_faces.add(r_face)
+                        explore_stack.append(r_face)
+
+                # Perform DFS
+                while explore_stack:
+                    face = explore_stack.pop()
+                    for hh in face:
+                        # Avoid traversing past the boundary
+                        if hh.is_boundary() or hh in trip_hourglasses or hh.twin() in trip_hourglasses: continue
+                        l_face = hh.left_face()
+                        if l_face not in visited_faces:
+                            print(" Found face " + str(l_face.id) + " to the right of trip") # TESTING #
+                            visited_faces.add(l_face)
+                            explore_stack.append(l_face)
+
+                # Value stored for this tuple is equal to whether the base face and this face are on
+                # different sides of the trip, ie the trip is separating
+                
+                visited_base_face = base_face in visited_faces
+                print("base_face " + ("" if visited_base_face else "not ") + "found to the right of trip") # TESTING #
+                for face in self._faces.values():
+                    separating_trips[(tripid(trip, i), face)] = (visited_base_face != (face in visited_faces))
+
+        hourglasses = self._get_interior_hourglasses()
+        for hh in hourglasses:
+            hh.label = list()
+            # Ensure we are rooted at white (unfilled)
+            if hh.v_from().filled: hh = hh.twin()
+            l_face = hh.left_face() # Left face has "white on right" for hourglass rooted at white
+            # for each strand: label is 1 + # separating trips
+            for strand in hh.iterate_strands():
+                hh.label.append(1 + sum(((t is not None) and separating_trips[(t, l_face)]) for t in strand_to_trips[strand]))
+            # Sort strand labels, then zip with (1, 2, ...) tuple
+            hh.label = [x + y for (x, y) in zip(sorted(hh.label), range(1, hh.multiplicity()))]
 
     # Internal accessors
 

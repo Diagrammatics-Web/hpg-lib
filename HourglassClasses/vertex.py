@@ -28,13 +28,13 @@ class Vertex:
     When traversing an HPG, trip i turns at the ith left on an unfilled vertex
     and the ith right on a filled vertex.
     """
-    def __init__(self, id, x, y, filled, boundary=False, label=''):
+    def __init__(self, id, x, y, filled, boundary=False, label=None):
         r"""
         Constructs a Vertex with the given ID, x and y positions, and filled and boundary statuses.
 
         INPUT:
 
-        - `id` -- an object, assumed unique, should be hashable
+        - `id` -- hashable, unique object
 
         - ``x`` -- float; the x-position of this Vertex
 
@@ -44,7 +44,7 @@ class Vertex:
 
         - `boundary` -- boolean (default: False); True if on the boundary
 
-        - `label` -- object (default: '')
+        - `label` -- object (default: None)
 
         OUTPUT: Vertex; the constructed Vertex
         """

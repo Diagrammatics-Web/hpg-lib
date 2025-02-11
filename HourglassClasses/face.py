@@ -30,7 +30,7 @@ class Face:
 
         INPUT:
 
-        - `id` -- an object, assumed unique, should be hashable
+        - `id` -- hashable, unique object
 
         - `half_hourglass` -- HalfHourglass; a HalfHourglass adjacent to this face with this face on its right.
 

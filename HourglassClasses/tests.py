@@ -33,6 +33,7 @@ def all_tests():
     move_tests()
     serialization_tests()
     reduced_tests()
+    separation_tests()
 
 # TESTS FOR BASE CLASS FUNCTIONALITY
 
@@ -530,6 +531,14 @@ def separation_labeling_tests():
     print("Testing separation labeling.")
 
     print("Separation labeling tests not yet complete.\n")
+    
+def separation_tests():
+    print("Testing separation_labeling.")
+    ID.reset_id()
+    HPG = HourglassPlabicGraph.from_dict(Examples.example_ASM)
+    HPG.print_faces()
+    HPG.separation_labeling(HPG._get_face('face2'), 4)
+    print("Separation labeling tests complete.\n")
 
 def create_test_HPG():
     '''
