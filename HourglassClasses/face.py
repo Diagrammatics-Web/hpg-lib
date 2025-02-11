@@ -24,7 +24,7 @@ class Face:
     A Face is simply a reference to a collection of edges/vertices, and does not actually
     directly manage them. This should instead be done though an HourglassPlabicGraph.
     """
-    def __init__(self, id, half_hourglass, label=''):
+    def __init__(self, id, half_hourglass):
         r"""
         Constructs a Face with the given ID to the right of the given half hourglass.
 
@@ -33,8 +33,6 @@ class Face:
         - `id` -- hashable, unique object
 
         - `half_hourglass` -- HalfHourglass; a HalfHourglass adjacent to this face with this face on its right.
-
-        - `label` -- object (default: '')
 
         OUTPUT: Face; the constructed Face
 
@@ -74,7 +72,6 @@ class Face:
             are already assumed to exist. The Face simply allows you to unify them.
         """
         self.id = id
-        self.label = label
 
         self._half_hourglasses_head = half_hourglass
         self.boundary = False

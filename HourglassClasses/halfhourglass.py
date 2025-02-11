@@ -30,7 +30,7 @@ class HalfHourglass(DihedralElement):
 
     A HalfHourglass is always assumed to be between two Vertices and be linked to adjacent HalfHourglasses for v_from.
     """
-    def __init__(self, id, v_from, v_to, multiplicity, label=None, twin=None):
+    def __init__(self, id, v_from, v_to, multiplicity, twin=None):
         r"""
         Constructs a HalfHourglass with the given ID, between vertices v_from and v_to, and constructs `multiplicity` strands.
         Also contsructs its own twin.
@@ -40,8 +40,6 @@ class HalfHourglass(DihedralElement):
         - `id` -- hashable, unique object
 
         - `multiplicity` -- nonnegative integer; number of strands between from and to. if 0, this is an edge boundary. Assumed to be an integer `\geq 1`.
-
-        - `label` -- object (default: None)
 
         - `twin` -- HalfHourglass (default: None); this parameter should be left blank. It is used internally to automatically construct this strand's twin.
 
@@ -72,13 +70,13 @@ class HalfHourglass(DihedralElement):
         self._v_from = v_from
         self._v_to = v_to
         self._multiplicity = multiplicity
-        self.label = label
+        self.label = None # Used by HPG for separation labeling
 
         # the half hourglass representing movement in the opposite direction, between the same vertices
         # twin will have swapped to/from vertices
         # only the "base" hourglass will need to set up strands
         if twin is None:
-            self._twin = HalfHourglass(f"{id}_t", v_to, v_from, multiplicity, '', self)
+            self._twin = HalfHourglass(f"{id}_t", v_to, v_from, multiplicity, self)
 
             # Create half strands and record head/tail
             if multiplicity == 0:

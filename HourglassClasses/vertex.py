@@ -28,7 +28,7 @@ class Vertex:
     When traversing an HPG, trip i turns at the ith left on an unfilled vertex
     and the ith right on a filled vertex.
     """
-    def __init__(self, id, x, y, filled, boundary=False, label=None):
+    def __init__(self, id, x, y, filled, boundary=False):
         r"""
         Constructs a Vertex with the given ID, x and y positions, and filled and boundary statuses.
 
@@ -44,8 +44,6 @@ class Vertex:
 
         - `boundary` -- boolean (default: False); True if on the boundary
 
-        - `label` -- object (default: None)
-
         OUTPUT: Vertex; the constructed Vertex
         """
         self.id = id
@@ -53,7 +51,6 @@ class Vertex:
         self.y = y
         self.filled = filled
         self.boundary = boundary
-        self.label = label
 
         r"""
         Some half hourglass around this vertex. When the graph is properly embedded,

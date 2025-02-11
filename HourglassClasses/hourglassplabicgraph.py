@@ -376,7 +376,7 @@ class HourglassPlabicGraph:
                     self.create_hourglass_by_id(v_id, first_id, multiplicities[i])
             last_id = v_id
 
-    def create_vertex(self, v_id, x, y, filled, boundary=False, label=None, verify_id=False):
+    def create_vertex(self, v_id, x, y, filled, boundary=False, verify_id=False):
         r"""
         Adds a vertex with the given parameters to the graph and returns it.
 
@@ -391,8 +391,6 @@ class HourglassPlabicGraph:
         - `filled` -- Boolean; Whether the vertex is to be filled or not.
         
         - `boundary` -- Boolean (default: `False`); Whether the vertex is on the boundary.
-        
-        - `label` -- object (default: `None`)
         
         - `verify_id` -- Boolean (default: `False`); Check whether v_id is already in use.
 
@@ -416,7 +414,7 @@ class HourglassPlabicGraph:
         """
         if verify_id and ((not boundary and v_id in self._inner_vertices) or (boundary and v_id in self._boundary_vertices)): raise ValueError(f"v_id {v_id} already in use.")
 
-        vertex = Vertex(v_id, x, y, filled, boundary, v_id if label == '' else label)
+        vertex = Vertex(v_id, x, y, filled, boundary)
         if boundary: self._boundary_vertices[v_id] = vertex
         else: self._inner_vertices[v_id] = vertex
         return vertex
@@ -1050,12 +1048,12 @@ class HourglassPlabicGraph:
 
         # prepare internal data for graph
         for v_data in data['vertices']:
-            label = v_data['label'] if 'label' in v_data else ''
-            HPG.create_vertex(v_data['id'], v_data['x'], v_data['y'], v_data['filled'], v_data['boundary'], label)
+            HPG.create_vertex(v_data['id'], v_data['x'], v_data['y'], v_data['filled'], v_data['boundary'])
 
         for e in data['edges']:
-            label = e['label'] if 'label' in e else ''
-            HPG.create_hourglass_by_id(e['sourceId'], e['targetId'], e['multiplicity']) # Use label?
+            label = e['label'] if 'label' in e else None
+            hh = HPG.create_hourglass_by_id(e['sourceId'], e['targetId'], e['multiplicity'])
+            hh.label = label
 
          # add boundary edges
         sorted_boundary_vertices = list(HPG._boundary_vertices.values())
@@ -1098,7 +1096,6 @@ class HourglassPlabicGraph:
                 "y": float(v.y),
                 "filled": v.filled,
                 "boundary": v.boundary,
-                "label": v.label,
                 } for v in vertices],
             'layout': self.layout,
         }
