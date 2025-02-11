@@ -63,7 +63,7 @@ class HalfStrand(DihedralElement):
         self._hourglass = hourglass
 
         # the half strand representing movement in the opposite direction, between the same vertices
-        self._twin = HalfStrand(str(id) + "_t", hourglass.twin() if hourglass is not None else None, self) if twin is None else twin
+        self._twin = HalfStrand(f"{id}_t", hourglass.twin() if hourglass is not None else None, self) if twin is None else twin
 
     def __repr__(self):
         r"""
@@ -80,7 +80,7 @@ class HalfStrand(DihedralElement):
             sage: hh._half_strands_head.__repr__()
             'Strand 0 (ID: v1_v2_s0) from v1 to v2'
         """
-        return "HalfStrand " + str(self.get_index_in_hourglass()) + " (ID: " + str(self.id) + ") from " + ("None" if self.v_from() is None else str(self.v_from().id)) + " to " + ("None" if self.v_to() is None else str(self.v_to().id))
+        return f"HalfStrand {self.get_index_in_hourglass()} (ID: {self.id}) from {'None' if self.v_from() is None else self.v_from().id} to {'None' if self.v_to() is None else self.v_to().id}"
 
     def hourglass(self):
         r"""

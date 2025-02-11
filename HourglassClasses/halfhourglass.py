@@ -78,7 +78,7 @@ class HalfHourglass(DihedralElement):
         # twin will have swapped to/from vertices
         # only the "base" hourglass will need to set up strands
         if twin is None:
-            self._twin = HalfHourglass(str(id) + "_t", v_to, v_from, multiplicity, '', self)
+            self._twin = HalfHourglass(f"{id}_t", v_to, v_from, multiplicity, '', self)
 
             # Create half strands and record head/tail
             if multiplicity == 0:
@@ -87,11 +87,11 @@ class HalfHourglass(DihedralElement):
                 self.twin()._half_strands_head = None
                 self.twin()._half_strands_tail = None
             else:
-                self._half_strands_head = HalfStrand(ID.get_new_id(str(id) + "_s"), self)
+                self._half_strands_head = HalfStrand(ID.get_new_id(f"{id}_s"), self)
                 self.twin()._half_strands_head = self._half_strands_head.twin()
                 for i in range(1, multiplicity): # runs multiplicity-1 times as we have already created a head strand
                     # potentially use thicken() instead of doing this manually?
-                    strand = HalfStrand(ID.get_new_id(str(id) + "_s"), self)
+                    strand = HalfStrand(ID.get_new_id(f"{id}_s"), self)
                     self._half_strands_head.append_cw(strand)
                     self.twin()._half_strands_head.append_cw(strand.twin())
                 self._half_strands_tail = self._half_strands_head.cw_last()
@@ -116,7 +116,7 @@ class HalfHourglass(DihedralElement):
             sage: hh.__repr__()
             'HalfHourglass between v1 to v2 with multiplicity 1'
         """
-        return "HalfHourglass (ID: " + str(self.id) + ") from " + ("None" if self.v_from() is None else str(self.v_from().id)) + " to " + ("None" if self.v_to() is None else str(self.v_to().id)) + " with multiplicity " + str(self.multiplicity())
+        return f"HalfHourglass (ID: {self.id}) from {'None' if self.v_from() is None else self.v_from().id} to {'None' if self.v_to() is None else self.v_to().id} with multiplicity {self.multiplicity()}"
 
     # Insert/remove overrides. These must be overridden as strands must be linked up as well.
 

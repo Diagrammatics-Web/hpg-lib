@@ -3,7 +3,7 @@ class ID:
     _id = 0
     @classmethod
     def get_new_id(cls, prefix):
-        n_id = prefix + str(cls._id)
+        n_id = f"{prefix}{cls._id}"
         cls._id += 1
         return n_id
 

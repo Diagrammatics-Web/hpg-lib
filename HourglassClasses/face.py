@@ -94,7 +94,7 @@ class Face:
             sage: f.__repr__()
             'Face face'
         """
-        return "Face " + str(self.id)
+        return f"Face {self.id}"
 
     def initialize_half_hourglasses(self, hh):
         r"""
@@ -445,7 +445,7 @@ class Face:
         """
         if start_hh.right_face() is not self:
             if start_hh.left_face() is self: start_hh = start_hh.twin()
-            else: raise ValueError("start_hh does not belong to this face!")
+            else: raise ValueError("start_hh does not belong to this face.")
 
         count = 0
         should_be_filled = not start_hh.v_from().filled

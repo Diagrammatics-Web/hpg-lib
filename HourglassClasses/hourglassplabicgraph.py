@@ -341,7 +341,7 @@ class HourglassPlabicGraph:
         boundary: Whether the vertex is on the boundary. Defaults to False.
         verify_id: Check whether v_id is already in use. Defaults to False.
         """
-        if verify_id and ((not boundary and v_id in self._inner_vertices) or (boundary and v_id in self._boundary_vertices)): raise ValueError("v_id already in use.")
+        if verify_id and ((not boundary and v_id in self._inner_vertices) or (boundary and v_id in self._boundary_vertices)): raise ValueError(f"v_id {v_id} already in use.")
 
         vertex = Vertex(v_id, x, y, filled, boundary, v_id if label == '' else label)
         if boundary: self._boundary_vertices[v_id] = vertex
@@ -535,7 +535,7 @@ class HourglassPlabicGraph:
         """
         for v in self._inner_vertices.values():
             if v.total_degree() != r:
-                if verbose: print("Graph is not r-valent. Vertex " + str(v.id) + " does not have degree " + str(r) + ". Instead, degree is " + str(v.total_degree()) + ".")
+                if verbose: print(f"Graph is not r-valent. Vertex {v.id} does not have degree {r}. Instead, degree is {v.total_degree()}.")
                 return False
         return True
 
@@ -559,7 +559,7 @@ class HourglassPlabicGraph:
                 for i in range(1, r):
                     trip = strand.get_trip(i)
                     if not trip[0].v_from().boundary and len(trip) > 2:
-                        if verbose: print("Isolated trip " + str(i) + " detected passing through " + str(trip[0]) + ".")
+                        if verbose: print(f"Isolated trip {i} detected passing through {trip[0]}.")
                         return False
 
         # Get all trips starting on the boundary in half-strand format
@@ -578,7 +578,7 @@ class HourglassPlabicGraph:
         for i in range(0, len(trips)):
             for trip in trips[i]:
                 if not validate_no_self_intersections(trip):
-                    if verbose: print("trip" + str(i+1) + " from vertex " + str(trip[0].v_from().id) + " self-intersects.")
+                    if verbose: print(f"trip{i+1} from vertex {trip[0].v_from().id} self-intersects.")
                     return False
 
         # Internal helper functions for double crossing checks
@@ -685,9 +685,7 @@ class HourglassPlabicGraph:
                 for b in range(a+1, len(all_compare_trips)):
                     trip2 = all_compare_trips[b]
                     if (do_trips_double_cross(trip1, trip2)):
-                        if verbose: print("trip" + str(i+1) + " from vertex " + str(trip1[0].v_from().id)
-                                          + " and trip" + (str(i+1) if b < len(trip_is) else str(i+2))
-                                          + " from vertex " + str(trip2[0].v_from().id) + " double cross.")
+                        if verbose: print(f"trip{i+1} from vertex {trip1[0].v_from().id} and trip{i+1 if b < len(trip_is) else i+2} from vertex {trip2[0].v_from().id} double cross.")
                         return False
         return True
 
@@ -759,7 +757,7 @@ class HourglassPlabicGraph:
         r"""
         """
         face = self._faces.get(f_id)
-        if face is None: raise ValueError("id " + str(f_id) + " does not correspond to any face.")
+        if face is None: raise ValueError(f"id {f_id} does not correspond to any face.")
         return face
 
     def _get_vertex(self, v_id):
@@ -769,7 +767,7 @@ class HourglassPlabicGraph:
         v = self._inner_vertices.get(v_id)
         if v is None:
             v = self._boundary_vertices.get(v_id)
-            if v is None: raise ValueError("id " + str(v_id) + " does not correspond to any vertex.")
+            if v is None: raise ValueError(f"id {v_id} does not correspond to any vertex.")
         return v
 
     def _get_hourglass_by_id(self, v1_id, v2_id):

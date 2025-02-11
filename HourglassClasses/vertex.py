@@ -75,7 +75,7 @@ class Vertex:
             sage: v.__repr__()
             'Vertex v at (0, 0), filled'
         """
-        return "Vertex " + str(self.id) + " at (" + str(self.x) + ", " + str(self.y) + "), " + ("filled" if self.filled else "unfilled")
+        return f"Vertex {self.id} at ({self.x}, {self.y}), {'filled' if self.filled else 'unfilled'}"
 
     def _reset_head(self):
         r"""
@@ -115,7 +115,7 @@ class Vertex:
 
             This function is a class method.
         """
-        hh_id = str(v1.id) + "_" + str(v2.id)
+        hh_id = f"{v1.id}_{v2.id}"
         hh = HalfHourglass(hh_id, v1, v2, multiplicity)
         v1._insert_hourglass(hh)
         v2._insert_hourglass(hh.twin())
@@ -259,7 +259,7 @@ class Vertex:
         """
         for hh in self:
             if hh.v_to() is v_to: return hh
-        raise ValueError("Hourglass to vertex [" + str(v_to) + "] does not exist.")
+        raise ValueError(f"Hourglass to vertex ({v_to}) does not exist.")
 
     def get_trip(self, i, output='half_strands'):
         r"""
