@@ -492,7 +492,8 @@ def serialization_tests():
 def reduced_tests():
     print("Testing is_fully_reduced.")
 
-    def test_reducedness(graphdict, name, r, expected, verbose=False):
+    verbose = False
+    def test_reducedness(graphdict, name, r, expected):
         if verbose: print(f"Testing {name} for reducedness.")
         if (expected is not None):
             assert HourglassPlabicGraph.from_dict(graphdict).is_fully_reduced(r, verbose) == expected, f"{name} should{' ' if expected else ' not '}be fully reduced."
@@ -530,7 +531,7 @@ def reduced_tests():
 def separation_labeling_tests():
     print("Testing separation_labeling.")
     
-    def test_labeling(graphdict, name, r, verbose=True):
+    def test_labeling(graphdict, name, r, verbose=False):
         if verbose: print(f"Testing separation labeling on {name}.")
         ID.reset_id()
         HPG = HourglassPlabicGraph.from_dict(graphdict)
@@ -553,8 +554,10 @@ def separation_labeling_tests():
                     oface = f
                     break
             assert oface is not None, f"Unable to find corresponding face for {face.id}."
-            HPG.separation_labeling(face, 4, verbose)
-            HPGOld.separation_labeling(oface, 4)
+            if verbose: print("-Performing New Separation Labeling-")
+            HPG.separation_labeling(face, r, verbose)
+            if verbose: print("-Performing Legacy Separation Labeling-")
+            HPGOld.separation_labeling(oface, r)
 
             # Compare all labels
             # Remember, labels are applied to halfhourglasses rooted at white (unfilled)
@@ -563,7 +566,8 @@ def separation_labeling_tests():
                 if oh.v_from.filled: hh = HPG._get_hourglass_by_id(oh.v_to.id, oh.v_from.id)
                 else: hh = HPG._get_hourglass_by_id(oh.v_from.id, oh.v_to.id)
                 assert hh is not None, f"Unable to find hourglass between vertices {oh.v_from.id} and {oh.v_to.id}."
-                assert oh.label == hh.label, f"Labels do not agree on hourglass between vertices {hh.v_from().id} to {hh.v_to().id}. New label: {hh.label} Old label: {oh.label}."
+                # Note that we assume label is in ascending order, which is not necessarily true of legacy code
+                assert sorted(oh.label) == hh.label, f"Labels do not agree on hourglass between vertices {hh.v_from().id} to {hh.v_to().id}. New label: {hh.label} Old label: {sorted(oh.label)}."
             if verbose: print(f"Separation labeling passed on {name}.")
 
     test_labeling(Examples.example_ASM, "example_ASM", 4)
@@ -577,7 +581,7 @@ def separation_labeling_tests():
     test_labeling(Examples.example_double_crossing, "example_double_crossing", 4)
     test_labeling(Examples.example_6_by_3, "example_6_by_3", 6)
 
-    print("separation_labeling tests not yet complete.\n")
+    print("separation_labeling tests complete.\n")
 
 def create_test_HPG():
     '''

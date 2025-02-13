@@ -70,7 +70,7 @@ class HalfHourglass(DihedralElement):
         self._v_from = v_from
         self._v_to = v_to
         self._multiplicity = multiplicity
-        self.label = None # Used by HPG for separation labeling
+        self.label = [] # Used by HPG for separation labeling
 
         # the half hourglass representing movement in the opposite direction, between the same vertices
         # twin will have swapped to/from vertices

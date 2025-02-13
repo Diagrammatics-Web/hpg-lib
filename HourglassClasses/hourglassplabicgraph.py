@@ -880,7 +880,7 @@ class HourglassPlabicGraph:
         r = max(v.total_degree() for v in self._inner_vertices.values()) # This is quite inefficient, could be a cached value provided by user?
         return [self.get_trip_perm(i, output) for i in range(1, r)]
 
-    def separation_labeling(self, base_face, r, verbose=False):
+    def separation_labeling(self, base_face, r=4, verbose=False):
         r"""
         """
         # Requisite data structures:
@@ -895,7 +895,7 @@ class HourglassPlabicGraph:
 
         tripid = lambda trip, i : (trip[0].v_from().id, i)
 
-        if verbose: print(f"Performing separation_labeling with base_face {base_face.id}.")
+        if verbose: print(f"Performing separation_labeling with base_face {base_face.id} ({', '.join(str(hh.v_from().id) for hh in base_face)}).")
 
         # Get all trips by strand
         # trips[i] are all trip is
@@ -954,13 +954,16 @@ class HourglassPlabicGraph:
 
         hourglasses = self._get_interior_hourglasses()
         for hh in hourglasses:
-            hh.label = list()
             # Ensure we are rooted at white (unfilled)
+            # Note that _get_interior_hourglasses filters out redundant (twin) hourglasses, so we can do this safely
             if hh.v_from().filled: hh = hh.twin()
+            if verbose: print(f"Creating label for hourglass from {hh.v_from().id} to {hh.v_to().id}.")
+            hh.label = []
             l_face = hh.left_face() # Left face has "white on right" for hourglass rooted at white
-            # for each strand: label is 1 + # separating trips
+            # for each strand: label is # separating trips
             for strand in hh.iterate_strands():
-                hh.label.append(1 + sum(((t is not None) and separating_trips[(t, l_face)]) for t in strand_to_trips[strand]))
+                hh.label.append(sum(((t is not None) and separating_trips[(t, l_face)]) for t in strand_to_trips[strand]))
+            if verbose: print(f"Pre-sorted counts: {hh.label}")
             # Sort strand labels, then zip with (1, 2, ..., m) tuple
             hh.label = [x + y for (x, y) in zip(sorted(hh.label), range(1, hh.multiplicity()+1))]
             if verbose: print(f"Created label {hh.label} for hourglass from {hh.v_from().id} to {hh.v_to().id}.")
