@@ -495,7 +495,7 @@ class HourglassPlabicGraph:
 
         EXAMPLES:
 
-        
+            TODO
         """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
@@ -505,7 +505,22 @@ class HourglassPlabicGraph:
     def create_hourglass(self, v1, v2, multiplicity=1):
         r"""
         Creates an hourglass (two HalfHourglasses) between v1 and v2, and returns it.
+
+        INPUT:
+
+        - `v1` -- Vertex; the first Vertex.
         
+        - `v2` -- Vertex; the second Vertex.
+        
+        - `multiplicity` -- nonnegative integer; multiplicity of the constructed hourglass.. Assumed to be an integer `\geq 1`.
+
+        OUTPUT: HalfHourglass; the HalfHourglass from `v1` to `v2`.
+
+            TODO
+
+        .. NOTE:
+
+            This function also generates the necessary faces that would be created by this edge.
         """
         new_hh = Vertex.create_hourglass_between(v1, v2, multiplicity)
 
@@ -538,6 +553,17 @@ class HourglassPlabicGraph:
 
     def remove_hourglass_by_id(self, v1_id, v2_id):
         r"""
+        Removes the hourglass between the vertices identified by `v1_id` and `v2_id`.
+
+        INPUT:
+
+        - `v1_id` -- object; the ID of the first Vertex.
+        
+        - `v2_id` -- object; the ID of the second Vertex.
+
+        EXAMPLES:
+
+            TODO
         """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
@@ -545,11 +571,23 @@ class HourglassPlabicGraph:
 
     def remove_hourglass(self, v1, v2):
         r"""
+        Removes the hourglass between the vertices `v1` and `v2`.
+
+        INPUT:
+
+        - `v1` -- Vertex; the first Vertex.
+        
+        - `v2` -- Vertex; the second Vertex.
+
+        EXAMPLES:
+
+            TODO
         """
         self._remove_hourglass_internal(self._get_hourglass(v1, v2), v1, v2)
 
     def _remove_hourglass_internal(self, del_hh, v1, v2):
         r"""
+        An internal function to assist in removing hourglasses. Do not use; instead use `remove_hourglass_by_id` or `remove_hourglass`.
         """
         face1 = None
         hh1 = None
@@ -585,6 +623,17 @@ class HourglassPlabicGraph:
 
     def thicken_hourglass_by_id(self, v1_id, v2_id):
         r"""
+        Thickens the hourglass between vertices identified by `v1_id` and `v2_id`.
+
+        INPUT:
+
+        - `v1_id` -- object; the ID of the first Vertex.
+        
+        - `v2_id` -- object; the ID of the second Vertex.
+
+        EXAMPLES:
+
+            TODO
         """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
@@ -593,12 +642,34 @@ class HourglassPlabicGraph:
 
     def thicken_hourglass(self, v1, v2):
         r"""
+        Thickens the hourglass between the vertices `v1` and `v2`.
+
+        INPUT:
+
+        - `v1` -- Vertex; the first Vertex.
+        
+        - `v2` -- Vertex; the second Vertex.
+
+        EXAMPLES:
+
+            TODO
         """
         self._get_hourglass(v1, v2).thicken()
     add_strand = thicken_hourglass # alias
 
     def thin_hourglass_by_id(self, v1_id, v2_id):
         r"""
+        Thins the hourglass between vertices identified by `v1_id` and `v2_id`.
+
+        INPUT:
+
+        - `v1_id` -- object; the ID of the first Vertex.
+        
+        - `v2_id` -- object; the ID of the second Vertex.
+
+        EXAMPLES:
+
+            TODO
         """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
@@ -607,6 +678,17 @@ class HourglassPlabicGraph:
 
     def thin_hourglass(self, v1, v2):
         r"""
+        Thins the hourglass between the vertices `v1` and `v2`.
+
+        INPUT:
+
+        - `v1` -- Vertex; the first Vertex.
+        
+        - `v2` -- Vertex; the second Vertex.
+
+        EXAMPLES:
+
+            TODO
         """
         self._get_hourglass(v1, v2).thin()
     remove_strand = thin_hourglass # alias
@@ -615,11 +697,31 @@ class HourglassPlabicGraph:
 
     def is_square_move_valid(self, face_id, r=4):
         r"""
+        Verifies that the provided face can perform a square move.
+
+        - `face_id` -- object; the ID of the provided face.
+
+        - ``r`` -- positive integer (default: `4`); the valence of the graph. Assumed to be an integer `\geq 1`.
+
+        OUTPUT: Boolean; Whether a square move is valid on the face.
+
+        EXAMPLES:
+
+            TODO
         """
         return self._get_face(face_id).is_square_move_valid(r)
 
     def square_move(self, face_id, r=4):
         r"""
+        Verifies that the provided face can perform a square move.
+
+        - `face_id` -- object; the ID of the provided face.
+
+        - ``r`` -- positive integer (default: `4`); the valence of the graph. Assumed to be an integer `\geq 1`.
+
+        EXAMPLES:
+
+            TODO
         """
         face = self._get_face(face_id)
 
@@ -638,6 +740,19 @@ class HourglassPlabicGraph:
 
     def is_cycle_valid(self, face_id, v1_id, v2_id):
         r"""
+        Verifies that the provided face can perform a cycle move, starting from the .
+
+        - `face_id` -- object; the ID of the provided face.
+
+        - `v1_id` -- object; the ID of the first Vertex.
+        
+        - `v2_id` -- object; the ID of the second Vertex.
+
+        OUTPUT: Boolean; Whether a square move is valid on the face.
+
+        EXAMPLES:
+
+            TODO
         """
         return self._get_face(face_id).is_cycle_valid(self._get_hourglass_by_id(v1_id, v2_id))
 
@@ -882,6 +997,19 @@ class HourglassPlabicGraph:
 
     def separation_labeling(self, base_face, r=4, verbose=False):
         r"""
+        Applies separation labelings to all HalfHourglasses in this graph departing from unfilled vertices.
+
+         INPUT:
+
+        - `base_face` -- Face; the base face of the separation labeling.
+    
+        - ``r`` -- positive integer (default: `4`); the valence of the graph. Assumed to be an integer `\geq 1`.
+
+        - `verbose` -- Boolean (default: `False`); whether to print informative output.
+    
+        EXAMPLES:
+
+            TODO
         """
         # Requisite data structures:
         # - Grid of faces and trips (dict of tuple trip, face to boolean)
