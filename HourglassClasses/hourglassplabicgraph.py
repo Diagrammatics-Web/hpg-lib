@@ -487,7 +487,13 @@ class HourglassPlabicGraph:
 
         EXAMPLES:
 
-            TODO
+            sage: HPG = HourglassPlabicGraph(6)
+            sage: HPG.create_hourglass_by_id(4, 5)
+            sage: HPG._get_hourglass_by_id(4, 5)
+            HalfHourglass (ID: 4_5) from 4 to 5 with multiplicity 0
+
+            sage: HPG.create_hourglass_by_id(5, 6)
+            ValueError: id 6 does not correspond to any vertex.
         """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)

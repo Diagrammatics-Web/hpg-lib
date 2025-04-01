@@ -7,7 +7,7 @@ from .face import Face
 from .hourglassplabicgraph import HourglassPlabicGraph
 from hourglass2 import HourglassPlabicGraph as HourglassPlabicGraphOld
 
-import examples as Examples
+from .examples import Examples
 
 import math
 import json
@@ -408,10 +408,10 @@ def hourglass_plabic_graph_tests():
 
     # Isomorphism tests
 
-    HPG1 = HourglassPlabicGraph.from_dict(Examples.example_ASM)
-    HPG2 = HourglassPlabicGraph.from_dict(Examples.example_ASM)
-    HPG3 = HourglassPlabicGraph.from_dict(Examples.example_5_by_2)
-    HPG4 = HourglassPlabicGraph.from_dict(Examples.example_5_by_2)
+    HPG1 = Examples.GetExample("example_ASM")
+    HPG2 = Examples.GetExample("example_ASM")
+    HPG3 = Examples.GetExample("example_5_by_2")
+    HPG4 = Examples.GetExample("example_5_by_2")
     assert HPG1.is_isomorphic(HPG2), "HPG1 should be isomorphic to HPG2."
     assert HPG3.is_isomorphic(HPG4), "HPG3 should be isomorphic to HPG4."
     assert not HPG1.is_isomorphic(HPG3), "HPG1 should not be isomorphic to HPG3."
@@ -427,7 +427,7 @@ def move_tests():
     ID.reset_id()
     plots = []
 
-    HPG = HourglassPlabicGraph.from_dict(Examples.example_ASM)
+    HPG = Examples.GetExample("example_ASM")
     face_id = "face2"
     plots.append(("HPG before square move:", HPG.plot()))
     assert HPG.is_square_move_valid(face_id), f"Square move should be valid on {face_id}."
@@ -463,7 +463,7 @@ def move_tests():
 
     # Square move test in SL7
     ID.reset_id()
-    HPG = HourglassPlabicGraph.from_dict(Examples.example_2_column_running)
+    HPG = Examples.GetExample("example_2_column_running")
     face_id = "face9"
     plots.append(("HPG before square move in SL7:", HPG.plot()))
     assert HPG.is_square_move_valid(face_id, 7), f"Square move should be valid on {face_id}."
@@ -493,38 +493,44 @@ def reduced_tests():
     print("Testing is_fully_reduced.")
 
     verbose = False
-    def test_reducedness(graphdict, name, r, expected):
+    def test_reducedness(name, r, expected):
         if verbose: print(f"Testing {name} for reducedness.")
         if (expected is not None):
-            assert HourglassPlabicGraph.from_dict(graphdict).is_fully_reduced(r, verbose) == expected, f"{name} should{' ' if expected else ' not '}be fully reduced."
+            assert Examples.GetExample(name).is_fully_reduced(r, verbose) == expected, f"{name} should{' ' if expected else ' not '}be fully reduced."
             if verbose: print(f"{name} is{' ' if expected else ' not '}fully reduced.")
-        else: print(f"{name} is{' ' if HourglassPlabicGraph.from_dict(graphdict).is_fully_reduced(r, verbose) else ' not '}fully reduced (unkown expectation).")
+        else: print(f"{name} is{' ' if Examples.GetExample(name).is_fully_reduced(r, verbose) else ' not '}fully reduced (unkown expectation).")
 
     # Reduced HPGs
-    test_reducedness(Examples.example_ASM, "example_ASM", 4, True)
-    test_reducedness(Examples.example_5_by_2, "example_5_by_2", 5, True)
-    test_reducedness(Examples.example_5_by_3_ASM, "example_5_by_3_ASM", 5, True)
-    test_reducedness(Examples.example_9_by_2, "example_9_by_2", 9, True)
-    test_reducedness(Examples.example_2_column_running, "example_2_column_running", 7, True)
-    test_reducedness(Examples.example_2_column_running_after_squaremove, "example_2_column_running_after_squaremove", 7, True)
-    test_reducedness(Examples.example_2_column_running_ear_cut, "example_2_column_running_ear_cut", 7, True)
-    test_reducedness(Examples.example_benzene, "example_benzene", 4, True)
-    test_reducedness(Examples.example_double_crossing, "example_double_crossing", 4, True)
-    test_reducedness(Examples.example_6_by_3, "example_6_by_3", 6, True)
+    test_reducedness("example_ASM", 4, True)
+    test_reducedness("example_5_by_2", 5, True)
+    test_reducedness("example_5_by_3_ASM", 5, True)
+    test_reducedness("example_9_by_2", 9, True)
+    test_reducedness("example_2_column_running", 7, True)
+    test_reducedness("example_2_column_running_after_squaremove", 7, True)
+    test_reducedness("example_2_column_running_ear_cut", 7, True)
+    test_reducedness("example_benzene", 4, True)
+    test_reducedness("example_double_crossing", 4, True)
+    test_reducedness("example_6_by_3", 6, True)
 
     # Non-reduced HPGs
-    test_reducedness(Examples.example_benzene_full_nonreduced, "example_benzene_full_nonreduced", 4, False)
-    test_reducedness(Examples.example_5x4_badsep, "example_5x4_badsep", 5, False)
-    test_reducedness(Examples.example_6_by_3_bad, "example_6_by_3_bad", 6, False)
-    test_reducedness(Examples.example_christian_is_working_with, "example_christian_is_working_with", 4, False)
-    test_reducedness(Examples.examples_christian_plabic, "examples_christian_plabic", 3, False)
+    test_reducedness("example_benzene_full_nonreduced", 4, False)
+    test_reducedness("example_5x4_badsep", 5, False)
+    test_reducedness("example_6_by_3_bad", 6, False)
+    test_reducedness("example_christian_is_working_with", 4, False)
+    test_reducedness("examples_christian_plabic", 3, False)
 
     if verbose:
         # Test unknown examples
-        test_reducedness(Examples.example_6_by_6, "example_6_by_6", 6, None)
-        test_reducedness(Examples.examples_ICERM, "examples_ICERM", 5, None)
+        test_reducedness("example_6_by_6", 6, None)
+        test_reducedness("examples_ICERM", 5, None)
         # Throws NotImplementedError
-        #test_reducedness(Examples.example_contractable, "example_contractable", 5, None)
+        try:
+            test_reducedness("example_contractable", 5, None)
+            assert False, "example_contractable should have thrown an error."
+        except NotImplementedError as nie:
+            print(f"Successfully caught NotImplementedError: '{nie}'.")
+        except Exception as e:
+            assert False, f"Some other error was thrown: '{e}'."
 
     print("is_fully_reduced tests complete.\n")
 
