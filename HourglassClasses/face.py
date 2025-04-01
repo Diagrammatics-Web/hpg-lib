@@ -52,16 +52,8 @@ class Face:
 
         This example verifies that the face is on the correct side of the hourglass.
 
-            sage: v1 = Vertex('v1', 0, 0, False)
-            sage: v2 = Vertex('v2', 0, 1, False)
-            sage: v3 = Vertex('v3', 1, 1, False)
-            sage: v4 = Vertex('v4', 1, 0, False)
             sage: v5 = Vertex('v5', 2, 0, False)
-            sage: Vertex.create_hourglass_between(v1, v2, 1)
-            sage: Vertex.create_hourglass_between(v2, v3, 1)
-            sage: Vertex.create_hourglass_between(v3, v4, 1)
             sage: Vertex.create_hourglass_between(v4, v5, 1)
-            sage: hh = Vertex.create_hourglass_between(v4, v1, 1)
             sage: face = Face('face', hh)
             sage: [hh.v_to().id for hh in face]
             ['v1', 'v2', 'v3', 'v4']
@@ -154,7 +146,7 @@ class Face:
 
         EXAMPLES:
 
-        This example constructs a face where a square move is valid.
+        This example explicitly constructs a face where a square move is valid.
 
             sage: v1 = Vertex(1, 0, 0, True)
             sage: v2 = Vertex(2, 1, 0, False)
@@ -179,15 +171,10 @@ class Face:
             sage: face.is_square_move_valid()
             True
 
-        This is an example of a face which clearly cannot perform a square move.
+        We modify the face so it clearly cannot perform a square move.
 
-            sage: v1 = Vertex(1, 0, 0, True)
-            sage: v2 = Vertex(2, 0, 1, False)
-            sage: v3 = Vertex(3, 1, 1, True)
-            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
-            sage: Vertex.create_hourglass_between(v2, v3, 1)
             sage: Vertex.create_hourglass_between(v3, v1, 1)
-            sage: face = Face('face', hh)
+            sage: face.initialize_half_hourglasses(hh.twin())
             sage: face.is_square_move_valid()
             False
         """
@@ -317,15 +304,10 @@ class Face:
             sage: face.is_square_move4_valid()
             True
 
-        This is an example of a face which clearly cannot perform a square move.
+        We modify the face so it clearly cannot perform a square move.
 
-            sage: v1 = Vertex(1, 0, 0, True)
-            sage: v2 = Vertex(2, 0, 1, False)
-            sage: v3 = Vertex(3, 1, 1, True)
-            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
-            sage: Vertex.create_hourglass_between(v2, v3, 1)
             sage: Vertex.create_hourglass_between(v3, v1, 1)
-            sage: face = Face('face', hh)
+            sage: face.initialize_half_hourglasses(hh.twin())
             sage: face.is_square_move4_valid()
             False
 

@@ -92,8 +92,6 @@ class HourglassPlabicGraph:
         This example demonstrates that edge multiplicities are relevant to isomorphism.
         See the WARNING for issues with testing otherwise isomorphic graphs with different orientations.
 
-            hpg1 = HourglassPlabicGraph()
-            hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
             hpg2 = HourglassPlabicGraph()
             hpg2.construct_face(6, [1, 2, 1, 2, 1, 2])
             hpg1.__eq__(hpg2)
@@ -101,8 +99,6 @@ class HourglassPlabicGraph:
 
         This example uses two clearly non-isomorphic graphs.
 
-            hpg1 = HourglassPlabicGraph()
-            hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
             hpg2 = HourglassPlabicGraph()
             hpg2.construct_face(4, [2, 1, 2, 1])
             hpg1.__eq__(hpg2)
@@ -199,9 +195,7 @@ class HourglassPlabicGraph:
 
         Ensure the hash value does not change for equal objects:
 
-            sage: hpg1 = HourglassPlabicGraph(6)
-            sage: hpg2 = HourglassPlabicGraph(6)
-            sage: hpg1.__hash__() == hpg2.__hash__()
+            sage: hpg.__hash__() == HourglassPlabicGraph(8).__hash__()
             True
         """
         hh_visited, hh_history, v_visited, v_history = self.traverse()
@@ -233,8 +227,6 @@ class HourglassPlabicGraph:
         This example demonstrates that edge multiplicities are relevant to isomorphism.
         See the WARNING for issues with testing otherwise isomorphic graphs with different orientations.
 
-            hpg1 = HourglassPlabicGraph()
-            hpg1.construct_face(6, [2, 1, 2, 1, 2, 1])
             hpg2 = HourglassPlabicGraph()
             hpg2.construct_face(6, [1, 2, 1, 2, 1, 2])
             hpg1.is_isomorphic(hpg2)
@@ -515,6 +507,8 @@ class HourglassPlabicGraph:
         - `multiplicity` -- nonnegative integer; multiplicity of the constructed hourglass.. Assumed to be an integer `\geq 1`.
 
         OUTPUT: HalfHourglass; the HalfHourglass from `v1` to `v2`.
+
+        EXAMPLES:
 
             TODO
 
