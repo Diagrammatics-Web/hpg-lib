@@ -216,7 +216,6 @@ class HalfStrand(DihedralElement):
             sage: hh._half_strands_head.get_index_in_hourglass()
             0
 
-            sage: hh = HalfHourglass('hh', None, None, 6)
             sage: hh._half_strands_head.get_cw_ith_element(3).get_index_in_hourglass()
             3
 

@@ -255,15 +255,13 @@ class DihedralElement:
 
         If i is 0 or less, this element is returned.
 
-            sage: d1 = DihedralElement(1)
-            sage: d2 = DihedralElement(2)
-            sage: d1.insert_cw_next(d2)
+            sage: d3.remove()
             sage: d1.get_cw_ith_element(-5) == d1
             True
 
         .. NOTE::
 
-            Runtime: O(n)
+            Runtime: O(i)
         """
         e = self
         while i > 0:
@@ -295,15 +293,13 @@ class DihedralElement:
 
         If i is 0 or less, this element is returned.
 
-            sage: d1 = DihedralElement(1)
-            sage: d2 = DihedralElement(2)
-            sage: d1.insert_ccw_next(d2)
+            sage: d3.remove()
             sage: d1.get_ccw_ith_element(-5) == d1
             True
 
         .. NOTE::
 
-            Runtime: O(n)
+            Runtime: O(i)
         """
         e = self
         while i > 0:

@@ -131,6 +131,7 @@ class HalfHourglass(DihedralElement):
 
         This example constructs a list of three HalfHourglasses using insert_cw_next.
 
+            sage: ID.reset_id()
             sage: hh1 = HalfHourglass('hh1', None, None, 1)
             sage: hh2 = HalfHourglass('hh2', None, None, 1)
             sage: hh3 = HalfHourglass('hh3', None, None, 1)
@@ -141,20 +142,13 @@ class HalfHourglass(DihedralElement):
 
         This example demonstrates how HalfStrands are connected.
 
-            sage: ID.reset_id()
-            sage: hh1 = HalfHourglass('hh1', None, None, 1)
-            sage: hh2 = HalfHourglass('hh2', None, None, 1)
-            sage: hh1.insert_cw_next(hh2)
             sage: [s.id for s in hh1._half_strands_head]
-            ['hh1_s0', 'hh2_s1']
+            ['hh1_s0', 'hh3_s2', 'hh2_s1']
 
         This example demonstrates how inserting HalfHourglasses with no HalfStrands is handled properly.
 
-            sage: ID.reset_id()
-            sage: hh1 = HalfHourglass('hh1', None, None, 1)
-            sage: hh2 = HalfHourglass('hh2', None, None, 1)
+            sage: hh3.remove()
             sage: hh3 = HalfHourglass('hh3', None, None, 0)
-            sage: hh1.insert_cw_next(hh2)
             sage: hh1.insert_cw_next(hh3)
             sage: [s.id for s in hh1._half_strands_head]
             ['hh1_s0', 'hh2_s1']
@@ -190,6 +184,7 @@ class HalfHourglass(DihedralElement):
 
         This example constructs a list of three HalfHourglasses using insert_ccw_next.
 
+            sage: ID.reset_id()
             sage: hh1 = HalfHourglass('hh1', None, None, 1)
             sage: hh2 = HalfHourglass('hh2', None, None, 1)
             sage: hh3 = HalfHourglass('hh3', None, None, 1)
@@ -200,20 +195,13 @@ class HalfHourglass(DihedralElement):
 
         This example demonstrates how HalfStrands are connected.
 
-            sage: ID.reset_id()
-            sage: hh1 = HalfHourglass('hh1', None, None, 1)
-            sage: hh2 = HalfHourglass('hh2', None, None, 1)
-            sage: hh1.insert_ccw_next(hh2)
             sage: [s.id for s in hh1._half_strands_head]
-            ['hh1_s0', 'hh2_s1']
+            ['hh1_s0', 'hh2_s1', 'hh3_s2']
 
         This example demonstrates how inserting HalfHourglasses with no HalfStrands is handled properly.
 
-            sage: ID.reset_id()
-            sage: hh1 = HalfHourglass('hh1', None, None, 1)
-            sage: hh2 = HalfHourglass('hh2', None, None, 1)
+            sage: hh3.remove()
             sage: hh3 = HalfHourglass('hh3', None, None, 0)
-            sage: hh1.insert_ccw_next(hh2)
             sage: hh1.insert_ccw_next(hh3)
             sage: [s.id for s in hh1._half_strands_head]
             ['hh1_s0', 'hh2_s1']
@@ -251,15 +239,10 @@ class HalfHourglass(DihedralElement):
             sage: hh1.insert_ccw_next(hh3)
             sage: hh2.remove()
             sage: [hh for hh in hh1] == [hh1, hh3]
+            True
 
         This example demonstrates how HalfStrands are automatically relinked upon removal.
 
-            sage: hh1 = HalfHourglass('hh1', None, None, 1)
-            sage: hh2 = HalfHourglass('hh2', None, None, 1)
-            sage: hh3 = HalfHourglass('hh3', None, None, 1)
-            sage: hh1.insert_ccw_next(hh2)
-            sage: hh1.insert_ccw_next(hh3)
-            sage: hh2.remove()
             sage: hh1._half_strands_head.get_num_elements()
             2
         """
@@ -347,17 +330,16 @@ class HalfHourglass(DihedralElement):
             sage: [s.id for s in hh._half_strands_head]
             ['hh_s0']
 
+        It is an error to remove_strand on an edge with only one strand.
+
+            sage: hh.remove_strand()
+            RuntimeError: Cannot remove a strand from an edge with only one strand.
+
         It is an error to remove_strand on a phantom edge.
 
             sage: hh = HalfHourglass('hh', None, None, 0)
             sage: hh.remove_strand()
             RuntimeError: Cannot remove a strand to a phantom/boundary edge.
-
-        It is an error to remove_strand on an edge with only one strand.
-
-            sage: hh = HalfHourglass('hh', None, None, 1)
-            sage: hh.remove_strand()
-            RuntimeError: Cannot remove a strand from an edge with only one strand.
 
         .. NOTE::
 
@@ -388,19 +370,16 @@ class HalfHourglass(DihedralElement):
 
             sage: ID.reset_id()
             sage: hh1 = HalfHourglass('hh1', None, None, 1)
-            sage: hh2 = HalfHourglass('hh2', None, None, 1)
-            sage: hh1.insert_cw_next(hh2)
+            sage: hh1.insert_cw_next(HalfHourglass('hh2', None, None, 1))
             sage: hh1._get_first_strand().id
             'hh1_s0'
 
         This example demonstrates when the hourglass owns no strands.
 
-            sage: ID.reset_id()
             sage: hh1 = HalfHourglass('hh1', None, None, 0)
-            sage: hh2 = HalfHourglass('hh2', None, None, 1)
-            sage: hh1.insert_cw_next(hh2)
+            sage: hh1.insert_cw_next(HalfHourglass('hh2', None, None, 1))
             sage: hh1._get_first_strand().id
-            'hh2_s0'
+            'hh2_s2'
         """
         if self._half_strands_head is not None: return self._half_strands_head
         for hh in self:
@@ -487,7 +466,6 @@ class HalfHourglass(DihedralElement):
             sage: hh.multiplicity()
             1
 
-            sage: hh = HalfHourglass('hh', None, None, 1)
             sage: hh.thicken()
             sage: hh.multiplicity()
             2
@@ -509,11 +487,11 @@ class HalfHourglass(DihedralElement):
 
             sage: hh = HalfHourglass('hh', None, None, 1)
             sage: hh.is_boundary()
-            True
+            False
 
             sage: hh = HalfHourglass('hh', None, None, 0)
             sage: hh.is_boundary()
-            False
+            True
 
         .. NOTE::
 
@@ -531,23 +509,17 @@ class HalfHourglass(DihedralElement):
 
         EXAMPLES:
 
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 1, 0, True)
-            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh = Vertex.create_hourglass_between(Vertex('v1', 0, 0, True), Vertex('v2', 1, 0, True), 1)
             sage: hh.get_angle()
             0.0
 
-            sage: v1 = Vertex('v1', 1, 1, True)
-            sage: v2 = Vertex('v2', -1, -1, True)
-            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh = Vertex.create_hourglass_between(Vertex('v1', 1, 1, True), Vertex('v2', -1, -1, True), 1)
             sage: hh.get_angle()
             3.9269908169872414
 
         This example demonstrates output close to 2pi.
 
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 1, -0.01, True)
-            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: hh = Vertex.create_hourglass_between(Vertex('v1', 0, 0, True), Vertex('v2', 1, -0.01, True), 1)
             sage: hh.get_angle()
             6.273185640492921
         """
@@ -578,24 +550,15 @@ class HalfHourglass(DihedralElement):
             sage: [ihh.id for ihh in hh.iterate_left_turns()]
             ['v1_v2', 'v2_v3', 'v3_v4', 'v4_v1']
 
-        This can also be used to iterate the hourglasses of an infinite face.
+        This can also be used to iterate the hourglasses of an unbounded face.
 
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 1, 0, True)
-            sage: v3 = Vertex('v3', 1, 1, True)
-            sage: v4 = Vertex('v4', 0, 1, True)
-            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
-            sage: Vertex.create_hourglass_between(v2, v3, 1)
-            sage: Vertex.create_hourglass_between(v3, v4, 1)
-            sage: Vertex.create_hourglass_between(v4, v1, 1)
             sage: [ihh.id for ihh in hh.twin().iterate_left_turns()]
             ['v1_v2_t', 'v4_v1_t', 'v3_v4_t', 'v2_v3_t']
 
         This example demonstrates what happens when iterating over a single hourglass not connected to anything.
 
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 0, 1, True)
-            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: v3.clear_hourglasses()
+            sage: v4.clear_hourglasses()
             sage: [ihh.id for ihh in hh.iterate_left_turns()]
             ['v1_v2', 'v1_v2_t']
         """
@@ -623,24 +586,15 @@ class HalfHourglass(DihedralElement):
             sage: [ihh.id for ihh in hh.iterate_right_turns()]
             ['v1_v2', 'v2_v3', 'v3_v4', 'v4_v1']
 
-        This can also be used to iterate the hourglasses of an infinite face.
+        This can also be used to iterate the hourglasses of an unbounded face.
 
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', -1, 0, True)
-            sage: v3 = Vertex('v3', -1, 1, True)
-            sage: v4 = Vertex('v4', 0, 1, True)
-            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
-            sage: Vertex.create_hourglass_between(v2, v3, 1)
-            sage: Vertex.create_hourglass_between(v3, v4, 1)
-            sage: Vertex.create_hourglass_between(v4, v1, 1)
             sage: [ihh.id for ihh in hh.twin().iterate_right_turns()]
             ['v1_v2_t', 'v4_v1_t', 'v3_v4_t', 'v2_v3_t']
 
         This example demonstrates what happens when iterating over a single hourglass not connected to anything.
 
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 0, 1, True)
-            sage: hh = Vertex.create_hourglass_between(v1, v2, 1)
+            sage: v3.clear_hourglasses()
+            sage: v4.clear_hourglasses()
             sage: [ihh.id for ihh in hh.iterate_right_turns()]
             ['v1_v2', 'v1_v2_t']
         """
@@ -655,20 +609,18 @@ class HalfHourglass(DihedralElement):
         EXAMPLES:
 
             sage: ID.reset_id()
-            sage: hh = HalfHourglass('hh', None, None, 3)
+            sage: v1 = Vertex('v1', 0, 0, True)
+            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: hh = Vertex.create_hourglass_between(v1, v2, 2)
             sage: [s.id for s in hh.iterate_strands()]
-            ['hh_s0', 'hh_s1', 'hh_s2']
+            ['v1_v2_s0', 'v1_v2_s1', 'v1_v2_s2']
 
         This will only iterate over the strands owned by this HalfHourglass, even if there are other adjacent strands.
 
-            sage: ID.reset_id()
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 0, 1, True)
             sage: v3 = Vertex('v3', 0, -1, True)
-            sage: hh = Vertex.create_hourglass_between(v1, v2, 2)
             sage: Vertex.create_hourglass_between(v1, v3, 2)
             sage: [s.id for s in hh.iterate_strands()]
-            ['v1_v2_s0', 'v1_v2_s1']
+            ['v1_v2_s0', 'v1_v2_s1', 'v1_v2_s2']
 
         This example demonstrates what happens when iterating over an hourglass with no strands.
 
