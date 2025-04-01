@@ -173,10 +173,8 @@ class Vertex:
 
         It is an error to call this function on vertices with no hourglass between them.
 
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 0, 1, True)
             sage: Vertex.remove_hourglass_between(v1, v2)
-            ValueError: Hourglass to vertex [Vertex v2 at (0, 1), filled] does not exist.
+            ValueError: Hourglass to vertex (Vertex v2 at (0, 1), filled) does not exist.
 
         .. NOTE::
 
@@ -215,12 +213,9 @@ class Vertex:
         EXAMPLES:
 
             sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 1, 0, False)
-            sage: v3 = Vertex('v3', 0, 1, False)
-            sage: v4 = Vertex('v4', -1, 0, False)
-            sage: Vertex.create_hourglass_between(v1, v2, 1)
-            sage: Vertex.create_hourglass_between(v1, v3, 1)
-            sage: Vertex.create_hourglass_between(v1, v4, 1)
+            sage: Vertex.create_hourglass_between(v1, Vertex('v2', 1, 0, False), 1)
+            sage: Vertex.create_hourglass_between(v1, Vertex('v3', 0, 1, False), 1)
+            sage: Vertex.create_hourglass_between(v1, Vertex('v4', -1, 0, False), 1)
             sage: v1.clear_hourglasses()
             sage: v1.simple_degree()
             0
@@ -249,10 +244,9 @@ class Vertex:
 
         It is an error to call this function on vertices with no hourglass between them.
 
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 0, 1, True)
+            sage: v1.clear_hourglasses()
             sage: v1.get_hourglass_to(v2)
-            ValueError: Hourglass to vertex [Vertex v2 at (0, 1), filled] does not exist.
+            ValueError: Hourglass to vertex (Vertex v2 at (1, 0), unfilled) does not exist.
         """
         for hh in self:
             if hh.v_to() is v_to: return hh
@@ -329,13 +323,9 @@ class Vertex:
             sage: v.get_neighbors()
             []
 
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 1, 0, False)
-            sage: v3 = Vertex('v3', 0, 1, False)
-            sage: v4 = Vertex('v4', -1, 0, False)
-            sage: Vertex.create_hourglass_between(v1, v2, 1)
-            sage: Vertex.create_hourglass_between(v1, v3, 1)
-            sage: Vertex.create_hourglass_between(v1, v4, 1)
+            sage: Vertex.create_hourglass_between(v1, Vertex('v2', 1, 0, False), 1)
+            sage: Vertex.create_hourglass_between(v1,  Vertex('v3', 0, 1, False), 1)
+            sage: Vertex.create_hourglass_between(v1, Vertex('v4', -1, 0, False), 1)
             sage: v1.get_neighbors()
             [Vertex v2 at (1, 0), unfilled, Vertex v3 at (0, 1), unfilled, Vertex v4 at (-1, 0), unfilled]
         """
@@ -348,18 +338,14 @@ class Vertex:
         OUTPUT: integer
 
         EXAMPLES:
-            sage: v = Vertex('v', 0, 0, False)
+            sage: v = Vertex('v1', 0, 0, False)
             sage: v.total_degree()
             0
-
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 1, 0, False)
-            sage: v3 = Vertex('v3', 0, 1, False)
-            sage: v4 = Vertex('v4', -1, 0, False)
-            sage: Vertex.create_hourglass_between(v1, v2, 2)
-            sage: Vertex.create_hourglass_between(v1, v3, 3)
-            sage: Vertex.create_hourglass_between(v1, v4, 1)
-            sage: v1.total_degree()
+            
+            sage: Vertex.create_hourglass_between(v, Vertex('v2', 1, 0, True), 2)
+            sage: Vertex.create_hourglass_between(v, Vertex('v3', 0, 1, True), 3)
+            sage: Vertex.create_hourglass_between(v, Vertex('v4', -1, 0, True), 1)
+            sage: v.total_degree()
             6
         """
         count = 0
@@ -373,18 +359,14 @@ class Vertex:
         OUTPUT: integer
 
         EXAMPLES:
-            sage: v = Vertex('v', 0, 0, False)
+            sage: v = Vertex('v1', 0, 0, False)
             sage: v.simple_degree()
             0
-
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 1, 0, False)
-            sage: v3 = Vertex('v3', 0, 1, False)
-            sage: v4 = Vertex('v4', -1, 0, False)
-            sage: Vertex.create_hourglass_between(v1, v2, 2)
-            sage: Vertex.create_hourglass_between(v1, v3, 3)
-            sage: Vertex.create_hourglass_between(v1, v4, 1)
-            sage: v1.simple_degree()
+            
+            sage: Vertex.create_hourglass_between(v, Vertex('v2', 1, 0, True), 2)
+            sage: Vertex.create_hourglass_between(v, Vertex('v3', 0, 1, True), 3)
+            sage: Vertex.create_hourglass_between(v, Vertex('v4', -1, 0, True), 1)
+            sage: v.simple_degree()
             3
         """
         if (self._half_hourglasses_head is None): return 0
@@ -494,19 +476,15 @@ class Vertex:
         OUTPUT: _DihedralIterator; Set as counterclockwise iterator
 
         EXAMPLES:
-            sage: v = Vertex('v', 0, 0, False)
+            sage: ID.reset_id()
+            sage: v = Vertex('v1', 0, 0, False)
             sage: [hh.id for hh in v]
             []
 
-            sage: ID.reset_id()
-            sage: v1 = Vertex('v1', 0, 0, True)
-            sage: v2 = Vertex('v2', 1, 0, False)
-            sage: v3 = Vertex('v3', 0, 1, False)
-            sage: v4 = Vertex('v4', -1, 0, False)
-            sage: Vertex.create_hourglass_between(v1, v2, 2)
-            sage: Vertex.create_hourglass_between(v1, v3, 3)
-            sage: Vertex.create_hourglass_between(v1, v4, 1)
-            sage: [hh.id for hh in v1]
+            sage: Vertex.create_hourglass_between(v, Vertex('v2', 1, 0, True), 2)
+            sage: Vertex.create_hourglass_between(v, Vertex('v3', 0, 1, True), 3)
+            sage: Vertex.create_hourglass_between(v, Vertex('v4', -1, 0, True), 1)
+            sage: [hh.id for hh in v]
             ['v1_v2', 'v1_v3', 'v1_v4']
 
         .. SEEALSO::
