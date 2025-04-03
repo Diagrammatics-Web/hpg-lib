@@ -341,7 +341,7 @@ class Vertex:
             sage: v = Vertex('v1', 0, 0, False)
             sage: v.total_degree()
             0
-            
+
             sage: Vertex.create_hourglass_between(v, Vertex('v2', 1, 0, True), 2)
             sage: Vertex.create_hourglass_between(v, Vertex('v3', 0, 1, True), 3)
             sage: Vertex.create_hourglass_between(v, Vertex('v4', -1, 0, True), 1)
@@ -362,7 +362,7 @@ class Vertex:
             sage: v = Vertex('v1', 0, 0, False)
             sage: v.simple_degree()
             0
-            
+
             sage: Vertex.create_hourglass_between(v, Vertex('v2', 1, 0, True), 2)
             sage: Vertex.create_hourglass_between(v, Vertex('v3', 0, 1, True), 3)
             sage: Vertex.create_hourglass_between(v, Vertex('v4', -1, 0, True), 1)

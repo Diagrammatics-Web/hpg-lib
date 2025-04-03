@@ -416,7 +416,7 @@ def hourglass_plabic_graph_tests():
     assert HPG3.is_isomorphic(HPG4), "HPG3 should be isomorphic to HPG4."
     assert not HPG1.is_isomorphic(HPG3), "HPG1 should not be isomorphic to HPG3."
     HPG.square_move("face12")
-    assert HPG1.is_isomorphic(HPG), "HPG1 should be isomorphic to HPG, even after two square moves."  
+    assert HPG1.is_isomorphic(HPG), "HPG1 should be isomorphic to HPG, even after two square moves."
 
     print("HourglassPlabicGraph test complete.\n")
 
@@ -448,6 +448,7 @@ def move_tests():
     plots.append(("HPG after second square move:", HPG.plot()))
     assert HPG.is_square_move_valid(face_id), f"Square move should be valid on {face_id} after performing second square move."
 
+
     # Benzene move test
     assert not HPG.is_benzene_move_valid(face_id), f"Benzene move should not be valid on {face_id}."
     HPG.thicken_hourglass_by_id(9, "v36")
@@ -460,6 +461,9 @@ def move_tests():
     assert HPG._get_hourglass_by_id("v33", 11).multiplicity() == 1, f"Hourglass between v33 and 11 should have multiplicity 1. Instead has multiplicity {HPG._get_hourglass_by_id('v33', '11').multiplicity()}."
     assert HPG._get_hourglass_by_id(11, "v36").multiplicity() == 2, f"Hourglass between 11 and v36 should have multiplicity 2. Instead has multiplicity {HPG._get_hourglass_by_id('11', 'v36').multiplicity()}."
     assert HPG._get_hourglass_by_id("v36", 9).multiplicity() == 1, f"Hourglass between v36 and 9 should have multiplicity 1. Instead has multiplicity {HPG._get_hourglass_by_id('v36', '9').multiplicity()}."
+
+    # Cycle move test
+    assert
 
     # Square move test in SL7
     ID.reset_id()
@@ -536,7 +540,7 @@ def reduced_tests():
 
 def separation_labeling_tests():
     print("Testing separation_labeling.")
-    
+
     def test_labeling(graphdict, name, r, verbose=False):
         if verbose: print(f"Testing separation labeling on {name}.")
         ID.reset_id()
@@ -547,7 +551,7 @@ def separation_labeling_tests():
             # Skip the boundary face
             is_complete_boundary = True
             for hh in face:
-                if not hh.is_boundary(): 
+                if not hh.is_boundary():
                     is_complete_boundary = False
                     break
             if is_complete_boundary: continue
@@ -555,7 +559,7 @@ def separation_labeling_tests():
             # IDs for vertices are shared as they are defined in the dictionary, thus they can be used as identifiers
             oface = None
             vertex_ids = set([hh.v_from().id for hh in face])
-            for f in HPGOld.faces.values(): 
+            for f in HPGOld.faces.values():
                 if vertex_ids == set([v.id for v in f.vertices()]):
                     oface = f
                     break

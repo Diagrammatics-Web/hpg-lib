@@ -373,17 +373,17 @@ class HourglassPlabicGraph:
         Adds a vertex with the given parameters to the graph and returns it.
 
         INPUT:
-        
+
         - `v_id` -- hashable, unique object; The id given to the vertex.
-        
+
         - ``x`` -- float; The x position of the vertex
-        
+
         - ``y`` -- float; The y position of the vertex
-        
+
         - `filled` -- Boolean; Whether the vertex is to be filled or not.
-        
+
         - `boundary` -- Boolean (default: `False`); Whether the vertex is on the boundary.
-        
+
         - `verify_id` -- Boolean (default: `False`); Check whether v_id is already in use.
 
         OUTPUT: Vertex
@@ -465,7 +465,7 @@ class HourglassPlabicGraph:
         if del_vertex.id in self._inner_vertices: del self._inner_vertices[del_vertex.id]
         elif del_vertex.id in self._boundary_vertices: del self._boundary_vertices[del_vertex.id]
         else: raise ValueError("The provided vertex is not in the graph.")
-        
+
         del_hourglasses = del_vertex.get_hourglasses_as_list()
         for hh in del_hourglasses:
             self._remove_hourglass_internal(hh, del_vertex, hh.v_to())
@@ -478,9 +478,9 @@ class HourglassPlabicGraph:
         INPUT:
 
         - `v1_id` -- object; the ID of the first Vertex.
-        
+
         - `v2_id` -- object; the ID of the second Vertex.
-        
+
         - `multiplicity` -- nonnegative integer; multiplicity of the constructed hourglass.. Assumed to be an integer `\geq 1`.
 
         OUTPUT: HalfHourglass; the HalfHourglass from `v1_id` to `v2_id`.
@@ -507,16 +507,21 @@ class HourglassPlabicGraph:
         INPUT:
 
         - `v1` -- Vertex; the first Vertex.
-        
+
         - `v2` -- Vertex; the second Vertex.
-        
+
         - `multiplicity` -- nonnegative integer; multiplicity of the constructed hourglass.. Assumed to be an integer `\geq 1`.
 
         OUTPUT: HalfHourglass; the HalfHourglass from `v1` to `v2`.
 
         EXAMPLES:
 
-            TODO
+            sage: HPG = HourglassPlabicGraph(6)
+            sage: v4 = HPG._get_vertex(4)
+            sage: v5 = HPG._get_vertex(5)
+            sage: HPG.create_hourglass(v4, v5)
+            sage: HPG._get_hourglass_by_id(4, 5)
+            HalfHourglass (ID: 4_5) from 4 to 5 with multiplicity 0
 
         .. NOTE:
 
@@ -558,12 +563,21 @@ class HourglassPlabicGraph:
         INPUT:
 
         - `v1_id` -- object; the ID of the first Vertex.
-        
+
         - `v2_id` -- object; the ID of the second Vertex.
 
         EXAMPLES:
 
-            TODO
+            sage: HPG = HourglassPlabicGraph()
+            sage: HPG.construct_face(6, [2, 1, 2, 1, 2, 1])
+            sage: HPG.remove_hourglass_by_id(6, 7)
+            sage: HPG._get_vertex(6).get_neighbors()
+            [Vertex 0 at (4.999999999999999, 8.660254037844387), unfilled, Vertex 11 at (-3.0000000000000027, 5.19615242270663), unfilled]
+
+        It is an error to remove an hourglass that does not exist.
+
+            sage: HPG.remove_hourglass_by_id(6, 8)
+            ValueError: Hourglass to vertex (Vertex 8 at (2.9999999999999996, -5.196152422706632), filled) does not exist.
         """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
@@ -576,18 +590,43 @@ class HourglassPlabicGraph:
         INPUT:
 
         - `v1` -- Vertex; the first Vertex.
-        
+
         - `v2` -- Vertex; the second Vertex.
 
         EXAMPLES:
 
-            TODO
+            sage: HPG = HourglassPlabicGraph()
+            sage: HPG.construct_face(6, [2, 1, 2, 1, 2, 1])
+            sage: v6 = HPG._get_vertex(6)
+            sage: v7 = HPG._get_vertex(7)
+            sage: HPG.remove_hourglass(v6, v7)
+            sage: v6.get_neighbors()
+            [Vertex 0 at (4.999999999999999, 8.660254037844387), unfilled, Vertex 11 at (-3.0000000000000027, 5.19615242270663), unfilled]
+
+        It is an error to remove an hourglass that does not exist.
+
+            sage: v8 = HPG._get_vertex(8)
+            sage: HPG.remove_hourglass(v6, v8)
+            ValueError: Hourglass to vertex (Vertex 8 at (2.9999999999999996, -5.196152422706632), filled) does not exist.
         """
         self._remove_hourglass_internal(self._get_hourglass(v1, v2), v1, v2)
 
     def _remove_hourglass_internal(self, del_hh, v1, v2):
         r"""
-        An internal function to assist in removing hourglasses. Do not use; instead use `remove_hourglass_by_id` or `remove_hourglass`.
+        An internal function to assist in removing hourglasses. This function manages faces to ensure they remain
+        accurate even after deleting the hourglass.
+
+        INPUT:
+
+        - `del_hh` -- HalfHourglass; the half hourglass to remove.
+
+        - `v1` -- Vertex; the vertex this hourglass originates from.
+
+        - `v2` -- Vertex; the vertex this hourglass goes to.
+
+        .. WARNING::
+
+            Do not use this function directly; instead use `remove_hourglass_by_id` or `remove_hourglass`.
         """
         face1 = None
         hh1 = None
@@ -628,12 +667,25 @@ class HourglassPlabicGraph:
         INPUT:
 
         - `v1_id` -- object; the ID of the first Vertex.
-        
+
         - `v2_id` -- object; the ID of the second Vertex.
 
         EXAMPLES:
 
-            TODO
+            sage: HPG = HourglassPlabicGraph(4)
+            sage: hh = HPG.create_hourglass_by_id(1, 3, multiplicity=3)
+            sage: HPG.thicken_hourglass_by_id(1, 3)
+            sage: hh.multiplicity()
+            4
+
+        It is an error to thicken a boundary hourglass.
+
+            sage: HPG.thicken_hourglass_by_id(1, 2)
+            RuntimeError: Cannot add a strand to a phantom/boundary edge.
+
+        .. NOTE::
+
+            This function is aliased by add_strand_by_id.
         """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
@@ -647,12 +699,28 @@ class HourglassPlabicGraph:
         INPUT:
 
         - `v1` -- Vertex; the first Vertex.
-        
+
         - `v2` -- Vertex; the second Vertex.
 
         EXAMPLES:
 
-            TODO
+            sage: HPG = HourglassPlabicGraph(4)
+            sage: v1 = HPG._get_vertex(1)
+            sage: v3 = HPG._get_vertex(3)
+            sage: hh = HPG.create_hourglass(v1, v3, multiplicity=3)
+            sage: HPG.thicken_hourglass(v1, v3)
+            sage: hh.multiplicity()
+            4
+
+        It is an error to thicken a boundary hourglass.
+
+            sage: v2 = HPG._get_vertex(2)
+            sage: HPG.thicken_hourglass(v1, v2)
+            RuntimeError: Cannot add a strand to a phantom/boundary edge.
+
+        .. NOTE::
+
+            This function is aliased by add_strand.
         """
         self._get_hourglass(v1, v2).thicken()
     add_strand = thicken_hourglass # alias
@@ -664,12 +732,25 @@ class HourglassPlabicGraph:
         INPUT:
 
         - `v1_id` -- object; the ID of the first Vertex.
-        
+
         - `v2_id` -- object; the ID of the second Vertex.
 
         EXAMPLES:
 
-            TODO
+            sage: HPG = HourglassPlabicGraph(4)
+            sage: hh = HPG.create_hourglass_by_id(1, 3, multiplicity=3)
+            sage: HPG.thin_hourglass_by_id(1, 3)
+            sage: hh.multiplicity()
+            2
+
+        It is an error to thin a boundary hourglass.
+
+            sage: HPG.thin_hourglass_by_id(1, 2)
+            RuntimeError: Cannot remove a strand from a phantom/boundary edge.
+
+        .. NOTE::
+
+            This function is aliased by remove_strand_by_id.
         """
         v1 = self._get_vertex(v1_id)
         v2 = self._get_vertex(v2_id)
@@ -683,12 +764,28 @@ class HourglassPlabicGraph:
         INPUT:
 
         - `v1` -- Vertex; the first Vertex.
-        
+
         - `v2` -- Vertex; the second Vertex.
 
         EXAMPLES:
 
-            TODO
+            sage: HPG = HourglassPlabicGraph(4)
+            sage: v1 = HPG._get_vertex(1)
+            sage: v3 = HPG._get_vertex(3)
+            sage: hh = HPG.create_hourglass(v1, v3, multiplicity=3)
+            sage: HPG.thin_hourglass(v1, v3)
+            sage: hh.multiplicity()
+            2
+
+        It is an error to thicken a boundary hourglass.
+
+            sage: v2 = HPG._get_vertex(2)
+            sage: HPG.thin_hourglass(v1, v2)
+            RuntimeError: Cannot remove a strand from a phantom/boundary edge.
+
+        .. NOTE::
+
+            This function is aliased by remove_strand.
         """
         self._get_hourglass(v1, v2).thin()
     remove_strand = thin_hourglass # alias
@@ -699,6 +796,8 @@ class HourglassPlabicGraph:
         r"""
         Verifies that the provided face can perform a square move.
 
+        INPUT:
+
         - `face_id` -- object; the ID of the provided face.
 
         - ``r`` -- positive integer (default: `4`); the valence of the graph. Assumed to be an integer `\geq 1`.
@@ -707,13 +806,27 @@ class HourglassPlabicGraph:
 
         EXAMPLES:
 
-            TODO
+            sage: ID.reset_id()
+            sage: HPG = Examples.GetExample("example_ASM")
+            sage: HPG.is_square_move_valid("face2")
+            True
+
+            sage: HPG.is_square_move_valid("face16")
+            False
+
+        .. PLOT::
+
+            # The middle face of this graph has a valid square move.
+            HPG = Examples.GetExample("example_ASM")
+            sphinx_plot(HPG)
         """
         return self._get_face(face_id).is_square_move_valid(r)
 
     def square_move(self, face_id, r=4):
         r"""
-        Verifies that the provided face can perform a square move.
+        Performs a square move on the provided face.
+
+        INPUT:
 
         - `face_id` -- object; the ID of the provided face.
 
@@ -721,7 +834,40 @@ class HourglassPlabicGraph:
 
         EXAMPLES:
 
-            TODO
+        This square move creates two vertices and removes two vertices, so should have no net change in the order of the graph.
+
+            sage: ID.reset_id()
+            sage: HPG = Examples.GetExample("example_ASM")
+            sage: initial_order = HPG.order()
+            sage: HPG.square_move("face2")
+            sage: (initial_order, HPG.order())
+
+        A square move should be valid on a face that has had a square move performed on it (in fact, this is an invertible operation).
+
+            sage: HPG.is_square_move_valid("face2")
+            True
+
+        .. WARNING::
+
+            This function may crash or otherwise corrupt the graph if a square move is
+            not valid. Use `is_square_move_valid` before to ensure this is possible.
+
+        .. NOTE::
+
+            This function is aliased by move_square.
+
+            See :meth:`Face.square_move` for implementation details.
+
+        .. PLOT::
+
+            # Before the square move
+            ID.reset_id()
+            HPG = Examples.GetExample("example_ASM")
+            sphinx_plot(HPG)
+
+            # After the square move
+            HPG.square_move("face2")
+            sphinx_plot(HPG)
         """
         face = self._get_face(face_id)
 
@@ -737,38 +883,103 @@ class HourglassPlabicGraph:
         # Note that hh will have face as its right face.
         for hh in face:
             hh.left_face().initialize_half_hourglasses(hh.twin())
+    move_square = square_move #alias
 
     def is_cycle_valid(self, face_id, v1_id, v2_id):
         r"""
-        Verifies that the provided face can perform a cycle move, starting from the .
+        Verifies that the provided face can perform a cycle move, starting from the hourglass from the first vertex to the second vertex.
+
+        INPUT:
 
         - `face_id` -- object; the ID of the provided face.
 
         - `v1_id` -- object; the ID of the first Vertex.
-        
+
         - `v2_id` -- object; the ID of the second Vertex.
 
-        OUTPUT: Boolean; Whether a square move is valid on the face.
+        OUTPUT: Boolean; Whether a cycle move is valid on the face.
 
         EXAMPLES:
 
-            TODO
+            sage: ID.reset_id()
+            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG.is_cycle_valid("face159", 72, 74)
+            True
+
+            sage: HPG.is_cycle_valid("face154", 61, 64)
+            False
+
+        .. PLOT::
+
+            # The face [66, 69, 74, 72] has a valid cycle move, while the face [66, 70, 63, 62, 61, 64] does not.
+            HPG = Examples.GetExample("example_6_by_6")
+            sphinx_plot(HPG)
         """
         return self._get_face(face_id).is_cycle_valid(self._get_hourglass_by_id(v1_id, v2_id))
 
     def cycle(self, face_id, v1_id, v2_id):
         r"""
+        performs a cycle move on the provided face, starting from the hourglass from the first vertex to the second vertex.
+        Note that the hourglass between the vertices will be thinned, and this operation will alternate with thicken around the face.
+
+        INPUT:
+
+        - `face_id` -- object; the ID of the provided face.
+
+        - `v1_id` -- object; the ID of the first Vertex.
+
+        - `v2_id` -- object; the ID of the second Vertex.
+
+        EXAMPLES:
+
+        Vertices can be passed in regardless of orientation.
+
+            sage: ID.reset_id()
+            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG.cycle("face159", 72, 74)
+            sage: HPG._get_hourglass_by_id(72, 74).multiplicity()
+            1
+
+        Cycle moves can be performed on the same face twice (in fact, it is an invertible operation) but the considered hourglass must be changed.
+
+            sage: HPG.cycle("face159", 74, 69)
+            sage: HPG._get_hourglass_by_id(72, 74).multiplicity()
+            2
+
+        Trying again may result in an error.
+
+            sage: HPG.cycle("face159", 74, 69)
+            RuntimeError: Cannot remove a strand from an edge with only one strand.
+
+        .. NOTE::
+
+            This function is aliased by `cycle_move`.
+
+        .. PLOT::
+
+            # Before the cycle move
+            ID.reset_id()
+            HPG = Examples.GetExample("example_6_by_6")
+            sphinx_plot(HPG)
+
+            # After the cycle move
+            HPG.cycle("face159", 72, 74)
+            sphinx_plot(HPG)
         """
         self._get_face(face_id).cycle(self._get_hourglass_by_id(v1_id, v2_id))
+    cycle_move = cycle # Alias
 
     def is_benzene_move_valid(self, face_id):
         r"""
         """
         return self._get_face(face_id).is_benzene_move_valid()
-    move_square = square_move # alias
 
     def benzene_move(self, face_id):
         r"""
+
+        .. NOTE::
+
+            This function is aliased by move_benzene.
         """
         self._get_face(face_id).benzene_move()
     move_benzene = benzene_move # alias
@@ -1002,11 +1213,11 @@ class HourglassPlabicGraph:
          INPUT:
 
         - `base_face` -- Face; the base face of the separation labeling.
-    
+
         - ``r`` -- positive integer (default: `4`); the valence of the graph. Assumed to be an integer `\geq 1`.
 
         - `verbose` -- Boolean (default: `False`); whether to print informative output.
-    
+
         EXAMPLES:
 
             TODO
@@ -1074,7 +1285,7 @@ class HourglassPlabicGraph:
 
                 # Value stored for this tuple is equal to whether the base face and this face are on
                 # different sides of the trip, ie the trip is separating
-                
+
                 visited_base_face = base_face in visited_faces
                 #if verbose: print(f"base_face{' ' if visited_base_face else ' not '}found to the right of trip.")
                 for face in self._faces.values():
