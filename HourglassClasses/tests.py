@@ -463,7 +463,13 @@ def move_tests():
     assert HPG._get_hourglass_by_id("v36", 9).multiplicity() == 1, f"Hourglass between v36 and 9 should have multiplicity 1. Instead has multiplicity {HPG._get_hourglass_by_id('v36', '9').multiplicity()}."
 
     # Cycle move test
-    assert
+    assert HPG.is_cycle_valid(face_id, 9, "v33"), f"Benzene move should be valid on {face_id} between vertices 9 and 'v33'."
+    assert not HPG.is_cycle_valid(face_id, 11, "v33"), f"Benzene move should not be valid on {face_id} between vertices 'v33' and 11."
+    HPG.cycle(face_id, 9, "v33")
+    assert HPG._get_hourglass_by_id(9, "v33").multiplicity() == 1, f"Hourglass between 9 and v33 should have multiplicity 2. Instead has multiplicity {HPG._get_hourglass_by_id('9', 'v33').multiplicity()}."
+    assert HPG._get_hourglass_by_id("v33", 11).multiplicity() == 2, f"Hourglass between v33 and 11 should have multiplicity 1. Instead has multiplicity {HPG._get_hourglass_by_id('v33', '11').multiplicity()}."
+    assert HPG._get_hourglass_by_id(11, "v36").multiplicity() == 1, f"Hourglass between 11 and v36 should have multiplicity 2. Instead has multiplicity {HPG._get_hourglass_by_id('11', 'v36').multiplicity()}."
+    assert HPG._get_hourglass_by_id("v36", 9).multiplicity() == 2, f"Hourglass between v36 and 9 should have multiplicity 1. Instead has multiplicity {HPG._get_hourglass_by_id('v36', '9').multiplicity()}."
 
     # Square move test in SL7
     ID.reset_id()
