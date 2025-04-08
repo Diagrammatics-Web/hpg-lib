@@ -550,7 +550,7 @@ def separation_labeling_tests():
     def test_labeling(graphdict, name, r, verbose=False):
         if verbose: print(f"Testing separation labeling on {name}.")
         ID.reset_id()
-        HPG = HourglassPlabicGraph.from_dict(graphdict)
+        HPG = Examples.GetExample(name)
         HPGOld = HourglassPlabicGraphOld.from_dict(graphdict)
         # Test separation labeling for every face
         for face in HPG._faces.values():
