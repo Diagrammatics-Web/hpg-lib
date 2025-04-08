@@ -940,7 +940,7 @@ class HourglassPlabicGraph:
             sage: HPG._get_hourglass_by_id(72, 74).multiplicity()
             1
 
-        Cycle moves can be performed on the same face twice (in fact, it is an invertible operation) but the considered hourglass must be changed.
+        A cycle move can be performed on the same face twice (in fact, it is an invertible operation) but the considered hourglass must be changed.
 
             sage: HPG.cycle("face159", 74, 69)
             sage: HPG._get_hourglass_by_id(72, 74).multiplicity()
@@ -971,15 +971,72 @@ class HourglassPlabicGraph:
 
     def is_benzene_move_valid(self, face_id):
         r"""
+        Verifies that the provided face can perform a benzene move.
+
+        INPUT:
+
+        - `face_id` -- object; the ID of the provided face.
+
+        OUTPUT: Boolean; whether a benzene move is valid on this face.
+
+        EXAMPLES:
+        
+            sage: ID.reset_id()
+            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG.is_benzene_move_valid("face159")
+            True
+
+            sage: HPG.is_benzene_move_valid("face154")
+            False
+
+            sage: HPG.benzene_move("face159")
+            sage: HPG.is_benzene_move_valid("face159")
+            True
+
+        .. PLOT::
+
+            # The face [66, 69, 74, 72] has a valid benzene move, while the face [66, 70, 63, 62, 61, 64] does not.
+            HPG = Examples.GetExample("example_6_by_6")
+            sphinx_plot(HPG)
         """
         return self._get_face(face_id).is_benzene_move_valid()
 
     def benzene_move(self, face_id):
         r"""
+        performs a benzene move on the provided face.
+
+        INPUT:
+
+        - `face_id` -- object; the ID of the provided face.
+
+        EXAMPLES:
+
+            sage: ID.reset_id()
+            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG.benzene_move("face159")
+            sage: HPG._get_hourglass_by_id(72, 74).multiplicity()
+            1
+
+        A benzene move can be performed on the same face twice (in fact, it is an invertible operation).
+
+            sage: HPG.benzene_move("face159")
+            sage: HPG._get_hourglass_by_id(72, 74).multiplicity()
+            2
 
         .. NOTE::
 
-            This function is aliased by move_benzene.
+            This function is aliased by `move_benzene`.
+
+        .. PLOT::
+
+            # Before the benzene move
+            ID.reset_id()
+            HPG = Examples.GetExample("example_6_by_6")
+            sphinx_plot(HPG)
+
+            # After the cycle move
+            HPG.benzene_move("face159")
+            sphinx_plot(HPG)
         """
         self._get_face(face_id).benzene_move()
     move_benzene = benzene_move # alias
@@ -988,6 +1045,31 @@ class HourglassPlabicGraph:
 
     def is_r_valent(self, r=4, verbose=False):
         r"""
+        Checks if this graph is r-valent; that is, all vertices have a total degree equal to r.
+
+        INPUT:
+        
+        - ``r`` -- positive integer (default: `4`); the valence of the graph. Assumed to be an integer `\geq 1`.
+
+        - `verbose` -- Boolean (default: `False`); whether to print informative output.
+
+        OUTPUT: Boolean
+
+        EXAMPLES:
+
+            sage: HPG = Examples.GetExample("example_ASM")
+            sage: HPG.is_r_valent(4)
+            True
+            
+            sage: HPG.is_r_valent(6)
+            False
+
+            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG.is_r_valent(4)
+            False
+
+            sage: HPG.is_r_valent(6)
+            True
         """
         for v in self._inner_vertices.values():
             if v.total_degree() != r:
@@ -997,6 +1079,7 @@ class HourglassPlabicGraph:
 
     def is_fully_reduced(self, r=4, verbose=False):
         r"""
+        Checks whether this graph is fully reduced, given it is r-valent.
         The conditions for being fully reduced:
         - r-valent
         - All trips should have no self-intersections, including nontrivial isolated trips
@@ -1005,6 +1088,45 @@ class HourglassPlabicGraph:
         It is trivial if it loops within the same hourglass.
         An essential double crossing occurs when two paths intersect (cross rather than reflect) twice
         while traveling in the same direction, ignoring consecutive intersections.
+
+        INPUT:
+        
+        - ``r`` -- positive integer (default: `4`); the valence of the graph. Assumed to be an integer `\geq 1`.
+
+        - `verbose` -- Boolean (default: `False`); whether to print informative output.
+
+        OUTPUT: Boolean
+
+        EXAMPLES:
+
+        These are examples of fully reduced graphs of various valences.
+
+            sage: Examples.GetExample("example_ASM").is_fully_reduced(4)
+            True
+            
+            sage: Examples.GetExample("example_5_by_2").is_fully_reduced(5)
+            True
+            
+            sage: Examples.GetExample("example_5_by_3_ASM").is_fully_reduced(5)
+            True
+            
+            sage: Examples.GetExample("example_9_by_2").is_fully_reduced(9)
+            True
+
+        These graphs are not fully reduced. The reasons why are printed out when verbose is True.
+
+            sage: ID.reset_id()
+            sage: Examples.GetExample("example_benzene_full_nonreduced").is_fully_reduced(4, verbose=True)
+            Isolated trip 2 detected passing through HalfStrand 0 (ID: 9_11_s17) from 9 to 11.
+            False
+            
+            sage: Examples.GetExample("example_5x4_badsep").is_fully_reduced(5, verbose=True)
+            trip2 from vertex 68 and trip2 from vertex 63 double cross.
+            False
+            
+            sage: Examples.GetExample("example_6_by_3_bad").is_fully_reduced(6, verbose=True)
+            trip2 from vertex 3 and trip3 from vertex 3 double cross.
+            False
         """
         # Verify r-valence
         if (not self.is_r_valent(r, verbose)): return False
@@ -1144,43 +1266,27 @@ class HourglassPlabicGraph:
                         return False
         return True
 
-    # Layout functions
-
-    def make_circular(self, r=10):
-        r"""
-        """
-        n = len(self._boundary_vertices.values())
-        for i,v in self._boundary_vertices:
-            v.x = r*math.sin((i+0.5)*2*math.pi/n)
-            v.y = r*math.cos((i+0.5)*2*math.pi/n)
-
-        self.tutte_layout()
-        self.layout = "circular"
-
-    def tutte_layout(self, error=0.01, max_iter = 1000):
-        r"""
-        from https://cs.brown.edu/people/rtamassi/gdhandbook/chapters/force-directed.pdf.
-        """
-        for i in range(max_iter):
-            err = 0
-            for v in self._inner_vertices:
-                neighbours = v.get_neighbors()
-                x_new = sum(w.x for w in neighbours)/len(neighbours)
-                y_new = sum(w.y for w in neighbours)/len(neighbours)
-                err += (v.x-x_new)**2 + (v.y-y_new)**2
-                v.x, v.y = x_new, y_new
-            if err < error:
-                break
-
     # Trip functions
 
     def get_trip(self, vertex, i, output='half_strands'):
         r"""
-        vertex: the initial boundary Vertex; assumes multiplicity 1
-        i: computes trip_i by taking the ith left at unfilled/ith right at filled
-        output: if output = 'half_strands', returns an array of HalfStrands. Otherwise, returns HalfHourglasses.
+        Gets the ith trip starting from the provided vertex. `vertex` should be on the boundary.
 
-        Returns the list of HalfHourglasses/HalfStrands the trip visits in order.
+        INPUT:
+
+        - `vertex` -- Vertex; This vertex should be a boundary vertex. It should also have multiplicity 1, as the fluctuating case is not yet implemented.
+
+        - ``i`` -- positive integer; the trip number. Assumed to be an integer `\geq 1`.
+
+        - `output` -- String (default: 'half_strands'); The data type stored in the output array. If 'half_strands', returns the
+            encountered HalfStrands. If 'half_hourglasses', returns the encountered HalfHourglasses. Anything else will return
+            the strand IDs.
+
+        OUTPUT: List; see `output` parameter for details
+
+        EXAMPLES:
+
+            sage: ID.reset_ID()
         """
 
         return vertex.get_trip(i, output)
@@ -1307,74 +1413,35 @@ class HourglassPlabicGraph:
             hh.label = [x + y for (x, y) in zip(sorted(hh.label), range(1, hh.multiplicity()+1))]
             if verbose: print(f"Created label {hh.label} for hourglass from {hh.v_from().id} to {hh.v_to().id}.")
 
-    # Internal accessors
+    # Layout functions
 
-    def _get_face(self, f_id):
+    def make_circular(self, r=10):
         r"""
         """
-        face = self._faces.get(f_id)
-        if face is None: raise ValueError(f"id {f_id} does not correspond to any face.")
-        return face
+        n = len(self._boundary_vertices.values())
+        for i,v in self._boundary_vertices:
+            v.x = r*math.sin((i+0.5)*2*math.pi/n)
+            v.y = r*math.cos((i+0.5)*2*math.pi/n)
 
-    def _get_vertex(self, v_id):
-        r"""
-        Internal helper function that gets the vertex with the given id from either _inner_vertices or _boundary_vertices, and throws if the id is not found.
-        """
-        v = self._inner_vertices.get(v_id)
-        if v is None:
-            v = self._boundary_vertices.get(v_id)
-            if v is None: raise ValueError(f"id {v_id} does not correspond to any vertex.")
-        return v
+        self.tutte_layout()
+        self.layout = "circular"
 
-    def _get_hourglass_by_id(self, v1_id, v2_id):
+    def tutte_layout(self, error=0.01, max_iter = 1000):
         r"""
+        from https://cs.brown.edu/people/rtamassi/gdhandbook/chapters/force-directed.pdf.
         """
-        return self._get_hourglass(self._get_vertex(v1_id), self._get_vertex(v2_id))
-    def _get_hourglass(self, v1, v2):
-        return v1.get_hourglass_to(v2)
-
-    def _get_interior_hourglasses(self):
-        r"""
-        """
-        hourglasses = set()
-        for vertex in self._inner_vertices.values():
-            for hh in vertex:
-                if hh.twin() not in hourglasses:
-                    hourglasses.add(hh)
-        return hourglasses
-
-    def order(self):
-        r"""
-        The number of vertices in this graph.
-        """
-        return len(self._inner_vertices) + len(self._boundary_vertices)
+        for i in range(max_iter):
+            err = 0
+            for v in self._inner_vertices.values():
+                neighbours = v.get_neighbors()
+                x_new = sum(w.x for w in neighbours)/len(neighbours)
+                y_new = sum(w.y for w in neighbours)/len(neighbours)
+                err += (v.x-x_new)**2 + (v.y-y_new)**2
+                v.x, v.y = x_new, y_new
+            if err < error:
+                break
 
     # Serialization/Data Conversion
-
-    def to_graph(self, hourglass_labels=False): # TODO: VERIFY/TEST
-        r"""
-        Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.
-        """
-        vertex_refs = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
-        edge_refs = set()
-        for v in vertex_refs:
-            for hh in v:
-                if not hh.twin() in edge_refs:
-                    edge_refs.add(hh)
-
-        vertices = [v.id for v in vertex_refs]
-        edges = [(h.v_from().id, h.v_to().id, h.label if hourglass_labels else h.strand_count()) for h in edge_refs]
-        pos = {v.id:(v.x,v.y) for v in vertex_refs}
-        g = Graph([vertices, edges], format='vertices_and_edges', pos=pos)
-        return g
-
-    # Update with **kwds argument?
-    def plot(self):
-        r"""
-        """
-        vertex_refs = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
-        vertex_colors = {"gray":[v.id for v in vertex_refs if v.filled],  "white":[v.id for v in vertex_refs if not v.filled]}
-        return self.to_graph().plot(vertex_colors=vertex_colors, edge_labels=True)
 
     @classmethod
     def from_dict(cls, data):
@@ -1440,6 +1507,87 @@ class HourglassPlabicGraph:
             'layout': self.layout,
         }
         return d
+
+    def to_graph(self, hourglass_labels=False): # TODO: VERIFY/TEST
+        r"""
+        Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.
+        """
+        vertex_refs = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
+        edge_refs = set()
+        for v in vertex_refs:
+            for hh in v:
+                if not hh.twin() in edge_refs:
+                    edge_refs.add(hh)
+
+        vertices = [v.id for v in vertex_refs]
+        edges = [(h.v_from().id, h.v_to().id, h.label if hourglass_labels else h.strand_count()) for h in edge_refs]
+        pos = {v.id:(v.x,v.y) for v in vertex_refs}
+        g = Graph([vertices, edges], format='vertices_and_edges', pos=pos)
+        return g
+
+    # Update with **kwds argument?
+    def plot(self):
+        r"""
+        """
+        vertex_refs = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
+        vertex_colors = {"gray":[v.id for v in vertex_refs if v.filled],  "white":[v.id for v in vertex_refs if not v.filled]}
+        return self.to_graph().plot(vertex_colors=vertex_colors, edge_labels=True)
+
+    def order(self):
+        r"""
+        Returns the number of vertices in this graph.
+
+        OUTPUT: Integer
+
+        EXAMPLES:
+
+            sage: HPG = HourglassPlabicGraph(8)
+            sage: HPG.order()
+            8
+
+            sage: HPG = Examples.GetExample("example_ASM")
+            14
+        """
+        return len(self._inner_vertices) + len(self._boundary_vertices)
+
+    # Internal accessors
+
+    def _get_face(self, f_id):
+        r"""
+        """
+        face = self._faces.get(f_id)
+        if face is None: raise ValueError(f"id {f_id} does not correspond to any face.")
+        return face
+
+    def _get_vertex(self, v_id):
+        r"""
+        Internal helper function that gets the vertex with the given id from either _inner_vertices or _boundary_vertices, and throws if the id is not found.
+        """
+        v = self._inner_vertices.get(v_id)
+        if v is None:
+            v = self._boundary_vertices.get(v_id)
+            if v is None: raise ValueError(f"id {v_id} does not correspond to any vertex.")
+        return v
+
+    def _get_hourglass_by_id(self, v1_id, v2_id):
+        r"""
+        """
+        return self._get_hourglass(self._get_vertex(v1_id), self._get_vertex(v2_id))
+
+    def _get_hourglass(self, v1, v2):
+        r"""
+        """
+        return v1.get_hourglass_to(v2)
+
+    def _get_interior_hourglasses(self):
+        r"""
+        """
+        hourglasses = set()
+        for vertex in self._inner_vertices.values():
+            for hh in vertex:
+                if hh.twin() not in hourglasses:
+                    hourglasses.add(hh)
+        return hourglasses
 
     # TESTING
     def print_faces(self):
