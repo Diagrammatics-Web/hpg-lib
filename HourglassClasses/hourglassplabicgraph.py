@@ -1520,11 +1520,28 @@ class HourglassPlabicGraph:
         r"""
         Constructs a new hourglass plabic graph from a dictionary representing a JSON encoding of the graph.
 
+        INPUT:
+
+        - `data` -- dict; a dictionary representing an hourglass plabic graph. It is typically best practice
+            to first create an HourglassPlabicGraph using lower level construction functions, then export it
+            using :meth:`HourglassPlabicGraph.to_dict`.
+
+        OUTPUT: HourglassPlabicGraph
+
+        .. NOTE::
+
+            Consult the dicts in the Examples class to see how they are structured.
+
         .. SEEALSO::
 
             :meth:`HourglassPlabicGraph.to_dict`
             
             :meth:`Examples.get_example`
+
+        .. PLOT::
+
+            HPG = HourglassPlabicGraph.from_dict(Examples.example_ASM)
+            sphinx_plot(HPG)
         """
         HPG = cls()
 
@@ -1556,8 +1573,18 @@ class HourglassPlabicGraph:
 
     def to_dict(self):
         r"""
-        Encode this HourglassPlabicGraph as a dictionary representing
-        a JSON encoding of the graph.
+        Encodes this HourglassPlabicGraph as a dictionary.
+
+        OUTPUT: dict
+
+        .. NOTE::
+
+            This function can be used in conjunction with :meth:`HourglassPlabicGraph.from_dict` to save an Hourglass
+            for later use, or copy it.
+
+        .. SEEALSO::
+
+            :meth:`HourglassPlabicGraph.from_dict`
         """
         vertices = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
         edges = set()
@@ -1587,7 +1614,12 @@ class HourglassPlabicGraph:
 
     def to_graph(self, hourglass_labels=False):
         r"""
-        Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.
+        Creates an equivalent sagemath Graph to this HourglassPlabicGraph. Represents strands in an hourglass in the label.
+
+        INPUT:
+
+        - `hourglass_labels` -- Boolean (default: False); Whether to apply the labels on the hourglasses to the edges of the graph.
+                Otherwise, uses the multiplicity as an edge weight.
         """
         vertex_refs = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
         edge_refs = set()
@@ -1605,6 +1637,7 @@ class HourglassPlabicGraph:
     # Update with **kwds argument?
     def plot(self):
         r"""
+        Generates a plot of this graph.
         """
         vertex_refs = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
         vertex_colors = {"gray":[v.id for v in vertex_refs if v.filled],  "white":[v.id for v in vertex_refs if not v.filled]}
@@ -1631,6 +1664,13 @@ class HourglassPlabicGraph:
 
     def _get_face(self, f_id):
         r"""
+        Internal helper function that gets the face with the given ID.
+
+        INPUT:
+
+        - `f_id` -- object; the ID of the desired face.
+
+        OUTPUT: Face
         """
         face = self._faces.get(f_id)
         if face is None: raise ValueError(f"id {f_id} does not correspond to any face.")
@@ -1638,7 +1678,13 @@ class HourglassPlabicGraph:
 
     def _get_vertex(self, v_id):
         r"""
-        Internal helper function that gets the vertex with the given id from either _inner_vertices or _boundary_vertices, and throws if the id is not found.
+        Internal helper function that gets the vertex with the given ID from either _inner_vertices or _boundary_vertices, and throws if the id is not found.
+
+        INPUT:
+
+        - `v_id` -- object; the ID of the desired vertex.
+
+        OUTPUT: Vertex
         """
         v = self._inner_vertices.get(v_id)
         if v is None:
@@ -1648,16 +1694,38 @@ class HourglassPlabicGraph:
 
     def _get_hourglass_by_id(self, v1_id, v2_id):
         r"""
+        Internal helper function that gets the hourglass between the vertices identified by the provided IDs.
+
+        INPUT:
+
+        - `v1_id` -- object; the ID of the first vertex.
+
+        - `v2_id` -- object; the ID of the second vertex.
+
+        OUTPUT: HalfHourglass
         """
         return self._get_hourglass(self._get_vertex(v1_id), self._get_vertex(v2_id))
 
     def _get_hourglass(self, v1, v2):
         r"""
+        Internal helper function that gets the hourglass between provided vertices.
+
+        INPUT:
+
+        - `v1` -- Vertex; the the first vertex.
+
+        - `v2` -- Vertex; the the second vertex.
+
+        OUTPUT: HalfHourglass
         """
         return v1.get_hourglass_to(v2)
 
     def _get_interior_hourglasses(self):
         r"""
+        Internal helper function that gets all interior hourglasses. Note that each
+        hourglass is represented only once by one of its HalfHourglasses.
+
+        OUTPUT: Set of HalfHourglasses
         """
         hourglasses = set()
         for vertex in self._inner_vertices.values():
