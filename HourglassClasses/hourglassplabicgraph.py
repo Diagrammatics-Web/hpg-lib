@@ -185,7 +185,7 @@ class HourglassPlabicGraph:
         r"""
         Computes the hash value of this object.
 
-        OUTPUT: Integer; the hash value of the object.
+        OUTPUT: integer; the hash value of the object.
 
         EXAMPLES:
 
@@ -807,7 +807,7 @@ class HourglassPlabicGraph:
         EXAMPLES:
 
             sage: ID.reset_id()
-            sage: HPG = Examples.GetExample("example_ASM")
+            sage: HPG = Examples.get_example("example_ASM")
             sage: HPG.is_square_move_valid("face2")
             True
 
@@ -817,7 +817,7 @@ class HourglassPlabicGraph:
         .. PLOT::
 
             # The middle face of this graph has a valid square move.
-            HPG = Examples.GetExample("example_ASM")
+            HPG = Examples.get_example("example_ASM")
             sphinx_plot(HPG)
         """
         return self._get_face(face_id).is_square_move_valid(r)
@@ -837,7 +837,7 @@ class HourglassPlabicGraph:
         This square move creates two vertices and removes two vertices, so should have no net change in the order of the graph.
 
             sage: ID.reset_id()
-            sage: HPG = Examples.GetExample("example_ASM")
+            sage: HPG = Examples.get_example("example_ASM")
             sage: initial_order = HPG.order()
             sage: HPG.square_move("face2")
             sage: (initial_order, HPG.order())
@@ -862,7 +862,7 @@ class HourglassPlabicGraph:
 
             # Before the square move
             ID.reset_id()
-            HPG = Examples.GetExample("example_ASM")
+            HPG = Examples.get_example("example_ASM")
             sphinx_plot(HPG)
 
             # After the square move
@@ -902,7 +902,7 @@ class HourglassPlabicGraph:
         EXAMPLES:
 
             sage: ID.reset_id()
-            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG = Examples.get_example("example_6_by_6")
             sage: HPG.is_cycle_valid("face159", 72, 74)
             True
 
@@ -912,7 +912,7 @@ class HourglassPlabicGraph:
         .. PLOT::
 
             # The face [66, 69, 74, 72] has a valid cycle move, while the face [66, 70, 63, 62, 61, 64] does not.
-            HPG = Examples.GetExample("example_6_by_6")
+            HPG = Examples.get_example("example_6_by_6")
             sphinx_plot(HPG)
         """
         return self._get_face(face_id).is_cycle_valid(self._get_hourglass_by_id(v1_id, v2_id))
@@ -935,7 +935,7 @@ class HourglassPlabicGraph:
         Vertices can be passed in regardless of orientation.
 
             sage: ID.reset_id()
-            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG = Examples.get_example("example_6_by_6")
             sage: HPG.cycle("face159", 72, 74)
             sage: HPG._get_hourglass_by_id(72, 74).multiplicity()
             1
@@ -959,7 +959,7 @@ class HourglassPlabicGraph:
 
             # Before the cycle move
             ID.reset_id()
-            HPG = Examples.GetExample("example_6_by_6")
+            HPG = Examples.get_example("example_6_by_6")
             sphinx_plot(HPG)
 
             # After the cycle move
@@ -982,7 +982,7 @@ class HourglassPlabicGraph:
         EXAMPLES:
         
             sage: ID.reset_id()
-            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG = Examples.get_example("example_6_by_6")
             sage: HPG.is_benzene_move_valid("face159")
             True
 
@@ -996,7 +996,7 @@ class HourglassPlabicGraph:
         .. PLOT::
 
             # The face [66, 69, 74, 72] has a valid benzene move, while the face [66, 70, 63, 62, 61, 64] does not.
-            HPG = Examples.GetExample("example_6_by_6")
+            HPG = Examples.get_example("example_6_by_6")
             sphinx_plot(HPG)
         """
         return self._get_face(face_id).is_benzene_move_valid()
@@ -1012,7 +1012,7 @@ class HourglassPlabicGraph:
         EXAMPLES:
 
             sage: ID.reset_id()
-            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG = Examples.get_example("example_6_by_6")
             sage: HPG.benzene_move("face159")
             sage: HPG._get_hourglass_by_id(72, 74).multiplicity()
             1
@@ -1031,7 +1031,7 @@ class HourglassPlabicGraph:
 
             # Before the benzene move
             ID.reset_id()
-            HPG = Examples.GetExample("example_6_by_6")
+            HPG = Examples.get_example("example_6_by_6")
             sphinx_plot(HPG)
 
             # After the cycle move
@@ -1057,14 +1057,14 @@ class HourglassPlabicGraph:
 
         EXAMPLES:
 
-            sage: HPG = Examples.GetExample("example_ASM")
+            sage: HPG = Examples.get_example("example_ASM")
             sage: HPG.is_r_valent(4)
             True
             
             sage: HPG.is_r_valent(6)
             False
 
-            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG = Examples.get_example("example_6_by_6")
             sage: HPG.is_r_valent(4)
             False
 
@@ -1101,30 +1101,30 @@ class HourglassPlabicGraph:
 
         These are examples of fully reduced graphs of various valences.
 
-            sage: Examples.GetExample("example_ASM").is_fully_reduced(4)
+            sage: Examples.get_example("example_ASM").is_fully_reduced(4)
             True
             
-            sage: Examples.GetExample("example_5_by_2").is_fully_reduced(5)
+            sage: Examples.get_example("example_5_by_2").is_fully_reduced(5)
             True
             
-            sage: Examples.GetExample("example_5_by_3_ASM").is_fully_reduced(5)
+            sage: Examples.get_example("example_5_by_3_ASM").is_fully_reduced(5)
             True
             
-            sage: Examples.GetExample("example_9_by_2").is_fully_reduced(9)
+            sage: Examples.get_example("example_9_by_2").is_fully_reduced(9)
             True
 
         These graphs are not fully reduced. The reasons why are printed out when verbose is True.
 
             sage: ID.reset_id()
-            sage: Examples.GetExample("example_benzene_full_nonreduced").is_fully_reduced(4, verbose=True)
+            sage: Examples.get_example("example_benzene_full_nonreduced").is_fully_reduced(4, verbose=True)
             Isolated trip 2 detected passing through HalfStrand 0 (ID: 9_11_s17) from 9 to 11.
             False
             
-            sage: Examples.GetExample("example_5x4_badsep").is_fully_reduced(5, verbose=True)
+            sage: Examples.get_example("example_5x4_badsep").is_fully_reduced(5, verbose=True)
             trip2 from vertex 68 and trip2 from vertex 63 double cross.
             False
             
-            sage: Examples.GetExample("example_6_by_3_bad").is_fully_reduced(6, verbose=True)
+            sage: Examples.get_example("example_6_by_3_bad").is_fully_reduced(6, verbose=True)
             trip2 from vertex 3 and trip3 from vertex 3 double cross.
             False
         """
@@ -1287,15 +1287,14 @@ class HourglassPlabicGraph:
         EXAMPLES:
 
             sage: ID.reset_id()
-            sage: HPG = Examples.GetExample("example_ASM")
+            sage: HPG = Examples.get_example("example_ASM")
             sage: HPG.get_trip(HPG._get_vertex(1), 1, 'strand_ids')
             ['8_1_s7_t', '12_8_s3_t', '11_12_s15_t', '11_13_s14', '10_13_s1_t', '10_4_s12']
 
-            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG = Examples.get_example("example_6_by_6")
             sage: HPG.get_trip(HPG._get_vertex(5), 3, 'strand_ids')
             ['40_5_s37_t', '40_55_s93', '38_55_s85_t', '38_53_s83', '37_53_s80_t', '37_35_s27']
         """
-
         return vertex.get_trip(i, output)
 
     def get_trip_perm(self, i):
@@ -1311,11 +1310,11 @@ class HourglassPlabicGraph:
         OUTPUT: list; the permutation. the ``k``th value is the vertex where trip ``i`` starting from vertex ``k`` ends up.
 
         EXAMPLES: 
-            sage: HPG = Examples.GetExample("example_ASM")
+            sage: HPG = Examples.get_example("example_ASM")
             sage: HPG.get_trip_perm(1)
             [1, 4, 3, 6, 5, 0, 7, 2]
 
-            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG = Examples.get_example("example_6_by_6")
             sage: HPG.get_trip_perm(3)
             [26, 12, 6, 31, 9, 35, 2, 18, 29, 4, 14, 17, 1, 25, 10, 33, 21, 11, 7, 22, 32, 16, 19, 27, 30, 13, 0, 23, 34, 8, 24, 3, 20, 15, 28, 5]
         """
@@ -1333,12 +1332,12 @@ class HourglassPlabicGraph:
         OUTPUT: list; the ``i``th element is the trip permutation for list ``i``.
 
         EXAMPLES: 
-            sage: HPG = Examples.GetExample("example_ASM")
+            sage: HPG = Examples.get_example("example_ASM")
             sage: HPG.get_trip_perms()
             [[1, 4, 3, 6, 5, 0, 7, 2], [3, 6, 5, 0, 7, 2, 1, 4], [5, 0, 7, 2, 1, 4, 3, 6]]
         """
         r = max(v.total_degree() for v in self._inner_vertices.values()) # This is quite inefficient, could be a cached value provided by user?
-        return [self.get_trip_perm(i, output) for i in range(1, r)]
+        return [self.get_trip_perm(i) for i in range(1, r)]
 
     def separation_labeling(self, base_face, r=4, verbose=False):
         r"""
@@ -1355,13 +1354,13 @@ class HourglassPlabicGraph:
         EXAMPLES:
         
             sage: ID.reset_id()
-            sage: HPG = Examples.GetExample("example_ASM")
+            sage: HPG = Examples.get_example("example_ASM")
             sage: HPG.separation_labeling('face2', 4)
             sage: HPG._get_hourglass_by_id(11, 12).label
             [1]
 
             sage: ID.reset_id()
-            sage: HPG = Examples.GetExample("example_6_by_6")
+            sage: HPG = Examples.get_example("example_6_by_6")
             sage: HPG.separation_labeling('face88', 6)
             sage: HPG._get_hourglass_by_id(62, 63).label
             [1, 2, 3, 4]
@@ -1458,11 +1457,11 @@ class HourglassPlabicGraph:
 
     def make_circular(self, r=10):
         r"""
-        Places the boundary of this graph into a neat circle and spaces the interior vertices according to the tutte layout algorithm.
+        Places the boundary of this graph into a neat circle and spaces the interior vertices according to the Tutte layout algorithm.
 
         INPUT:
 
-        - ``r`` -- Integer (default: 10); The desired radius of the graph.
+        - ``r`` -- integer (default: 10); The desired radius of the graph.
 
         .. SEEALSO::
 
@@ -1470,7 +1469,7 @@ class HourglassPlabicGraph:
 
         .. PLOT::
 
-            HPG = Examples.GetExample("example_5_by_3_ASM")
+            HPG = Examples.get_example("example_5_by_3_ASM")
             sphinx_plot(HPG)
 
             HPG.make_circular()
@@ -1486,7 +1485,22 @@ class HourglassPlabicGraph:
 
     def tutte_layout(self, error=0.01, max_iter = 1000):
         r"""
-        from https://cs.brown.edu/people/rtamassi/gdhandbook/chapters/force-directed.pdf.
+        Comfortably arranges the interior vertices using Tutte's iterative force-directed algorithm from
+        https://cs.brown.edu/people/rtamassi/gdhandbook/chapters/force-directed.pdf.
+
+        INPUT:
+
+        - `error` -- positive float (default: 0.01); the maximum allowed error for the computation. Assumed to be a float `\geq 0.0`.
+
+        - `max_iter` -- positive integer (default: 1000); positive integer; the maximum number of iterations to perform. Assumed to be an integer `\geq 1`.
+
+        .. PLOT::
+
+            HPG = Examples.get_example("example_5_by_3_ASM")
+            sphinx_plot(HPG)
+
+            HPG.tutte_layout()
+            sphinx_plot(HPG)
         """
         for i in range(max_iter):
             err = 0
@@ -1504,8 +1518,13 @@ class HourglassPlabicGraph:
     @classmethod
     def from_dict(cls, data):
         r"""
-        Constructs a new hourglass plabic graph from a dictionary representing
-        a JSON encoding of the graph.
+        Constructs a new hourglass plabic graph from a dictionary representing a JSON encoding of the graph.
+
+        .. SEEALSO::
+
+            :meth:`HourglassPlabicGraph.to_dict`
+            
+            :meth:`Examples.get_example`
         """
         HPG = cls()
 
@@ -1566,7 +1585,7 @@ class HourglassPlabicGraph:
         }
         return d
 
-    def to_graph(self, hourglass_labels=False): # TODO: VERIFY/TEST
+    def to_graph(self, hourglass_labels=False):
         r"""
         Creates an equivalent sagemath Graph. Represents strands in an hourglass in the label.
         """
@@ -1595,7 +1614,7 @@ class HourglassPlabicGraph:
         r"""
         Returns the number of vertices in this graph.
 
-        OUTPUT: Integer
+        OUTPUT: integer
 
         EXAMPLES:
 
@@ -1603,7 +1622,7 @@ class HourglassPlabicGraph:
             sage: HPG.order()
             8
 
-            sage: HPG = Examples.GetExample("example_ASM")
+            sage: HPG = Examples.get_example("example_ASM")
             14
         """
         return len(self._inner_vertices) + len(self._boundary_vertices)

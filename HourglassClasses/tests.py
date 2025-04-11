@@ -408,10 +408,10 @@ def hourglass_plabic_graph_tests():
 
     # Isomorphism tests
 
-    HPG1 = Examples.GetExample("example_ASM")
-    HPG2 = Examples.GetExample("example_ASM")
-    HPG3 = Examples.GetExample("example_5_by_2")
-    HPG4 = Examples.GetExample("example_5_by_2")
+    HPG1 = Examples.get_example("example_ASM")
+    HPG2 = Examples.get_example("example_ASM")
+    HPG3 = Examples.get_example("example_5_by_2")
+    HPG4 = Examples.get_example("example_5_by_2")
     assert HPG1.is_isomorphic(HPG2), "HPG1 should be isomorphic to HPG2."
     assert HPG3.is_isomorphic(HPG4), "HPG3 should be isomorphic to HPG4."
     assert not HPG1.is_isomorphic(HPG3), "HPG1 should not be isomorphic to HPG3."
@@ -427,7 +427,7 @@ def move_tests():
     ID.reset_id()
     plots = []
 
-    HPG = Examples.GetExample("example_ASM")
+    HPG = Examples.get_example("example_ASM")
     face_id = "face2"
     plots.append(("HPG before square move:", HPG.plot()))
     assert HPG.is_square_move_valid(face_id), f"Square move should be valid on {face_id}."
@@ -473,7 +473,7 @@ def move_tests():
 
     # Square move test in SL7
     ID.reset_id()
-    HPG = Examples.GetExample("example_2_column_running")
+    HPG = Examples.get_example("example_2_column_running")
     face_id = "face9"
     plots.append(("HPG before square move in SL7:", HPG.plot()))
     assert HPG.is_square_move_valid(face_id, 7), f"Square move should be valid on {face_id}."
@@ -506,9 +506,9 @@ def reduced_tests():
     def test_reducedness(name, r, expected):
         if verbose: print(f"Testing {name} for reducedness.")
         if (expected is not None):
-            assert Examples.GetExample(name).is_fully_reduced(r, verbose) == expected, f"{name} should{' ' if expected else ' not '}be fully reduced."
+            assert Examples.get_example(name).is_fully_reduced(r, verbose) == expected, f"{name} should{' ' if expected else ' not '}be fully reduced."
             if verbose: print(f"{name} is{' ' if expected else ' not '}fully reduced.")
-        else: print(f"{name} is{' ' if Examples.GetExample(name).is_fully_reduced(r, verbose) else ' not '}fully reduced (unkown expectation).")
+        else: print(f"{name} is{' ' if Examples.get_example(name).is_fully_reduced(r, verbose) else ' not '}fully reduced (unkown expectation).")
 
     # Reduced HPGs
     test_reducedness("example_ASM", 4, True)
@@ -550,7 +550,7 @@ def separation_labeling_tests():
     def test_labeling(graphdict, name, r, verbose=False):
         if verbose: print(f"Testing separation labeling on {name}.")
         ID.reset_id()
-        HPG = Examples.GetExample(name)
+        HPG = Examples.get_example(name)
         HPGOld = HourglassPlabicGraphOld.from_dict(graphdict)
         # Test separation labeling for every face
         for face in HPG._faces.values():
