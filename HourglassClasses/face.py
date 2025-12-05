@@ -618,6 +618,11 @@ class Face:
         """
         return self._half_hourglasses_head.iterate_right_turns()
 
+    def vertices(self):
+        '''Iterates over the vertices of this face in clockwise order from an arbitrary starting point.'''
+        for hh in self:
+            yield hh.v_from()
+
     # TESTING
     def print_vertices(self):
         print(str([hh.v_from().id for hh in self]))
