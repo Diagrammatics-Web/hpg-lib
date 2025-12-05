@@ -313,7 +313,7 @@ class HourglassPlabicGraph:
         hh = Vertex.create_hourglass_between(self._boundary_vertices[n-1], self._boundary_vertices[0], 0)
 
         inner_face = Face(ID.get_new_id("face"), hh)
-        outer_face = Face(ID.get_new_id("face"), hh.twin())
+        outer_face = Face(ID.get_new_id("face"), hh.twin(), True)
         self._faces[inner_face.id] = inner_face
         self._faces[outer_face.id] = outer_face
 
@@ -1621,6 +1621,12 @@ class HourglassPlabicGraph:
             v_to   = sorted_boundary_vertices[(i+1)%len(sorted_boundary_vertices)]
             HPG.create_hourglass(v_from, v_to, 0)
 
+        # mark the outer face as such
+        v0 = sorted_boundary_vertices[0]
+        vn = sorted_boundary_vertices[-1]
+        hh = v0.get_hourglass_to(vn)
+        hh.right_face().outer = True
+
         return HPG
 
     def to_dict(self):
@@ -1688,7 +1694,7 @@ class HourglassPlabicGraph:
             'faces': [{
                 "id": f.id,
                 "vertexIds": [int(v.id) for v in f.vertices()]
-            } for f in self._faces.values()]
+            } for f in self._faces.values() if not f.outer]
         }
         for h in edges:
             for i,s in enumerate(h.iterate_strands()):
