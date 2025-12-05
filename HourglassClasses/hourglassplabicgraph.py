@@ -3,7 +3,9 @@ Represents an hourglass plabic graph.
 
 AUTHORS:
 
-- Stefano L. Corno (2024-05-10): initial version
+- Joshua P. Swanson (2023): initial version
+- Stefano L. Corno (2024-05-10): partial refactor
+- Joshua P. Swanson (2025-12-04): imported additional functionality
 
 """
 
@@ -469,6 +471,38 @@ class HourglassPlabicGraph:
         del_hourglasses = del_vertex.get_hourglasses_as_list()
         for hh in del_hourglasses:
             self._remove_hourglass_internal(hh, del_vertex, hh.v_to())
+
+    def sorted_boundary_vertices(self):
+        '''Returns a sorted version of the boundary vertices.
+           For circular layout, this uses clockwise order starting from vertically straight up.
+           For linear order, this uses left-to-right order.'''
+        sorted_boundary_vertices = list(self._boundary_vertices.values())
+        if self.layout == 'circular':
+            sorted_boundary_vertices.sort(key = lambda v: math.atan2(-v.x, -v.y)) # cw orientation
+        elif self.layout == 'linear':
+            sorted_boundary_vertices.sort(key = lambda v: v.x) # left to right
+        else:
+            raise NotImplementedError("Layout must be circular or linear.")
+        return sorted_boundary_vertices
+    
+    def base_face(self):
+        '''Returns the base Face. This is assumed to be the face to the left of the hourglass
+           connecting the first to the last boundary vertex.'''
+        sbv = self.sorted_boundary_vertices()
+        v0 = sbv[0]
+        vn = sbv[-1]
+        hh = v0.get_hourglass_to(vn)
+        return hh.left_face()
+
+    def contract_all(self):
+        '''Repeatedly contracts all contractible vertices.'''
+        while True:
+            for v in self._inner_vertices.values():
+                if v.is_contractible():
+                    v.contract()
+                    break
+            else:
+                break
 
     def create_hourglass_by_id(self, v1_id, v2_id, multiplicity=1):
         r"""
@@ -1041,6 +1075,28 @@ class HourglassPlabicGraph:
         self._get_face(face_id).benzene_move()
     move_benzene = benzene_move # alias
 
+    def face_colors(self):
+        '''Given an r-hourglass plabic graph, colors the faces as in the fundamental SL(r) alcove.
+           Concretely, face 0 is given color 0, and in crossing an m-hourglass edge with white on the
+           right, the color increments by m mod r.'''
+        r = max(v.total_degree() for v in self._inner_vertices.values())
+        F_colors = dict()
+        F_colors[0] = 0
+        to_process = [0]
+        while len(to_process) > 0:
+            Fi = to_process.pop()
+            ci = F_colors[Fi]
+            F = self._faces[Fi]
+            for hh in F._half_hourglasses:
+                Fj = hh.twin().face().id
+                if Fj in self._faces and Fj not in F_colors:
+                    to_process.append(Fj)
+                    m = hh._hourglass.multiplicity
+                    if hh.v_from.is_filled():
+                        m *= -1
+                    F_colors[Fj] = (ci + m) % r
+        return F_colors
+
     # Checks
 
     def is_r_valent(self, r=4, verbose=False):
@@ -1557,13 +1613,7 @@ class HourglassPlabicGraph:
             hh.label = label
 
          # add boundary edges
-        sorted_boundary_vertices = list(HPG._boundary_vertices.values())
-        if HPG.layout == 'circular':
-            sorted_boundary_vertices.sort(key = lambda v: math.atan2(-v.x, -v.y)) # cw orientation
-        elif HPG.layout == 'linear':
-            sorted_boundary_vertices.sort(key = lambda v: v.x) # left to right
-        else:
-            raise NotImplementedError("Layout must be circular or linear.")
+        sorted_boundary_vertices = HPG.sorted_boundary_vertices()
         for i in range(0, len(sorted_boundary_vertices)):
             v_from = sorted_boundary_vertices[i]
             v_to   = sorted_boundary_vertices[(i+1)%len(sorted_boundary_vertices)]
