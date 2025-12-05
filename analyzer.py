@@ -100,7 +100,7 @@ def _get_eel_fns():
         return CURR_GRAPH.to_dict_analyzer()
 
     def get_trip(v_id, trip_idx):
-        v = CURR_GRAPH.vertices[v_id]
+        v = CURR_GRAPH._get_vertex(v_id)
         return CURR_GRAPH.get_trip(v, trip_idx, output='ids')
 
     def get_edge_trips(strand_id):
