@@ -126,7 +126,6 @@ def _get_eel_fns():
 
     def cycle_face(face_id, inverse):
         print("CYCLING FACE", face_id, inverse)
-#        CURR_GRAPH.cycle_face(CURR_GRAPH.faces[face_id], inverse)
         if CURR_GRAPH.is_cycle_valid(face_id, None, None, inverse):
             CURR_GRAPH.cycle(face_id, None, None, inverse)
         return CURR_GRAPH.to_dict_analyzer()
@@ -146,10 +145,6 @@ def _get_eel_fns():
         CURR_GRAPH.tutte_layout()
         return CURR_GRAPH.to_dict_analyzer()
 
-    def lloyd_layout():
-        CURR_GRAPH.lloyd_layout()
-        return CURR_GRAPH.to_dict_analyzer()
-
     # return dict of functions
     return {
         'update_server_status': update_server_status,
@@ -161,5 +156,4 @@ def _get_eel_fns():
         'square_move': square_move,
         'separation_labeling': separation_labeling,
         'tutte_layout': tutte_layout,
-        'lloyd_layout': lloyd_layout
     }
