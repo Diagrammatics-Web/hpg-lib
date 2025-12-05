@@ -36,7 +36,7 @@ class HalfStrand(DihedralElement):
 
         INPUT:
 
-        - `id` -- hashable, unique object
+        - `id` -- hashable, unique object; currently, a `HalfStrand` and its twin have the same `id`
 
         - `hourglass` -- HalfHourglass; the owning half hourglass. This HalfStrand will travel in the same direction.
 
