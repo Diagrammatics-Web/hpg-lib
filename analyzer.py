@@ -104,11 +104,11 @@ def _get_eel_fns():
         return CURR_GRAPH.get_trip(v, trip_idx, output='ids')
 
     def get_edge_trips(strand_id):
-        for h in CURR_GRAPH.hourglasses.values():
-            for s in h._strands:
+        for h in CURR_GRAPH._get_edges():
+            for s in h.iterate_strands():
                 if s.id == strand_id:
-                    r = max(len(h.v_from._half_strands),len(h.v_to._half_strands))
-                    return [s._half_strands[0].get_trip(i, output='ids') for i in range(1,r)]
+                    r = max(h.v_from().total_degree(),h.v_to().total_degree())
+                    return [s.get_trip(i, output='ids') for i in range(1,r)]
 
         return []
 
