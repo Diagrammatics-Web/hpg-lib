@@ -30,7 +30,7 @@ class HalfStrand(DihedralElement):
     typically be instantiated on their own, and are instead managed by higher level classes.
     """
 
-    def __init__(self, id, hourglass, twin=None):
+    def __init__(self, id, hourglass, twin=None, label=''):
         r"""
         Constructs a HalfStrand with the given ID, owned by the provided HalfHourglass, and its twin.
 
@@ -61,6 +61,7 @@ class HalfStrand(DihedralElement):
         """
         super().__init__(id)
         self._hourglass = hourglass
+        self.label = label
 
         # the half strand representing movement in the opposite direction, between the same vertices
         self._twin = HalfStrand(f"{id}_t", hourglass.twin() if hourglass is not None else None, self) if twin is None else twin

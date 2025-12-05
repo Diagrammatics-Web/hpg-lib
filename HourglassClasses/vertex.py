@@ -29,7 +29,7 @@ class Vertex:
     When traversing an HPG, trip i turns at the ith left on an unfilled vertex
     and the ith right on a filled vertex.
     """
-    def __init__(self, id, x, y, filled, boundary=False):
+    def __init__(self, id, x, y, filled, boundary=False, label=''):
         r"""
         Constructs a Vertex with the given ID, x and y positions, and filled and boundary statuses.
 
@@ -52,6 +52,7 @@ class Vertex:
         self.y = y
         self.filled = filled
         self.boundary = boundary
+        self.label = ''
 
         r"""
         Some half hourglass around this vertex. When the graph is properly embedded,
@@ -113,7 +114,7 @@ class Vertex:
 
             This function is a class method.
         """
-        hh_id = f"{v1.id}_{v2.id}"
+        hh_id = f"hh_{v1.id}_{v2.id}"
         hh = HalfHourglass(hh_id, v1, v2, multiplicity)
         v1._insert_hourglass(hh)
         v2._insert_hourglass(hh.twin())
