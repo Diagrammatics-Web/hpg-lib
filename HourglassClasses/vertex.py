@@ -4,6 +4,7 @@ Represents a vertex in an hourglass plabic graph.
 AUTHORS:
 
 - Stefano L. Corno (2024-05-10): initial version
+- Joshua P. Swanson (2025-12-04): additional functionality
 
 """
 
@@ -131,7 +132,7 @@ class Vertex:
         .. WARNING::
 
             This function should be called only on hourglasses originating from this vertex but not already
-            tracked by this vertex. It is an internal function called in create_hourglass_between and reparent.
+            tracked by this vertex. It is an internal function called in createdhourglass_between and reparent.
         """
         # empty list case
         if self._half_hourglasses_head is None:
@@ -380,8 +381,13 @@ class Vertex:
         hh1 = self._half_hourglasses_head
         hh2 = hh1.cw_next()
         if (hh1 is not hh2.cw_next() or hh1 is hh2): return False
-        if (hh1.v_to().filled and hh2.v_to().filled and not self.filled) or (not hh1.v_to().filled and not hh2.v_to().filled and self.filled):
+        u = hh1.v_to()
+        w = hh2.v_to()
+        if (u.filled and w.filled and not self.filled) or (not u.filled and not w.filled and self.filled):
             return False
+        if u.boundary and w.boundary: return False
+        if u.boundary and w.simple_degree() != 2: return False
+        if w.boundary and u.simple_degree() != 2: return False
         return True
 
     def contract(self):
