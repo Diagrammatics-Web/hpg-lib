@@ -120,8 +120,8 @@ def _get_eel_fns():
                 and the index of the face in the returned list corresponds to the face's id
         """
         faces = []
-        for face_id in sorted(CURR_GRAPH.faces.keys()):
-            faces.append([(v.id, v.x, v.y) for v in CURR_GRAPH.faces[face_id].vertices()])
+        for face_id in sorted(CURR_GRAPH._faces.keys()):
+            faces.append([(v.id, v.x, v.y) for v in CURR_GRAPH._faces[face_id].vertices()])
         return faces
 
     def cycle_face(face_id, inverse):
