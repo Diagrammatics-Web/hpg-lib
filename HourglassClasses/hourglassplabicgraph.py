@@ -1664,6 +1664,45 @@ class HourglassPlabicGraph:
         }
         return d
 
+    def to_dict_analyzer(self):
+        '''Encode this HourglassPlabicGraph as a dictionary representing
+           a JSON encoding of the graph, suitable for use with the analyzer.'''
+        vertices = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
+        edges = set()
+        for v in vertices:
+            for hh in v:
+                # do not record boundary edges
+                if not (hh.is_boundary() or hh.twin() in edges):
+                    edges.add(hh)
+
+        d = {
+            'edges': [],
+            'vertices': [{
+                "id": int(v.id),
+                "x": float(v.x),
+                "y": float(v.y),
+                "filled": v.filled,
+                "boundary": v.boundary,
+                "label": v.label,
+                } for v in vertices],
+            'faces': [{
+                "id": f.id,
+                "vertexIds": [int(v.id) for v in f.vertices()]
+            } for f in self._faces.values()]
+        }
+        for h in edges:
+            for i,s in enumerate(h.iterate_strands()):
+                d["edges"].append({
+                "id" : s.id,
+                "index": int(i),
+                "multiplicity": int(h.multiplicity()),
+                "sourceId": int(h.v_from().id),
+                "targetId": int(h.v_to().id),
+                "label": str(s.label),
+                })
+
+        return d
+
     def to_graph(self, hourglass_labels=False):
         r"""
         Creates an equivalent sagemath Graph to this HourglassPlabicGraph. Represents strands in an hourglass in the label.
