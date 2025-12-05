@@ -1629,11 +1629,15 @@ class HourglassPlabicGraph:
 
         return HPG
 
+    def _get_vertices(self):
+        '''Internal helper function. Returns a list of all vertices, boundary or inner.'''
+        return list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
+    
     def _get_edges(self):
         '''Internal helper function. Returns a complete set of HalfStrands, one from each twin class,
            with no guarantee about which is included. Skips phantom boundary edges.'''
         edges = set()
-        for v in vertices:
+        for v in self._get_vertices():
             for hh in v:
                 # do not record boundary edges
                 if not (hh.is_boundary() or hh.twin() in edges):
@@ -1655,7 +1659,7 @@ class HourglassPlabicGraph:
 
             :meth:`HourglassPlabicGraph.from_dict`
         """
-        vertices = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
+        vertices = self._get_vertices()
         edges = self._get_edges()
 
         d = {
@@ -1679,7 +1683,7 @@ class HourglassPlabicGraph:
     def to_dict_analyzer(self):
         '''Encode this HourglassPlabicGraph as a dictionary representing
            a JSON encoding of the graph, suitable for use with the analyzer.'''
-        vertices = list(self._inner_vertices.values()) + list(self._boundary_vertices.values())
+        vertices = self._get_vertices()
         edges = self._get_edges()
 
         d = {
