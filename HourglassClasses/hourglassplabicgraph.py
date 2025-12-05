@@ -1684,7 +1684,7 @@ class HourglassPlabicGraph:
         d = {
             'edges': [],
             'vertices': [{
-                "id": int(v.id),
+                "id": v.id,
                 "x": float(v.x),
                 "y": float(v.y),
                 "filled": v.filled,

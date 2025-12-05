@@ -64,7 +64,7 @@ class HalfStrand(DihedralElement):
         self.label = label
 
         # the half strand representing movement in the opposite direction, between the same vertices
-        self._twin = HalfStrand(f"{id}_t", hourglass.twin() if hourglass is not None else None, self) if twin is None else twin
+        self._twin = HalfStrand(f"{id}", hourglass.twin() if hourglass is not None else None, self) if twin is None else twin
 
     def __repr__(self):
         r"""

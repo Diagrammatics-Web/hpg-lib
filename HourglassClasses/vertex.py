@@ -114,8 +114,8 @@ class Vertex:
 
             This function is a class method.
         """
-        hh_id = f"hh_{v1.id}_{v2.id}"
-        hh = HalfHourglass(hh_id, v1, v2, multiplicity)
+#        hh_id = f"hh_{v1.id}_{v2.id}"
+        hh = HalfHourglass(None, v1, v2, multiplicity)
         v1._insert_hourglass(hh)
         v2._insert_hourglass(hh.twin())
         return hh

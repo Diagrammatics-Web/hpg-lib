@@ -37,7 +37,7 @@ class HalfHourglass(DihedralElement):
 
         INPUT:
 
-        - `id` -- hashable, unique object
+        - `id` -- hashable, unique object; if `None`, then created by combining `v_from` and `v_to`'s ID's.
 
         - `multiplicity` -- nonnegative integer; number of strands between from and to. if 0, this is an edge boundary. Assumed to be an integer `\geq 1`.
 
@@ -66,6 +66,8 @@ class HalfHourglass(DihedralElement):
 
             It is very unlikely you will need to directly construct HalfHourglasses; instead, use Vertex's create_hourglass_between function.
         """
+        if id is None:
+            id = f"h_{v_from.id}_{v_to.id}"
         super().__init__(id)
         self._v_from = v_from
         self._v_to = v_to
@@ -76,7 +78,7 @@ class HalfHourglass(DihedralElement):
         # twin will have swapped to/from vertices
         # only the "base" hourglass will need to set up strands
         if twin is None:
-            self._twin = HalfHourglass(f"{id}_t", v_to, v_from, multiplicity, self)
+            self._twin = HalfHourglass(None, v_to, v_from, multiplicity, self)
 
             # Create half strands and record head/tail
             if multiplicity == 0:
