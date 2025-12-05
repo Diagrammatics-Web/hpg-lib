@@ -358,7 +358,7 @@ def hourglass_plabic_graph_tests():
     assert len(HPG._boundary_vertices) == 6, f"HPG should have been initialized with 6 boundary vertices. Instead, has {len(HPG._boundary_vertices)}."
     assert len(HPG._inner_vertices) == 6, f"HPG should have been initialized with 6 inner vertices. Instead, has {len(HPG._inner_vertices)}."
     assert len(HPG._faces) == 8, f"HPG should have eight faces. Instead, has {len(HPG._faces)}."
-    assert str(HPG.get_trip_perms()) == "[[4, 3, 0, 5, 2, 1], [3, 4, 5, 0, 1, 2], [2, 5, 4, 1, 0, 3]]", f"Issue with trip permutations. Should be [[4, 3, 0, 5, 2, 1], [3, 4, 5, 0, 1, 2], [2, 5, 4, 1, 0, 3]], but instead are {HPG.get_trip_perms()}."
+    assert str(HPG.get_trip_perms()) == "[[5, 4, 1, 6, 3, 2], [4, 5, 6, 1, 2, 3], [3, 6, 5, 2, 1, 4]]", f"Issue with trip permutations. Should be [[5, 4, 1, 6, 3, 2], [4, 5, 6, 1, 2, 3], [3, 6, 5, 2, 1, 4]], but instead are {HPG.get_trip_perms()}."
 
     # adding vertices and hourglasses
 
@@ -400,7 +400,7 @@ def hourglass_plabic_graph_tests():
     HPG = create_test_HPG()
 
     trip_perms1 = HPG.get_trip_perms()
-    assert trip_perms1 == [[1, 4, 3, 6, 5, 0, 7, 2], [3, 6, 5, 0, 7, 2, 1, 4], [5, 0, 7, 2, 1, 4, 3, 6]], f"Trip permutations should be [[1, 4, 3, 6, 5, 0, 7, 2], [3, 6, 5, 0, 7, 2, 1, 4], [5, 0, 7, 2, 1, 4, 3, 6]], but instead are {trip_perms1}."
+    assert trip_perms1 == [[2, 5, 4, 7, 6, 1, 8, 3], [4, 7, 6, 1, 8, 3, 2, 5], [6, 1, 8, 3, 2, 5, 4, 7]], f"Trip permutations should be [[2, 5, 4, 7, 6, 1, 8, 3], [4, 7, 6, 1, 8, 3, 2, 5], [6, 1, 8, 3, 2, 5, 4, 7]], but instead are {trip_perms1}."
     # Should be the same
     HPG.square_move("face12")
     trip_perms2 = HPG.get_trip_perms()

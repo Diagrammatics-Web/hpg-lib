@@ -1375,10 +1375,12 @@ class HourglassPlabicGraph:
             [26, 12, 6, 31, 9, 35, 2, 18, 29, 4, 14, 17, 1, 25, 10, 33, 21, 11, 7, 22, 32, 16, 19, 27, 30, 13, 0, 23, 34, 8, 24, 3, 20, 15, 28, 5]
         """
         perm = []
-        for vertex in self._boundary_vertices.values():
+        sbv = self.sorted_boundary_vertices()
+        sbv_idxs = {v:i for i,v in enumerate(sbv)}
+        for vertex in sbv:
             trip = vertex.get_trip(i)
             final_vertex = trip[-1].v_to()
-            perm.append(final_vertex.id)
+            perm.append(sbv_idxs[final_vertex]+1)
         return perm
 
     def get_trip_perms(self):
