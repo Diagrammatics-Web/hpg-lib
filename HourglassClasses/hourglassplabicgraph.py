@@ -826,7 +826,7 @@ class HourglassPlabicGraph:
 
     # Moves
 
-    def is_square_move_valid(self, face_id, r=4):
+    def is_square_move_valid(self, face_id, r=0):
         r"""
         Verifies that the provided face can perform a square move.
 
@@ -834,7 +834,7 @@ class HourglassPlabicGraph:
 
         - `face_id` -- object; the ID of the provided face.
 
-        - ``r`` -- positive integer (default: `4`); the valence of the graph. Assumed to be an integer `\geq 1`.
+        - ``r`` -- integer; the valence of the vertices on the square; if `0` (default), inferred
 
         OUTPUT: Boolean; Whether a square move is valid on the face.
 
@@ -856,7 +856,7 @@ class HourglassPlabicGraph:
         """
         return self._get_face(face_id).is_square_move_valid(r)
 
-    def square_move(self, face_id, r=4):
+    def square_move(self, face_id, r=0):
         r"""
         Performs a square move on the provided face.
 
@@ -864,7 +864,7 @@ class HourglassPlabicGraph:
 
         - `face_id` -- object; the ID of the provided face.
 
-        - ``r`` -- positive integer (default: `4`); the valence of the graph. Assumed to be an integer `\geq 1`.
+        - ``r`` -- integer; the valence of the vertices on the square; if `0` (default), inferred
 
         EXAMPLES:
 
@@ -1712,7 +1712,7 @@ class HourglassPlabicGraph:
                 } for v in vertices],
             'faces': [{
                 "id": f.id,
-                "vertexIds": [int(v.id) for v in f.vertices()]
+                "vertexIds": [v.id for v in f.vertices()]
             } for f in self._faces.values() if not f.outer]
         }
         for h in edges:
@@ -1721,8 +1721,8 @@ class HourglassPlabicGraph:
                 "id" : s.id,
                 "index": int(i),
                 "multiplicity": int(h.multiplicity()),
-                "sourceId": int(h.v_from().id),
-                "targetId": int(h.v_to().id),
+                "sourceId": h.v_from().id,
+                "targetId": h.v_to().id,
                 "label": str(s.label),
                 })
 

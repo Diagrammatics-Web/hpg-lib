@@ -130,7 +130,7 @@ class Face:
 
     # Square move
 
-    def is_square_move_valid(self, r=4):
+    def is_square_move_valid(self, r=0):
         r"""
         Verifies that this face can perform a square move.
 
@@ -143,7 +143,7 @@ class Face:
 
         INPUT:
 
-        - ``r`` -- positive integer (default: 4); the valence of the graph. Assumed to be an integer `\geq 1`.
+        - ``r`` -- integer; the valence of the vertices on the square; if `0` (default), inferred
 
         OUTPUT: Boolean; whether the face can perform a square move.
 
@@ -181,12 +181,16 @@ class Face:
             sage: face.is_square_move_valid()
             False
         """
+        if r==0:
+            r = self._half_hourglasses_head.v_from().total_degree()
+
         count = 0
         multiplicity_sum = 0
         should_be_filled = not self._half_hourglasses_head.v_from().filled # this check may be unecessary depending on the assumptions on the graph
         for hh in self:
             # Checks
             if hh.v_to().filled != should_be_filled: return False
+            if hh.v_to().total_degree() != r: return False
             if count > 4: return False
             multiplicity_sum += hh.multiplicity()
             # Iterate
@@ -194,7 +198,7 @@ class Face:
             should_be_filled = not should_be_filled
         return (multiplicity_sum == r)
 
-    def square_move(self, r=4):
+    def square_move(self, r=0):
         r"""
         Performs a square move on this face.
         In a square move, vertices with one outgoing edge are contracted, while vertices
@@ -203,7 +207,7 @@ class Face:
 
         INPUT:
 
-        - ``r`` -- positive integer (default: 4); the valence of the graph. Assumed to be an integer `\geq 1`.
+        - ``r`` -- integer; the valence of the vertices on the square; if `0` (default), inferred
 
         OUTPUT: Array Tuple; the first is of created vertices that result from this move, the second is of all removed vertices.
 
@@ -247,6 +251,9 @@ class Face:
             :meth:`Vertex.square_move_expand`
             :meth:`Vertex.square_move_contract`
         """
+        if r==0:
+            r = self._half_hourglasses_head.v_from().total_degree()
+
         new_vertices = []
         removed_vertices = []
 

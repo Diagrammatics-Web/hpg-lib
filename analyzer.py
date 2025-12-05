@@ -132,7 +132,8 @@ def _get_eel_fns():
 
     def square_move(face_id):
         print("Square move", face_id)
-        CURR_GRAPH.square_move(CURR_GRAPH.faces[face_id])
+        if CURR_GRAPH.is_square_move_valid(face_id):
+            CURR_GRAPH.square_move(face_id)
         return CURR_GRAPH.to_dict_analyzer()
 
     def separation_labeling(face_id):
