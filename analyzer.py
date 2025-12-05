@@ -126,7 +126,9 @@ def _get_eel_fns():
 
     def cycle_face(face_id, inverse):
         print("CYCLING FACE", face_id, inverse)
-        CURR_GRAPH.cycle_face(CURR_GRAPH.faces[face_id], inverse)
+#        CURR_GRAPH.cycle_face(CURR_GRAPH.faces[face_id], inverse)
+        if CURR_GRAPH.is_cycle_valid(face_id, None, None, inverse):
+            CURR_GRAPH.cycle(face_id, None, None, inverse)
         return CURR_GRAPH.to_dict_analyzer()
 
     def square_move(face_id):

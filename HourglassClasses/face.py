@@ -392,7 +392,7 @@ class Face:
 
     # Cycle
 
-    def is_cycle_valid(self, start_hh):
+    def is_cycle_valid(self, start_hh, inverse=False):
         r"""
         Verifies that this face can perform a cycle move.
         This requires the face to have an even number of vertices, with alternating filled/unfilled
@@ -402,6 +402,9 @@ class Face:
         INPUT:
 
         - `start_hh` -- HalfHourglass; An hourglass in this face. This hourglass will be thinned.
+                        If `None`, defaults to this face's head HalfHourglass.
+
+        - `inverse` -- boolean; default `False`; reverses the usual cycling operation if `True`
 
         OUTPUT: Boolean, whether a cycle can be performed on this face.
 
@@ -425,10 +428,16 @@ class Face:
             sage: face.is_cycle_valid(hh)
             True
         """
+        if start_hh is None:
+            start_hh = self._half_hourglasses_head
+
         if start_hh.right_face() is not self:
             if start_hh.left_face() is self: start_hh = start_hh.twin()
             else: raise ValueError("start_hh does not belong to this face.")
 
+        if inverse:
+            start_hh = start_hh.right_turn()
+        
         count = 0
         should_be_filled = not start_hh.v_from().filled
         check_mult = True
@@ -442,7 +451,7 @@ class Face:
             check_mult = not check_mult
         return count % 2 == 0
 
-    def cycle(self, start_hh):
+    def cycle(self, start_hh, inverse=False):
         r"""
         Performs a cycle move on this face. Its edges are alternatingly thinned and thickened,
         starting from start_hh.
@@ -450,6 +459,9 @@ class Face:
         INPUT:
 
         - `start_hh` -- HalfHourglass; An hourglass in this face. This hourglass will be thinned.
+                        If `None`, defaults to this face's head HalfHourglass.
+        
+        - `inverse` -- boolean; default `False`; reverses the usual cycling operation if `True`
 
         EXAMPLES:
 
@@ -482,7 +494,13 @@ class Face:
 
             :meth:`Face.is_cycle_valid`
         """
+        if start_hh is None:
+            start_hh = self._half_hourglasses_head
+        
         if start_hh.right_face() is not self: start_hh = start_hh.twin()
+
+        if inverse:
+            start_hh = start_hh.right_turn()
 
         thicken = False
         for hh in start_hh.iterate_right_turns():

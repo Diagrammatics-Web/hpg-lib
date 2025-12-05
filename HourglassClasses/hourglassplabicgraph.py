@@ -919,7 +919,7 @@ class HourglassPlabicGraph:
             hh.left_face().initialize_half_hourglasses(hh.twin())
     move_square = square_move #alias
 
-    def is_cycle_valid(self, face_id, v1_id, v2_id):
+    def is_cycle_valid(self, face_id, v1_id, v2_id, inverse=False):
         r"""
         Verifies that the provided face can perform a cycle move, starting from the hourglass from the first vertex to the second vertex.
 
@@ -927,9 +927,12 @@ class HourglassPlabicGraph:
 
         - `face_id` -- object; the ID of the provided face.
 
-        - `v1_id` -- object; the ID of the first Vertex.
+        - `v1_id` -- object; the ID of the first Vertex. If this an `v2_id` are both `None`,
+                     defaults to this face's head HalfHourglass
 
         - `v2_id` -- object; the ID of the second Vertex.
+        
+        - `inverse` -- boolean; default `False`; reverses the usual cycling operation if `True`
 
         OUTPUT: Boolean; Whether a cycle move is valid on the face.
 
@@ -949,9 +952,13 @@ class HourglassPlabicGraph:
             HPG = Examples.get_example("example_6_by_6")
             sphinx_plot(HPG)
         """
-        return self._get_face(face_id).is_cycle_valid(self._get_hourglass_by_id(v1_id, v2_id))
+        if v1_id == None and v2_id == None:
+            hh = None
+        else:
+            hh = self._get_hourglass_by_id(v1_id, v2_id)
+        return self._get_face(face_id).is_cycle_valid(hh, inverse=inverse)
 
-    def cycle(self, face_id, v1_id, v2_id):
+    def cycle(self, face_id, v1_id, v2_id, inverse=False):
         r"""
         performs a cycle move on the provided face, starting from the hourglass from the first vertex to the second vertex.
         Note that the hourglass between the vertices will be thinned, and this operation will alternate with thicken around the face.
@@ -960,9 +967,12 @@ class HourglassPlabicGraph:
 
         - `face_id` -- object; the ID of the provided face.
 
-        - `v1_id` -- object; the ID of the first Vertex.
+        - `v1_id` -- object; the ID of the first Vertex. If this an `v2_id` are both `None`,
+                     defaults to this face's head HalfHourglass
 
         - `v2_id` -- object; the ID of the second Vertex.
+        
+        - `inverse` -- boolean; default `False`; reverses the usual cycling operation if `True`
 
         EXAMPLES:
 
@@ -1000,7 +1010,11 @@ class HourglassPlabicGraph:
             HPG.cycle("face159", 72, 74)
             sphinx_plot(HPG)
         """
-        self._get_face(face_id).cycle(self._get_hourglass_by_id(v1_id, v2_id))
+        if v1_id == None and v2_id == None:
+            hh = None
+        else:
+            hh = self._get_hourglass_by_id(v1_id, v2_id)
+        self._get_face(face_id).cycle(hh, inverse=inverse)
     cycle_move = cycle # Alias
 
     def is_benzene_move_valid(self, face_id):
@@ -1775,7 +1789,7 @@ class HourglassPlabicGraph:
         OUTPUT: Face
         """
         face = self._faces.get(f_id)
-        if face is None: raise ValueError(f"id {f_id} does not correspond to any face.")
+        if face is None: raise ValueError(f"id '{f_id}' does not correspond to any face.")
         return face
 
     def _get_vertex(self, v_id):
