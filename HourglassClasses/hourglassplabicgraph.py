@@ -1703,11 +1703,11 @@ class HourglassPlabicGraph:
            a JSON encoding of the graph, suitable for use with the analyzer.'''
         vertices = self._get_vertices()
         edges = self._get_edges()
-
+        
         d = {
             'edges': [],
             'vertices': [{
-                "id": v.id,
+                "id": str(v.id),
                 "x": float(v.x),
                 "y": float(v.y),
                 "filled": v.filled,
@@ -1716,7 +1716,7 @@ class HourglassPlabicGraph:
                 } for v in vertices],
             'faces': [{
                 "id": f.id,
-                "vertexIds": [v.id for v in f.vertices()]
+                "vertexIds": [str(v.id) for v in f.vertices()]
             } for f in self._faces.values() if not f.outer]
         }
         for h in edges:
@@ -1725,8 +1725,8 @@ class HourglassPlabicGraph:
                 "id" : s.id,
                 "index": int(i),
                 "multiplicity": int(h.multiplicity()),
-                "sourceId": h.v_from().id,
-                "targetId": h.v_to().id,
+                "sourceId": str(h.v_from().id),
+                "targetId": str(h.v_to().id),
                 "label": str(s.label),
                 })
 
