@@ -1729,7 +1729,7 @@ class HourglassPlabicGraph:
                 "targetId": str(h.v_to().id),
                 "label": str(s.label),
                 })
-
+ 
         return d
 
     def to_graph(self, hourglass_labels=False):
