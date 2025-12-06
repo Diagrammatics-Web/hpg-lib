@@ -1,5 +1,3 @@
-from hourglass2 import HourglassPlabicGraph
-
 import eel
 import importlib
 from IPython.display import IFrame, display, clear_output

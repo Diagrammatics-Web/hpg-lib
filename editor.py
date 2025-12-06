@@ -1,4 +1,4 @@
-from hourglass2 import HourglassPlabicGraph
+from HourglassClasses.hourglassplabicgraph import HourglassPlabicGraph
 
 import eel
 import importlib
