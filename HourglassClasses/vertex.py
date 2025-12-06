@@ -472,7 +472,12 @@ class Vertex:
         hh2.reparent(new_v)
 
         multiplicity = hh1.multiplicity() + hh2.multiplicity()
-        Vertex.create_hourglass_between(self, new_v, multiplicity)
+        hh_new = Vertex.create_hourglass_between(self, new_v, multiplicity)
+        
+        hh_new._left_face  = hh1._left_face
+        hh_new._right_face = hh2._right_face
+        hh_new.twin()._left_face  = hh_new._right_face
+        hh_new.twin()._right_face = hh_new._left_face
 
         return new_v
 
