@@ -138,8 +138,8 @@ def _get_eel_fns():
 
     def separation_labeling(face_id):
         print("separating labeling", face_id)
-        rank = max(v.total_degree() for v in CURR_GRAPH.vertices.values() if v.is_interior_vertex)
-        CURR_GRAPH.separation_labeling(CURR_GRAPH.faces[face_id], rank, check=False)
+        rank = max(v.total_degree() for v in CURR_GRAPH._inner_vertices.values())
+        CURR_GRAPH.separation_labeling(CURR_GRAPH._faces[face_id], rank)
         return CURR_GRAPH.to_dict_analyzer()
 
     def tutte_layout():

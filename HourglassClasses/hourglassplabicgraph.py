@@ -1523,6 +1523,10 @@ class HourglassPlabicGraph:
             if verbose: print(f"Pre-sorted counts: {hh.label}")
             # Sort strand labels, then zip with (1, 2, ..., m) tuple
             hh.label = [x + y for (x, y) in zip(sorted(hh.label), range(1, hh.multiplicity()+1))]
+            # Put individual labels on strands in a somewhat arbitrary order
+            for strand,x in zip(hh.iterate_strands(), hh.label):
+                strand.label = str(x)
+                strand.twin().label = str(x)
             if verbose: print(f"Created label {hh.label} for hourglass from {hh.v_from().id} to {hh.v_to().id}.")
 
     # Layout functions

@@ -23,6 +23,7 @@ class _TestVertex:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.id = 'id'
 
 def all_tests():
     dihedral_element_tests()
