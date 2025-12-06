@@ -86,7 +86,7 @@ class Face:
             sage: f.__repr__()
             'Face face'
         """
-        return f"Face {self.id}"
+        return f"Face {self.id} {[v.id for v in self.vertices()]}"
 
     def initialize_half_hourglasses(self, hh):
         r"""
