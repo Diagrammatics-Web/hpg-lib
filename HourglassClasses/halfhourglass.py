@@ -273,14 +273,16 @@ class HalfHourglass(DihedralElement):
             HalfHourglass (ID: v1_v2) from v3 to v2 with multiplicity 1
         """
         self.v_from()._remove_hourglass(self)
+        self._v_from = v
+        self.id = f"h_{self._v_from.id}_{self._v_to.id}"
         v._insert_hourglass(self)
 
         # Reinsert twin as it may now have swapped places
         self.twin().v_from()._remove_hourglass(self.twin())
+        self.twin()._v_to = v
+        self.twin().id = f"h_{self._v_to.id}_{self._v_from.id}"
         self.twin().v_from()._insert_hourglass(self.twin())
 
-        self._v_from = v
-        self.twin()._v_to = v
 
     # Strand modification and accessor functions
 
