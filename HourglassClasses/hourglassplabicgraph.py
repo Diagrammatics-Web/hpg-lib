@@ -1796,6 +1796,86 @@ class HourglassPlabicGraph:
         g = Graph([vertices, edges], format='vertices_and_edges', pos=pos)
         return g
 
+    def to_tikz(self, scale=1, hourglasses=True):
+        """Returns a standalone tikz representation of this HourglassPlabicGraph."""
+        s = """\\documentclass{standalone}
+\\usepackage{tikz}
+\\usetikzlibrary{intersections}
+\\tikzstyle{vertex}=[
+minimum size=0.15cm,
+inner sep=0pt,
+outer sep=0pt,
+circle,
+draw=black,
+]
+\\tikzstyle{filled}=[
+vertex,
+fill=black
+]
+\\tikzstyle{unfilled}=[
+vertex,
+fill=white
+]
+\\tikzstyle{blank}=[
+vertex,
+fill=white,
+draw=white
+]
+
+\\tikzstyle{hourglass}=[
+out=#1*20,
+in={#1*20+180},
+relative,
+looseness=1.5
+]
+\\begin{document}
+
+\\begin{tikzpicture}
+"""
+        s += "\\node [draw, circle, minimum size=" + str(round(float(2*10*scale),2)) + "cm, dashed] at (0,0) {};\n\n"
+
+
+        for v in self.sorted_boundary_vertices():
+            s += "\\node at ({1},{2}) {{\\footnotesize {0}}};\n".format(v.label,
+                                                         round(v.x*float(scale)*1.1, 2),
+                                                         round(v.y*float(scale)*1.1, 2))
+
+        for v in self._get_vertices():
+            s += "\\node [{0}] (v{1}) at ({2},{3}) {{}};\n".format("filled" if v.filled else "unfilled",
+                                                           v.id,
+                                                           round(v.x*float(scale), 2),
+                                                           round(v.y*float(scale), 2))
+
+        for h in self._get_edges():
+            if h.is_phantom():
+                continue
+            v_fromIdStr = "v" + str(h.v_from().id)
+            v_toIdStr = "v" + str(h.v_to().id)
+            if h.v_from().filled:
+                v_fromIdStr,v_toIdStr = v_toIdStr,v_fromIdStr
+            hourglass_style = [0, 0, 1, 1.5, 2, 2.5]
+            if hourglasses:
+                if h.multiplicity() == 1:
+                    s += "\\draw ({0}) to ({1});\n".format(v_fromIdStr, v_toIdStr)
+                else:
+                    hs = hourglass_style[-1]
+                    if h.multiplicity() < len(hourglass_style):
+                        hs = hourglass_style[h.multiplicity()]
+                    for i in range(h.multiplicity()):
+                        s += "\\draw [hourglass={0},name path={1}{2}s{3}] ({1}) to ({2});\n".format(round(float(hs - i*2.0*hs/(h.multiplicity()-1.0)),2),
+                                                                               v_fromIdStr, v_toIdStr, i)
+            else:
+                if h.multiplicity() == 1:
+                    s += "\\draw ({0}) to ({1});\n".format(v_fromIdStr, v_toIdStr)
+                else:
+                    s += "\\draw ({0}) to node[midway,above,sloped] {{\\tiny {2}}} ({1});\n".format(v_fromIdStr, v_toIdStr, h.multiplicity);
+
+
+        s += """\\end{tikzpicture}
+\\end{document}"""
+
+        return s
+
     # Update with **kwds argument?
     def plot(self):
         r"""
