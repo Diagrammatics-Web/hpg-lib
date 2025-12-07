@@ -20,6 +20,7 @@ AUTHORS:
 # ****************************************************************************
 
 import math
+from copy import deepcopy
 from sage.graphs.graph import Graph
 from .vertex import Vertex
 from .face import Face
@@ -137,6 +138,10 @@ class HourglassPlabicGraph:
             :meth:`HourglassPlabicGraph.__eq__`
         """
         return not self.__eq__(other)
+
+    def copy(self):
+        '''Returns an HourglassPlabicGraph which is a deep copy of self.'''
+        return deepcopy(self)
 
     def traverse(self):
         r"""
@@ -919,6 +924,19 @@ class HourglassPlabicGraph:
             hh.left_face().initialize_half_hourglasses(hh.twin())
     move_square = square_move #alias
 
+    def get_square_move_faces(self):
+        '''Returns a list of faces for which a square move applies in this hourglass plabic graph.'''
+        ret = []
+        for face_id,face in self._faces.items():
+            if self.is_square_move_valid(face_id):
+                ret.append(face)
+        return ret
+
+    def get_square_move_class(self, plabic=False):
+        '''Returns an iterator representing the
+           square move equivalence class of self.'''
+        return _depth_first_exploration(self, _successors_square)
+    
     def is_cycle_valid(self, face_id, v1_id, v2_id, inverse=False):
         r"""
         Verifies that the provided face can perform a cycle move, starting from the hourglass from the first vertex to the second vertex.
@@ -1859,3 +1877,26 @@ class HourglassPlabicGraph:
         for f in self._faces.values():
             print(f.id + ":")
             f.print_vertices()
+
+def _depth_first_exploration(seed, succ):
+    '''Starting from seed, recursively explores
+       all possible successors, and returns a depth-first
+       iterator of the results. Relies on __eq__, though
+       does not require hashability. Modeled off of Sage's
+       RecursivelyEnumeratedSet.'''
+    known = {hash(seed)}
+    def _explore():
+        yield seed
+        for H in succ(seed):
+            h = hash(H)
+            if h not in known:
+                known.add(h)
+                yield from _explore()
+
+    yield from _explore()
+
+def _successors_square(G):
+    for face in G.get_square_move_faces():
+        G.square_move(face.id)
+        yield G
+        G.square_move(face.id) # self-inversive, when contracted
