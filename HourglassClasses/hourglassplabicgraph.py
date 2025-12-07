@@ -21,6 +21,7 @@ AUTHORS:
 
 import math
 from copy import deepcopy
+from collections import defaultdict
 from sage.graphs.graph import Graph
 from .vertex import Vertex
 from .face import Face
@@ -1876,6 +1877,40 @@ looseness=1.5
 
         return s
 
+    def to_dual_diskoid(self):
+        '''Returns a Sage Graph object representing the dual diskoid of self.
+           
+           Vertices correspond to faces of self represented as face_id's,
+           edges correspond to adjacent faces (i.e. sharing an edge in self). Faces
+           are placed at the center of mass of their boundary vertices.
+           Edges are labeled with (from_id, to_id, weight) where white is on the right
+           when traveling from face from_id to face to_id and weight is given by the integer
+           m when crossing an m-hourglass.'''
+        fvs = {k:list(v.vertices()) for k,v in self._faces.items() if not v.outer}
+        pos = dict()
+        for face_index, face_vertices in fvs.items():
+            cx = sum(v.x for v in face_vertices)/float(len(face_vertices))
+            cy = sum(v.y for v in face_vertices)/float(len(face_vertices))
+            pos[face_index] = (cx, cy)
+        base_dv = self.base_face().id
+        edges = []
+        for face_index, face in self._faces.items():
+            if face.outer:
+                continue
+            hhs = list(face)
+            for i in range(-1, len(hhs)-1):
+                # Traveling counterclockwise around the face
+                if not hhs[i].v_from().filled:
+                    # White is on the right
+                    edges.append((hhs[i].left_face().id, hhs[i].twin().left_face().id, hhs[i].multiplicity()))
+        edges_dict = defaultdict(lambda: dict())
+        for edge in edges:
+            F_from, F_to, _ = edge
+            edges_dict[F_from][F_to] = edge
+        GG = Graph(edges_dict, format='dict_of_dicts', pos=pos)
+        GG.base_face = base_dv
+        return GG
+    
     # Update with **kwds argument?
     def plot(self):
         r"""
