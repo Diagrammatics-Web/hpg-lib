@@ -285,11 +285,11 @@ class HalfHourglass(DihedralElement):
         v._insert_hourglass(self, base)
 
         # Reinsert twin as it may now have swapped places
-        if base is not None:
+        if base is None:
             self.twin().v_from()._remove_hourglass(self.twin())
         self.twin()._v_to = v
         self.twin().id = f"h_{self._v_to.id}_{self._v_from.id}"
-        if base is not None:
+        if base is None:
             self.twin().v_from()._insert_hourglass(self.twin())
 
 
