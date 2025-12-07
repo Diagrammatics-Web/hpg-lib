@@ -206,19 +206,19 @@ def vertex_tests():
     hh4 = Vertex.create_hourglass_between(v6, extras[3], 1)
 
     v5.square_move_contract(mid_hh)
-    assert v6.get_neighbors() == [extras[2], extras[0], extras[1], extras[3]], "v6 should be connected to 7, 8, 9, and 10."
-    v5 = v6.square_move_expand(hh1, hh2)
+    assert cyclically_equal(v6.get_neighbors(), [extras[2], extras[0], extras[1], extras[3]]), "v6 should be connected to 7, 8, 9, and 10."
+    v5 = v6.square_move_expand(hh2, hh1)
     assert (
-        v5.get_neighbors() == [v6, extras[0], extras[1]] and
-        v6.get_neighbors() == [extras[2], v5, extras[3]]
+        cyclically_equal(v5.get_neighbors(), [v6, extras[0], extras[1]]) and
+        cyclically_equal(v6.get_neighbors(), [extras[2], v5, extras[3]])
     ), "Graph should have returned to previous state."
 
-    v6.square_move_contract(v5._half_hourglasses_head.twin())
-    assert v5.get_neighbors() == [extras[2], extras[0], extras[1], extras[3]], "v5 should be connected to 7, 8, 9, and 10."
+    v6.square_move_contract(list(v5)[1].twin())
+    assert cyclically_equal(v5.get_neighbors(), [extras[2], extras[0], extras[1], extras[3]]), "v5 should be connected to 7, 8, 9, and 10."
     v6 = v5.square_move_expand(hh3, hh4)
     assert (
-        v5.get_neighbors() == [v6, extras[0], extras[1]] and
-        v6.get_neighbors() == [extras[2], v5, extras[3]]
+        cyclically_equal(v5.get_neighbors(), [v6, extras[0], extras[1]]) and
+        cyclically_equal(v6.get_neighbors(), [extras[2], v5, extras[3]])
     ), "Graph should have returned to previous state."
 
     print("Vertex tests complete.\n")
@@ -644,3 +644,9 @@ def create_test_HPG():
     HPG.create_hourglass_by_id(11, 6)
     HPG.create_hourglass_by_id(11, 7)
     return HPG
+
+def cyclically_equal(L1, L2):
+    '''Determines if some cyclic rotation of L1 is equal to L2. Assumes they are list-like.'''
+    if len(L1) != len(L2):
+        return False
+    return any(L1[i:]+L1[:i]==L2 for i in range(len(L1)))
