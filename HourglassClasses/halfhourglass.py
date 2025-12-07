@@ -253,13 +253,20 @@ class HalfHourglass(DihedralElement):
             self._half_strands_head.link_cw_prev(self._half_strands_tail)
         super().remove()
 
-    def reparent(self, v):
+    def reparent(self, v, base=None):
         r"""
         Changes this half hourglass's v_from to v, performing all appropriate bookkeeping.
 
         INPUT:
 
         - `v` -- Vertex; The new vertex this hourglass should come from.
+
+        - `base` -- optional HalfHourglass starting from `v`, default `None`.
+                    If supplied, angles and coordinates are ignored completely, and
+                    instead this HalfHourglass is inserted to `v`'s hourglass list so that
+                    it becomes the counterclockwise next element from `base`. In this
+                    situation, the twin is assumed to maintain its existing position
+                    in its starting vertex's hourglass list.
 
         EXAMPLES:
 
@@ -275,13 +282,15 @@ class HalfHourglass(DihedralElement):
         self.v_from()._remove_hourglass(self)
         self._v_from = v
         self.id = f"h_{self._v_from.id}_{self._v_to.id}"
-        v._insert_hourglass(self)
+        v._insert_hourglass(self, base)
 
         # Reinsert twin as it may now have swapped places
-        self.twin().v_from()._remove_hourglass(self.twin())
+        if base is not None:
+            self.twin().v_from()._remove_hourglass(self.twin())
         self.twin()._v_to = v
         self.twin().id = f"h_{self._v_to.id}_{self._v_from.id}"
-        self.twin().v_from()._insert_hourglass(self.twin())
+        if base is not None:
+            self.twin().v_from()._insert_hourglass(self.twin())
 
 
     # Strand modification and accessor functions

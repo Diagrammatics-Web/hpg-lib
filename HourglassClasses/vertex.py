@@ -86,7 +86,7 @@ class Vertex:
     # Hourglass construction and manipulation functions
 
     @classmethod
-    def create_hourglass_between(cls, v1, v2, multiplicity=1):
+    def create_hourglass_between(cls, v1, v2, multiplicity=1, v1_base=None, v2_base=None):
         r"""
         Creates a half hourglass to and from `v1` and `v2`, inserting it into each vertex's hourglass list.
 
@@ -97,6 +97,16 @@ class Vertex:
         - `v2` -- Vertex; the vertex to create the hourglass to.
 
         - `multiplicity` -- nonnegative integer; the multiplicity of the hourglass.
+        
+        - `v1_base` -- optional HalfHourglass starting from `v1`, default `None`.
+                       If supplied, `v2_base` must be supplied as well. In that case,
+                       angles and coordinates are ignored completely. Instead, the new
+                       hourglass is inserted to the hourglass lists of `v1` and `v2`
+                       so that it becomes the counterclockwise next element from `v1_base`
+                       and `v2_base`.
+        
+        - `v2_base` -- optional HalfHourglass starting from `v2`, default `None`.
+                       See `v1_base`.
 
         OUTPUT: HalfHourglass; the constructed hourglass from `v1` to `v2`.
 
@@ -116,11 +126,11 @@ class Vertex:
         """
 #        hh_id = f"hh_{v1.id}_{v2.id}"
         hh = HalfHourglass(None, v1, v2, multiplicity)
-        v1._insert_hourglass(hh)
-        v2._insert_hourglass(hh.twin())
+        v1._insert_hourglass(hh, v1_base)
+        v2._insert_hourglass(hh.twin(), v2_base)
         return hh
 
-    def _insert_hourglass(self, hh):
+    def _insert_hourglass(self, hh, base=None):
         r"""
         Inserts a half hourglass into the hourglass list for this vertex, maintaining
         the list with the first hourglass being the one with the smallest angle counterclockwise
@@ -129,6 +139,11 @@ class Vertex:
         INPUT:
 
         - `hh` -- HalfHourglass; the HalfHourglass to insert. This hourglass should start from this vertex.
+        
+        - `base` -- optional HalfHourglass starting from this vertex, default `None`.
+                    If supplied, angles and coordinates are ignored completely, and
+                    instead `hh` is inserted to this vertex's hourglass list so that
+                    it becomes the counterclockwise next element from `base`.
 
         .. WARNING::
 
@@ -140,17 +155,22 @@ class Vertex:
             self._half_hourglasses_head = hh
             return
 
-        self._reset_head()
-
-        # find first edge with greater angle, then insert_cw_next
-        hh_angle = hh.get_angle()
-        for iter_hh in self:
-            if hh_angle < iter_hh.get_angle():
-                iter_hh.insert_ccw_prev(hh)
-                if iter_hh is self._half_hourglasses_head: self._half_hourglasses_head = hh
-                return
-        # we've run the entire loop, so angle is greater than every other edge
-        self._half_hourglasses_head.append_ccw(hh)
+        if base is None:
+            self._reset_head()
+            
+            # find first edge with greater angle, then insert_cw_next
+            hh_angle = hh.get_angle()
+            for iter_hh in self:
+                if hh_angle < iter_hh.get_angle():
+                    iter_hh.insert_ccw_prev(hh)
+                    if iter_hh is self._half_hourglasses_head: self._half_hourglasses_head = hh
+                    return
+            # we've run the entire loop, so angle is greater than every other edge
+            self._half_hourglasses_head.append_ccw(hh)
+            return
+        else:
+            base.insert_ccw_prev(hh)
+            return
 
     @classmethod
     def remove_hourglass_between(cls, v1, v2):
@@ -434,10 +454,10 @@ class Vertex:
         """
         sur_v = out_hh.v_to()
 
-        # store in an array to make iteration safe while reparenting
-        hourglasses = [hh for hh in self if hh is not out_hh]
-        for hh in hourglasses:
-            hh.reparent(sur_v)
+        hh1 = out_hh.cw_next()
+        hh2 = hh1.cw_next()
+        hh1.reparent(sur_v, out_hh.twin())
+        hh2.reparent(sur_v, out_hh.twin().cw_next())
         sur_v._remove_hourglass(out_hh.twin())
 
         return self
@@ -463,16 +483,19 @@ class Vertex:
 
             :meth:`Face.square_move`
         """
+        # save reference for later rebasing
+        hh_saved = hh1.cw_prev() #hh2.cw_next()
+        
         # find the new position by just taking a weighted average
         x = (2 * self.x + hh1.v_to().x + hh2.v_to().x) / 4
         y = (2 * self.y + hh1.v_to().y + hh2.v_to().y) / 4
         new_v = Vertex(ID.get_new_id("v"), x, y, not self.filled)
 
         hh1.reparent(new_v)
-        hh2.reparent(new_v)
+        hh2.reparent(new_v, hh1)
 
         multiplicity = hh1.multiplicity() + hh2.multiplicity()
-        hh_new = Vertex.create_hourglass_between(self, new_v, multiplicity)
+        hh_new = Vertex.create_hourglass_between(self, new_v, multiplicity, hh_saved, hh2)
         
         hh_new._left_face  = hh1._left_face
         hh_new._right_face = hh2._right_face
