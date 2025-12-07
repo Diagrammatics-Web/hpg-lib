@@ -527,8 +527,8 @@ def reduced_tests():
     test_reducedness("example_benzene_full_nonreduced", 4, False)
     test_reducedness("example_5x4_badsep", 5, False)
     test_reducedness("example_6_by_3_bad", 6, False)
-    test_reducedness("example_christian_is_working_with", 4, False)
-    test_reducedness("examples_christian_plabic", 3, False)
+    test_reducedness("example_fat_square", 4, False)
+    test_reducedness("example_some_plabic", 3, False)
 
     if verbose:
         # Test unknown examples
