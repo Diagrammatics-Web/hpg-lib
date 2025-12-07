@@ -455,7 +455,7 @@ class Face:
             count += 1
             should_be_filled = not should_be_filled
             expected_mult = 3 - expected_mult # maps 2 -> 1 and 1 -> 2
-        return count % 2 == 0
+        return count == 6
 
     def benzene_move(self):
         r"""
