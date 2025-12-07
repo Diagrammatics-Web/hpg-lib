@@ -274,7 +274,18 @@ class Face:
 
         return new_vertices, removed_vertices
 
+
     # Cycle
+
+    def _has_cycle_multiplicities(self, ms, cw=True):
+        '''Determines if this face has a half hourglass where the edge multiplicities
+           starting from that half hourglass is the given list of multiplicities.
+           If so, returns True and the half hourglass. Otherwise returns False and None.'''
+        for hh in self.iterate():
+            if self.has_multiplicities_starting_at(hh, ms, cw=cw):
+                return True, hh
+        
+        return False, None
 
     def is_cycle_valid(self, start_hh, inverse=False):
         r"""

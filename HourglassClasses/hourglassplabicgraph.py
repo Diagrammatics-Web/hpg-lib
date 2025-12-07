@@ -1107,6 +1107,21 @@ class HourglassPlabicGraph:
         self._get_face(face_id).benzene_move()
     move_benzene = benzene_move # alias
 
+    def get_benzene_faces(self):
+        '''Returns a list of pairs (face, hh) for the benzene faces in this r=4 hourglass plabic graph.
+           A benzene face is a non-boundary face with 6 edges whose edge multiplicities are
+           1, 2, 1, 2, 1, 2.'''
+        ret = []
+        for face in self._faces.values():
+            if face.is_benzene_move_valid():
+                ret.append(face)
+        return ret
+
+    def get_benzene_move_class(self):
+        '''Returns an iterator representing the
+           benzene move equivalence class of self.'''
+        return _depth_first_exploration(self, _successors_benzene)
+
     def face_colors(self):
         '''Given an r-hourglass plabic graph, colors the faces as in the fundamental SL(r) alcove.
            Concretely, face 0 is given color 0, and in crossing an m-hourglass edge with white on the
@@ -1900,3 +1915,9 @@ def _successors_square(G):
         G.square_move(face.id)
         yield G
         G.square_move(face.id) # self-inversive, when contracted
+
+def _successors_benzene(G):
+    for face in G.get_benzene_faces():
+        face.benzene_move()
+        yield G
+        face.benzene_move() # self-inversive
