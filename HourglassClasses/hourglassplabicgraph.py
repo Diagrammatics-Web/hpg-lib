@@ -1122,6 +1122,14 @@ class HourglassPlabicGraph:
            benzene move equivalence class of self.'''
         return _depth_first_exploration(self, _successors_benzene)
 
+    def get_move4_class(self):
+        '''Returns an iterator representing the
+           benzene SL(4) plus square move equivalence class of self.'''
+        def _successors_move4(G):
+            yield from _successors_benzene(G)
+            yield from _successors_square(G)
+        return _depth_first_exploration(self, _successors_move4)
+    
     def face_colors(self):
         '''Given an r-hourglass plabic graph, colors the faces as in the fundamental SL(r) alcove.
            Concretely, face 0 is given color 0, and in crossing an m-hourglass edge with white on the
