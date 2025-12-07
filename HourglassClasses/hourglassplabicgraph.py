@@ -1128,18 +1128,19 @@ class HourglassPlabicGraph:
            right, the color increments by m mod r.'''
         r = max(v.total_degree() for v in self._inner_vertices.values())
         F_colors = dict()
-        F_colors[0] = 0
-        to_process = [0]
+        base_face_id = self.base_face().id
+        F_colors[base_face_id] = 0
+        to_process = [base_face_id]
         while len(to_process) > 0:
             Fi = to_process.pop()
             ci = F_colors[Fi]
             F = self._faces[Fi]
-            for hh in F._half_hourglasses:
-                Fj = hh.twin().face().id
+            for hh in F:
+                Fj = hh.left_face().id
                 if Fj in self._faces and Fj not in F_colors:
                     to_process.append(Fj)
-                    m = hh._hourglass.multiplicity
-                    if hh.v_from.is_filled():
+                    m = hh.multiplicity()
+                    if not hh.v_from().filled:
                         m *= -1
                     F_colors[Fj] = (ci + m) % r
         return F_colors
