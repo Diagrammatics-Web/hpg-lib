@@ -22,6 +22,7 @@ AUTHORS:
 import math
 from copy import deepcopy
 from collections import defaultdict
+from itertools import combinations
 from sage.graphs.graph import Graph
 from .vertex import Vertex
 from .face import Face
@@ -1130,7 +1131,148 @@ class HourglassPlabicGraph:
             yield from _successors_benzene(G)
             yield from _successors_square(G)
         return _depth_first_exploration(self, _successors_move4)
-    
+
+    def get_move4_pocket(self):
+        '''Returns a SimplicialComplex representing the SL(4) pocket associated
+           to the move4 class of self.'''
+
+        dual_vertices = {}    # (hash(G), face.id) -> DualVertex object
+        dual_edges = set()    # frozenset({dv1, dv2})
+        def initialize_dual_edges(G, h):
+            '''Adds all the dual edges between adjacent faces in G to the dual edge set.
+               Assumes the dual vertices of the faces of G have been initialized.
+               Here h is the hash of G.'''
+#            print("Initializing dual edges for ", h)
+            for v in G._get_vertices():
+#                print("...processing vertex ", v)
+
+                faces = v.get_adjacent_faces()
+                for f1, f2 in combinations(faces, 2):
+                    dv1 = dual_vertices[(h, f1.id)]
+                    dv2 = dual_vertices[(h, f2.id)]
+#                    print("...adding ", dv1, dv2)
+                    dual_edges.add( frozenset({dv1, dv2}) )
+#            print(dual_vertices)
+
+        def identify_dual_vertices(dv1, dv2):
+            '''Takes dual vertices dv1, dv2, assumed distinct, and identifies them.
+            
+               Adds all elements from dv2 to dv1 and updates all references to dv2 to
+               point to dv1 instead.'''
+#            print("Identifying ", dv1.id, dv2.id)
+            # Recycle first DualVertex object
+            dv1.pairs.update(dv2.pairs)
+
+            # Update dual vertex references from dv2 to dv1
+            for pair, dv in dual_vertices.items():
+                if dv == dv2:
+                    dual_vertices[pair] = dv1
+            
+            # Update dual edge references from dv2 to dv1
+            to_remove = []
+            to_add = []
+            for edge in dual_edges:
+                edge_dv1, edge_dv2 = edge
+                if edge_dv1 == dv2:
+                    to_remove.append(edge)
+                    to_add.append( frozenset({dv1, edge_dv2}) )
+                if edge_dv2 == dv2:
+                    to_remove.append(edge)
+                    to_add.append( frozenset({dv1, edge_dv1}) )
+                assert not (edge_dv1 == dv2 and edge_dv2 == dv2)
+            for edge in to_remove:
+                dual_edges.remove(edge)
+            for edge in to_add:
+                dual_edges.add(edge)
+
+        def get_move4_successor_pairs(G):
+            '''Yields all pairs H, face_id where H is a move4 successor of G and face_id is
+               the benzene4 or square face id involved. Mutates G in-place during the iteration.
+               Copy "H" each time if you wish.'''
+            for f in G.get_square_move_faces():
+                G.square_move(f.id)
+                yield G, f.id
+                G.square_move(f.id)
+            for f in G.get_benzene_faces():
+                G.benzene_move(f.id)
+                yield G, f.id
+                G.benzene_move(f.id)
+
+        to_explore = [self]
+        explored = set()
+        initialized = set()
+        next_dv_id = 0
+
+        h = hash(self)
+        for face_id, f in self._faces.items():
+            if f.outer:
+                continue
+#            print("New dv (initial): ", next_dv_id)
+            dv = DualVertex(next_dv_id, face_id)
+            next_dv_id += 1
+            dual_vertices[(h, face_id)] = dv
+            dv.pairs.add((h, face_id))
+        initialize_dual_edges(self, h)
+        initialized.add(h)
+
+        while to_explore:
+            G_from = to_explore.pop()
+            h_from = hash(G_from)
+
+#            print("Processing ", h_from)
+
+            for G_to, move_face_id in get_move4_successor_pairs(G_from):
+#                print("...move to %i at face %i"%(hash(G_to), move_face_id))
+                h_to = hash(G_to)
+
+                if h_to not in initialized:
+#                    print("Encountered uninitialized graph", h_to)
+                    # Encountering new graph
+                    if h_to not in to_explore:
+#                        print("Will explore ", h_to)
+                        to_explore.append(G_to.copy())
+
+                    for face_id,face in G_from._faces.items():
+                        if face.outer:
+                            continue
+                        if face_id != move_face_id:
+                            dv = dual_vertices[(h_from, face_id)]
+                        else:
+#                            print("New dv: ", next_dv_id)
+                            dv = DualVertex(next_dv_id, face_id)
+                            next_dv_id += 1
+                        dual_vertices[(h_to, face_id)] = dv
+                        dv.pairs.add((h_to, face_id))
+                    
+                    dv_move_face_from = dual_vertices[(h_from, move_face_id)]
+                    dv_move_face_to   = dual_vertices[(h_to, move_face_id)]
+                    dual_edges.add(frozenset( {dv_move_face_from, dv_move_face_to} ))
+
+                    initialize_dual_edges(G_to, h_to)
+                    initialized.add(h_to)
+                else:
+                    # Encountering old graph
+                    dv_move_face_from = dual_vertices[(h_from, move_face_id)]
+                    dv_move_face_to   = dual_vertices[(h_to, move_face_id)]
+                    dual_edges.add(frozenset( {dv_move_face_from, dv_move_face_to} ))
+
+                    for face_id,face in G_from._faces.items():
+                        if face.outer:
+                            continue
+                        if face_id != move_face_id:
+                            dv1 = dual_vertices[(h_to, face_id)]
+                            dv2 = dual_vertices[(h_from, face_id)]
+                            if dv1 != dv2:
+#                                print("Identifying ", dv1, dv2)
+                                identify_dual_vertices(dv1, dv2)
+
+            explored.add(h_from)
+        
+        # At this point, dual_edges is the 1-skeleton. The pocket is
+        #   the clique complex of this
+        skeleton = Graph(dual_edges, format='list_of_edges')
+        return skeleton.clique_complex()
+
     def face_colors(self):
         '''Given an r-hourglass plabic graph, colors the faces as in the fundamental SL(r) alcove.
            Concretely, face 0 is given color 0, and in crossing an m-hourglass edge with white on the
@@ -2016,6 +2158,19 @@ looseness=1.5
         for f in self._faces.values():
             print(f.id + ":")
             f.print_vertices()
+
+class DualVertex:
+    '''Class used for computing a move4_pocket'''
+    def __init__(self, id, face_id):
+        self.id = id
+        self.face_id = face_id
+        self.pairs = set()
+    
+    def __repr__(self):
+        return "DualVertex %i, for face %i"%(self.id, self.face_id)
+
+    def __gt__(self, other):
+        return self.id > other.id
 
 def _depth_first_exploration(seed, succ):
     '''Starting from seed, recursively explores

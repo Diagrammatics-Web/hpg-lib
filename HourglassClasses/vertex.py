@@ -353,6 +353,11 @@ class Vertex:
         """
         return [hh.v_to() for hh in self]
 
+    def get_adjacent_faces(self):
+        '''Returns a list of adjacent faces in clockwise order.
+           Skips the outer face.'''
+        return list(reversed([hh.left_face() for hh in self if not hh.left_face().outer]))
+
     def total_degree(self):
         r"""
         Returns the number of strands around this vertex.
@@ -493,7 +498,7 @@ class Vertex:
 
         hh1.reparent(new_v)
         hh2.reparent(new_v, hh1)
-
+        
         multiplicity = hh1.multiplicity() + hh2.multiplicity()
         hh_new = Vertex.create_hourglass_between(self, new_v, multiplicity, hh_saved, hh2)
         
