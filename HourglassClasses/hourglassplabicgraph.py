@@ -140,6 +140,10 @@ class HourglassPlabicGraph:
             :meth:`HourglassPlabicGraph.__eq__`
         """
         return not self.__eq__(other)
+    
+    def __repr__(self):
+        '''String representation.'''
+        return f"HourglassPlabicGraph with {len(self._get_vertices())} vertices and {len(self._get_edges())} edges. Use .plot() to visualize."
 
     def copy(self):
         '''Returns an HourglassPlabicGraph which is a deep copy of self.'''
