@@ -269,7 +269,7 @@ import itertools
 
 def prom_perm(T, k):
     '''Computes the promotion permutation of a rectangular standard Young tableau T with shape b^a as
-       defined by Sam Hopkins.
+       defined by [HR] and [GPPSS].
 
        To compute it, do inverse promotion, without decrementing, ab times
        (i.e. remove 1 which is in the upper left corner, rectify, make lower right entry one
