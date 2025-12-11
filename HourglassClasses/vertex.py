@@ -404,16 +404,17 @@ class Vertex:
     def is_contractible(self):
         r"""
         """
+        if self.simple_degree() != 2:
+            return False
+        if self.boundary: return False
         hh1 = self._half_hourglasses_head
         hh2 = hh1.cw_next()
         if (hh1 is not hh2.cw_next() or hh1 is hh2): return False
         u = hh1.v_to()
         w = hh2.v_to()
-        if (u.filled and w.filled and not self.filled) or (not u.filled and not w.filled and self.filled):
+        if (u.filled != w.filled or u.filled == self.filled):
             return False
         if u.boundary and w.boundary: return False
-        if u.boundary and w.simple_degree() != 2: return False
-        if w.boundary and u.simple_degree() != 2: return False
         return True
 
     def contract(self):
@@ -425,14 +426,22 @@ class Vertex:
         # transfer hourglasses to one vertex, delete the other
         sur_v = hh1.v_to() # surviving vertex
         del_v = hh2.v_to()
+        
+        if del_v.boundary: # exactly one boundary allowed, must be survivor
+            sur_v, del_v = del_v, sur_v
+            hh1, hh2 = hh2, hh1
 
         # Store hourglasses in array for safe iteration
-        hhs = [hh for hh in del_v if hh is not hh2]
+        base = hh1.twin().ccw_next()
+        hhs = [hh for hh in del_v if hh is not hh2.twin()]
         for hh in hhs:
-            hh.reparent(sur_v)
+            hh.reparent(sur_v, base)
+            base = hh
 
-        sur_v.remove_hourglass(hh1.twin())
-
+        sur_v._remove_hourglass(hh1.twin())
+        self._remove_hourglass(hh1)
+        self._remove_hourglass(hh2)
+        
         return (self, del_v)
 
     # Square move functions
