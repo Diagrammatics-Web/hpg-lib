@@ -4,7 +4,7 @@ Represents a vertex in an hourglass plabic graph.
 AUTHORS:
 
 - Stefano L. Corno (2024-05-10): initial version
-- Joshua P. Swanson (2025-12-04): additional functionality
+- Joshua P. Swanson (2025-12-04): additional functionality and cleanup
 
 """
 

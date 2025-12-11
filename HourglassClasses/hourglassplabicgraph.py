@@ -5,7 +5,7 @@ AUTHORS:
 
 - Joshua P. Swanson (2023): initial version
 - Stefano L. Corno (2024-05-10): partial refactor
-- Joshua P. Swanson (2025-12-04): imported additional functionality
+- Joshua P. Swanson (2025-12-04): additional functionality and cleanup
 
 """
 
@@ -505,12 +505,21 @@ class HourglassPlabicGraph:
         hh = v0.get_hourglass_to(vn)
         return hh.left_face()
 
+    def contract(self, v):
+        '''Contracts the indicated vertex in self, if possible.'''
+        if not v.is_contractible():
+            return False
+        v, w = v.contract()
+        del self._inner_vertices[v.id]
+        del self._inner_vertices[w.id]
+        return True
+    
     def contract_all(self):
         '''Repeatedly contracts all contractible vertices.'''
         while True:
             for v in self._inner_vertices.values():
                 if v.is_contractible():
-                    v.contract()
+                    self.contract(v)
                     break
             else:
                 break
