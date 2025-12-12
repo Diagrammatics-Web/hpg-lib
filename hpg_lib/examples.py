@@ -8270,3 +8270,340 @@ class Examples:
        'boundary': True,
        'label': ''}],
      'layout': 'circular'}
+
+
+    example_tshirt = {
+      "edges": [
+        {
+          "multiplicity": 1,
+          "sourceId": 0,
+          "targetId": 12
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 1,
+          "targetId": 18
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 2,
+          "targetId": 19
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 3,
+          "targetId": 20
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 4,
+          "targetId": 26
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 5,
+          "targetId": 25
+        },
+        {
+          "multiplicity": 4,
+          "sourceId": 6,
+          "targetId": 13
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 7,
+          "targetId": 24
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 8,
+          "targetId": 23
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 9,
+          "targetId": 17
+        },
+        {
+          "multiplicity": 2,
+          "sourceId": 10,
+          "targetId": 14
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 11,
+          "targetId": 12
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 12,
+          "targetId": 14
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 12,
+          "targetId": 16
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 14,
+          "targetId": 15
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 15,
+          "targetId": 16
+        },
+        {
+          "multiplicity": 2,
+          "sourceId": 15,
+          "targetId": 17
+        },
+        {
+          "multiplicity": 2,
+          "sourceId": 16,
+          "targetId": 18
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 17,
+          "targetId": 22
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 18,
+          "targetId": 19
+        },
+        {
+          "multiplicity": 2,
+          "sourceId": 19,
+          "targetId": 20
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 20,
+          "targetId": 21
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 21,
+          "targetId": 22
+        },
+        {
+          "multiplicity": 2,
+          "sourceId": 21,
+          "targetId": 26
+        },
+        {
+          "multiplicity": 2,
+          "sourceId": 22,
+          "targetId": 23
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 23,
+          "targetId": 24
+        },
+        {
+          "multiplicity": 2,
+          "sourceId": 24,
+          "targetId": 25
+        },
+        {
+          "multiplicity": 1,
+          "sourceId": 25,
+          "targetId": 26
+        }
+      ],
+      "vertices": [
+        {
+          "id": 0,
+          "x": 2.59,
+          "y": 9.66,
+          "filled": True,
+          "boundary": True
+        },
+        {
+          "id": 1,
+          "x": 7.07,
+          "y": 7.07,
+          "filled": True,
+          "boundary": True
+        },
+        {
+          "id": 2,
+          "x": 9.66,
+          "y": 2.59,
+          "filled": False,
+          "boundary": True
+        },
+        {
+          "id": 3,
+          "x": 9.66,
+          "y": -2.59,
+          "filled": True,
+          "boundary": True
+        },
+        {
+          "id": 4,
+          "x": 7.07,
+          "y": -7.07,
+          "filled": True,
+          "boundary": True
+        },
+        {
+          "id": 5,
+          "x": 2.59,
+          "y": -9.66,
+          "filled": False,
+          "boundary": True
+        },
+        {
+          "id": 6,
+          "x": -2.59,
+          "y": -9.66,
+          "filled": False,
+          "boundary": True
+        },
+        {
+          "id": 7,
+          "x": -7.07,
+          "y": -7.07,
+          "filled": True,
+          "boundary": True
+        },
+        {
+          "id": 8,
+          "x": -9.66,
+          "y": -2.59,
+          "filled": False,
+          "boundary": True
+        },
+        {
+          "id": 9,
+          "x": -9.66,
+          "y": 2.59,
+          "filled": False,
+          "boundary": True
+        },
+        {
+          "id": 10,
+          "x": -7.07,
+          "y": 7.07,
+          "filled": False,
+          "boundary": True
+        },
+        {
+          "id": 11,
+          "x": -2.59,
+          "y": 9.66,
+          "filled": True,
+          "boundary": True
+        },
+        {
+          "id": 12,
+          "x": -1.03,
+          "y": 7.52,
+          "filled": False,
+          "boundary": False
+        },
+        {
+          "id": 13,
+          "x": -1.8,
+          "y": -7.4,
+          "filled": True,
+          "boundary": False
+        },
+        {
+          "id": 14,
+          "x": -3.48,
+          "y": 6.05,
+          "filled": True,
+          "boundary": False
+        },
+        {
+          "id": 15,
+          "x": -2.35,
+          "y": 3.96,
+          "filled": False,
+          "boundary": False
+        },
+        {
+          "id": 16,
+          "x": 0.04,
+          "y": 5.28,
+          "filled": True,
+          "boundary": False
+        },
+        {
+          "id": 17,
+          "x": -2.75,
+          "y": 0.92,
+          "filled": True,
+          "boundary": False
+        },
+        {
+          "id": 18,
+          "x": 3.67,
+          "y": 4.88,
+          "filled": False,
+          "boundary": False
+        },
+        {
+          "id": 19,
+          "x": 4.88,
+          "y": 2.49,
+          "filled": True,
+          "boundary": False
+        },
+        {
+          "id": 20,
+          "x": 4.4,
+          "y": -0.48,
+          "filled": False,
+          "boundary": False
+        },
+        {
+          "id": 21,
+          "x": 2.02,
+          "y": -2.27,
+          "filled": True,
+          "boundary": False
+        },
+        {
+          "id": 22,
+          "x": -0.95,
+          "y": -1.58,
+          "filled": False,
+          "boundary": False
+        },
+        {
+          "id": 23,
+          "x": -3.41,
+          "y": -3.59,
+          "filled": True,
+          "boundary": False
+        },
+        {
+          "id": 24,
+          "x": -2.68,
+          "y": -6.2,
+          "filled": False,
+          "boundary": False
+        },
+        {
+          "id": 25,
+          "x": 0.37,
+          "y": -7.11,
+          "filled": True,
+          "boundary": False
+        },
+        {
+          "id": 26,
+          "x": 2.93,
+          "y": -4.99,
+          "filled": False,
+          "boundary": False
+        }
+      ]
+    }

@@ -1757,16 +1757,18 @@ class HourglassPlabicGraph:
         self.tutte_layout()
         self.layout = "circular"
 
-    def tutte_layout(self, error=0.01, max_iter = 1000):
+    def tutte_layout(self, error=0.01, max_iter=1000, pull_strength=0.08):
         r"""
         Comfortably arranges the interior vertices using Tutte's iterative force-directed algorithm from
         https://cs.brown.edu/people/rtamassi/gdhandbook/chapters/force-directed.pdf.
 
         INPUT:
 
-        - `error` -- positive float (default: 0.01); the maximum allowed error for the computation. Assumed to be a float `\geq 0.0`.
+        - `error` -- positive float (default: 0.01); the maximum allowed error for the computation. Assumed to be a float `\ge 0.0`.
 
         - `max_iter` -- positive integer (default: 1000); positive integer; the maximum number of iterations to perform. Assumed to be an integer `\geq 1`.
+
+        - `pull_exponent` -- float (default: 1.5); A parameter `s` to pull vertices towards the center. A higher value means a stronger pull.
 
         .. PLOT::
 
@@ -1786,6 +1788,13 @@ class HourglassPlabicGraph:
                 v.x, v.y = x_new, y_new
             if err < error:
                 break
+
+        if pull_strength > 0:
+            for v in self._inner_vertices.values():
+                d = math.sqrt(v.x**2 + v.y**2)
+                scale_factor = 1.0 - pull_strength * (d / 10.0)
+                v.x *= scale_factor
+                v.y *= scale_factor
 
     # Serialization/Data Conversion
 
