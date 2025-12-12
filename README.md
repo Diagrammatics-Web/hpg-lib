@@ -6,7 +6,7 @@ This is a Python/SageMath implementation of hourglass plabic graphs (HPG's). Key
 
 This repository contains only the Python backend. If you wish to use the UI graph editor and analyzer, follow the installation instructions at the companion project [hpg-studio](https://github.com/Diagrammatics-Web/hpg-lib), which automatically installs this one. If you instead wish to use only the Python backend, continue.
 
-You must have a working installation of [SageMath](https://doc.sagemath.org/html/en/installation/index.html). To install the current development version of `hpg-lib` in the system `sage`, run the following, either in a terminal or in Sage itself:
+You must have a working installation of [SageMath](https://doc.sagemath.org/html/en/installation/index.html). To install the current development version of `hpg-lib` in the system `sage`, run the following in a terminal:
 
     sage -pip install git+https://github.com/Diagrammatics-Web/hpg-lib/
   
