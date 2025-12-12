@@ -121,4 +121,5 @@ def get_nonelliptic_web(T):
         else:
             break
     G.make_circular()
+    G = HourglassPlabicGraph.from_dict(G.to_dict())
     return G
