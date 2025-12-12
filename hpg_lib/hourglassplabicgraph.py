@@ -524,7 +524,7 @@ class HourglassPlabicGraph:
             else:
                 break
 
-    def create_hourglass_by_id(self, v1_id, v2_id, multiplicity=1):
+    def create_hourglass_by_id(self, v1_id, v2_id, multiplicity=1, v1_base=None, v2_base=None):
         r"""
         Creates an hourglass (two HalfHourglasses) between the vertices
         identified by `v1_id` and `v2_id`, and returns it.
@@ -554,7 +554,7 @@ class HourglassPlabicGraph:
 
         return self.create_hourglass(v1, v2, multiplicity)
 
-    def create_hourglass(self, v1, v2, multiplicity=1):
+    def create_hourglass(self, v1, v2, multiplicity=1, v1_base=None, v2_base=None):
         r"""
         Creates an hourglass (two HalfHourglasses) between v1 and v2, and returns it.
 
@@ -581,7 +581,7 @@ class HourglassPlabicGraph:
 
             This function also generates the necessary faces that would be created by this edge.
         """
-        new_hh = Vertex.create_hourglass_between(v1, v2, multiplicity)
+        new_hh = Vertex.create_hourglass_between(v1, v2, multiplicity, v1_base, v2_base)
 
         # Create faces
 
