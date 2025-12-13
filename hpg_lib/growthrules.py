@@ -4,6 +4,7 @@ Routines for dealing with growth rules.
 AUTHORS:
 
 - Joshua P. Swanson (2025-12-11): initial version
+- Stephan Pfannerer (2025-12-12): added missing rule
 
 """
 
@@ -52,7 +53,8 @@ _nonelliptic_rule_specs = (([1, 2], [-3], "Y"),
                            ([2, -1], [-1, 2], "H"),
                            ([1, -2], [-2, 1], "H"),
                            ([-2, 2], [3, -3], "H"),
-                           ([-3, 2], [-2, 3], "H"),
+                           ([-2, 3], [3, -2], "H"),
+                           ([-3, 2], [2, -3], "H"),
                            ([1, -1], [], "cup"),
                            ([-3, 3], [], "cup"))
 
@@ -88,8 +90,8 @@ def get_nonelliptic_web(T):
 #                print("...v_new", v_new.id)
 #                print("...v1 hh's before", v1.id, [hh.id for hh in v1])
 #                print("...v2 hh's before", v2.id, [hh.id for hh in v2])
-                hh1 = G.create_hourglass(v_new, v1, 1, base_hhs[i], None)
-                hh2 = G.create_hourglass(v_new, v2, 1, hh1, None)
+                hh1 = G.create_hourglass(v_new, v1, 1)#, base_hhs[i], None)
+                hh2 = G.create_hourglass(v_new, v2, 1)#, hh1, None)
 #                print("...v1 hh's after", v1.id, [hh.id for hh in v1])
 #                print("...v2 hh's after", v2.id, [hh.id for hh in v2])
 #                print("...v_new hh's after", v_new.id, [hh.id for hh in v_new])
@@ -101,16 +103,17 @@ def get_nonelliptic_web(T):
             elif s=="H":
                 v1_new = G.create_vertex(ID.get_new_id("k"), random(), random(), False if Lp[i]<0 else True)
                 v2_new = G.create_vertex(ID.get_new_id("k"), random(), random(), False if Lp[i+1]<0 else True)
-                hh1 = G.create_hourglass(v1_new, v1, 1, base_hhs[i], None)
-                hh2 = G.create_hourglass(v2_new, v2, 1, base_hhs[i+1], None)
-                hhx = G.create_hourglass(v2_new, v1_new, 1, None, None)
+                hh1 = G.create_hourglass(v1_new, v1, 1)#, base_hhs[i], None)
+                hh2 = G.create_hourglass(v2_new, v2, 1)#, base_hhs[i+1], None)
+                hhx = G.create_hourglass(v2_new, v1_new, 1)#, None, None)
                 danglers[i] = v1_new
                 danglers[i+1] = v2_new
                 base_hhs[i] = hhx
                 base_hhs[i+1] = hh2
             
             elif s=="cup":
-                G.create_hourglass(v1, v2, 1, base_hhs[i], base_hhs[i+1].twin())
+                #G.create_hourglass(v1, v2, 1, base_hhs[i], base_hhs[i+1].twin())
+                G.create_hourglass(v1, v2, 1)
                 del danglers[i:i+2]
                 del base_hhs[i:i+2]
                 
