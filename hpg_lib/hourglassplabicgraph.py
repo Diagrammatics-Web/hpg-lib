@@ -1621,19 +1621,15 @@ class HourglassPlabicGraph:
         if fix_initial:
             v_initial = self.sorted_boundary_vertices()[0]
             
-            hh_initial = v_initial._half_hourglasses_head
-            while hh_initial.is_boundary(): hh = hh.cw_next()
-            hh_initial = hh_initial.twin()
+            hh = v_initial._half_hourglasses_head
+            while hh.is_boundary(): hh = hh.cw_next()
+            hh = hh.twin()
 
-            hh = hh_initial
             i=1
-            while True:
-                hh = hh.cw_next()
-                hh.label = list(range(i, i+len(hh.multiplicity())))
-                hh.twin().label = hh.label
-                i += hh.multiplicity()
-                if hh == hh_initial:
-                    break
+            for h in hh.v_from():
+                h.label = list(range(i, i+h.multiplicity()))
+                h.twin().label = h.label
+                i += h.multiplicity()
 
         def _complete_labeling():
             hs = [h for h in self._get_edges() if h.label is None and h.multiplicity() > 0]
