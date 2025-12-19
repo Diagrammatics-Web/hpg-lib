@@ -1609,6 +1609,73 @@ class HourglassPlabicGraph:
         r = max(v.total_degree() for v in self._inner_vertices.values()) # This is quite inefficient, could be a cached value provided by user?
         return [self.get_trip_perm(i) for i in range(1, r)]
 
+    def get_proper_labelings(self, fix_initial=False):
+        hs = self._get_edges()
+        for h in self._get_edges():
+            h.label = None
+            h.twin().label = None
+        r = max(v.total_degree() for v in self._inner_vertices.values())
+
+        # Fix the labeling of the vertex connected to the initial boundary vertex,
+        #   to avoid r!-ish symmetry
+        if fix_initial:
+            v_initial = self.sorted_boundary_vertices()[0]
+            
+            hh_initial = v_initial._half_hourglasses_head
+            while hh_initial.is_boundary(): hh = hh.cw_next()
+            hh_initial = hh_initial.twin()
+
+            hh = hh_initial
+            i=1
+            while True:
+                hh = hh.cw_next()
+                hh.label = list(range(i, i+len(hh.multiplicity())))
+                hh.twin().label = hh.label
+                i += hh.multiplicity()
+                if hh == hh_initial:
+                    break
+
+        def _complete_labeling():
+            hs = [h for h in self._get_edges() if h.label is None and h.multiplicity() > 0]
+
+            if len(hs) == 0:
+                yield self
+                return
+
+            # Find a likely next hourglass to complete
+    #        def h_goodness(h):
+    #            g1 = sum(1 for )
+    #        hs.sort(key=lambda h: sum(1 for ))
+            h = hs.pop()
+    #        print("Doing ", h)
+
+            ls1 = sum((hh.label for hh in h.v_from() if hh.label is not None), [])
+            ls2 = sum((hh.label for hh in h.v_to()   if hh.label is not None), [])
+    #        print("...ls1:", ls1)
+    #        print("...ls2:", ls2)
+            ls_valid = [i for i in range(1, r+1) if (i not in ls1) and (i not in ls2)]
+            for ls in combinations(ls_valid, h.multiplicity()):
+    #            print("...trying ls:", ls)
+                h.label = list(ls)
+                h.twin().label = h.label
+                yield from _complete_labeling()
+                h.label = None
+                h.twin().label = None
+    #        print("Finished ", h)
+
+        yield from _complete_labeling()
+
+    def boundary_word(self):
+        '''Assumes the boundary vertices are single edges.
+           Returns the list of boundary hourglass labels in
+           clockwise order from slightly east of due north.'''
+        ret = []
+        for v in self.sorted_boundary_vertices():
+            hh = v._half_hourglasses_head
+            while hh.is_boundary(): hh = hh.cw_next()
+            ret.append(hh.label)
+        return ret
+
     def separation_labeling(self, base_face, r=4, verbose=False):
         r"""
         Applies separation labelings to all HalfHourglasses in this graph departing from unfilled vertices.
