@@ -164,7 +164,12 @@ class HourglassPlabicGraph:
 
         # Find edge into the graph; this is assumed to be the first hourglass from the
         # first boundary vertex into the graph
-        hh = self._get_hourglass_by_id(0, len(self._boundary_vertices) - 1).ccw_next()
+        v_initial = self.sorted_boundary_vertices()[0]
+
+        hh = v_initial._half_hourglasses_head
+        while hh.is_boundary(): hh = hh.cw_next()
+
+        #hh = self._get_hourglass_by_id(0, len(self._boundary_vertices) - 1).ccw_next()
 
         half_hourglasses_visited = [hh]
         half_hourglass_history = [hh]
